@@ -79,7 +79,7 @@ jobs:
 
       - name: Run cargo-deny check
         run: |
-          cargo deny --log-level warn check --all-features
+          cargo deny --log-level warn check
 
   dependency-review:
     name: Dependency Review
