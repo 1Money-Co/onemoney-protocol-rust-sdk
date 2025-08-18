@@ -23,6 +23,11 @@ jobs:
   lint-and-test:
     name: Lint and Test
     runs-on: [self-hosted]
+    container:
+      image: rust:1.87-bullseye
+      env:
+        CARGO_TERM_COLOR: always
+        RUST_BACKTRACE: 1
 
     steps:
       - name: Checkout code
@@ -31,17 +36,20 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
-      - name: Update system packages
+      - name: Install system dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential pkg-config libssl-dev
+          apt-get update && apt-get install -y \
+            build-essential \
+            pkg-config \
+            libssl-dev \
+            libclang-dev \
+            clang \
+            protobuf-compiler \
+            git
 
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: "1.87.0"
-          rustflags: -D warnings
-          components: rustfmt, clippy, llvm-tools-preview
+      - name: Install Rust components
+        run: |
+          rustup component add rustfmt clippy llvm-tools-preview
 
       - name: Install cargo tools
         run: |
@@ -49,10 +57,8 @@ jobs:
           cargo install cargo-audit || echo "cargo-audit already installed"
           cargo install cargo-outdated || echo "cargo-outdated already installed"
 
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
-        with:
-          cache-on-failure: true
+      - name: Set git safe directory
+        run: git config --global --add safe.directory /github/workspace
 
       - name: Check code formatting
         run: cargo fmt --all -- --check
@@ -85,20 +91,30 @@ jobs:
   security-audit:
     name: Security Audit
     runs-on: [self-hosted]
+    container:
+      image: rust:1.87-bullseye
+      env:
+        CARGO_TERM_COLOR: always
+        RUST_BACKTRACE: 1
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: "1.87.0"
+      - name: Install system dependencies
+        run: |
+          apt-get update && apt-get install -y \
+            build-essential \
+            pkg-config \
+            libssl-dev \
+            git
+
+      - name: Set git safe directory
+        run: git config --global --add safe.directory /github/workspace
 
       - name: Install cargo-audit
         run: cargo install cargo-audit || echo "cargo-audit already installed"
 
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
 
       - name: Run security audit
         run: cargo audit
@@ -106,20 +122,30 @@ jobs:
   check-dependencies:
     name: Check Dependencies
     runs-on: [self-hosted]
+    container:
+      image: rust:1.87-bullseye
+      env:
+        CARGO_TERM_COLOR: always
+        RUST_BACKTRACE: 1
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: "1.87.0"
+      - name: Install system dependencies
+        run: |
+          apt-get update && apt-get install -y \
+            build-essential \
+            pkg-config \
+            libssl-dev \
+            git
+
+      - name: Set git safe directory
+        run: git config --global --add safe.directory /github/workspace
 
       - name: Install cargo-outdated
         run: cargo install cargo-outdated || echo "cargo-outdated already installed"
 
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
 
       - name: Check for outdated dependencies
         run: cargo outdated --exit-code 1
@@ -128,6 +154,11 @@ jobs:
   coverage:
     name: Code Coverage
     runs-on: [self-hosted]
+    container:
+      image: rust:1.87-bullseye
+      env:
+        CARGO_TERM_COLOR: always
+        RUST_BACKTRACE: 1
     permissions:
       # Required for OIDC authentication with Codecov
       id-token: write
@@ -136,17 +167,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: "1.87.0"
-          components: llvm-tools-preview
+      - name: Install system dependencies
+        run: |
+          apt-get update && apt-get install -y \
+            build-essential \
+            pkg-config \
+            libssl-dev \
+            git
+
+      - name: Set git safe directory
+        run: git config --global --add safe.directory /github/workspace
 
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
 
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
 
       - name: Generate code coverage
         run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
@@ -163,17 +197,27 @@ jobs:
   msrv-check:
     name: Minimum Supported Rust Version
     runs-on: [self-hosted]
+    container:
+      image: rust:1.87-bullseye
+      env:
+        CARGO_TERM_COLOR: always
+        RUST_BACKTRACE: 1
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust MSRV (1.87)
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: "1.87"
+      - name: Install system dependencies
+        run: |
+          apt-get update && apt-get install -y \
+            build-essential \
+            pkg-config \
+            libssl-dev \
+            git
 
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
+      - name: Set git safe directory
+        run: git config --global --add safe.directory /github/workspace
+
 
       - name: Test with MSRV
         run: cargo check --all-features
@@ -181,17 +225,27 @@ jobs:
   documentation:
     name: Documentation
     runs-on: [self-hosted]
+    container:
+      image: rust:1.87-bullseye
+      env:
+        CARGO_TERM_COLOR: always
+        RUST_BACKTRACE: 1
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: "1.87.0"
+      - name: Install system dependencies
+        run: |
+          apt-get update && apt-get install -y \
+            build-essential \
+            pkg-config \
+            libssl-dev \
+            git
 
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
+      - name: Set git safe directory
+        run: git config --global --add safe.directory /github/workspace
+
 
       - name: Build documentation
         run: cargo doc --all-features --no-deps

@@ -21,20 +21,30 @@ jobs:
   cargo-audit:
     name: Cargo Security Audit
     runs-on: [self-hosted]
+    container:
+      image: rust:1.87-bullseye
+      env:
+        CARGO_TERM_COLOR: always
+        RUST_BACKTRACE: 1
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: "1.87.0"
+      - name: Install system dependencies
+        run: |
+          apt-get update && apt-get install -y \
+            build-essential \
+            pkg-config \
+            libssl-dev \
+            git
+
+      - name: Set git safe directory
+        run: git config --global --add safe.directory /github/workspace
 
       - name: Install cargo-audit
         run: cargo install cargo-audit || echo "cargo-audit already installed"
 
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
 
       - name: Run cargo audit
         run: |
@@ -51,20 +61,30 @@ jobs:
   cargo-deny:
     name: Cargo Deny
     runs-on: [self-hosted]
+    container:
+      image: rust:1.87-bullseye
+      env:
+        CARGO_TERM_COLOR: always
+        RUST_BACKTRACE: 1
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: "1.87.0"
+      - name: Install system dependencies
+        run: |
+          apt-get update && apt-get install -y \
+            build-essential \
+            pkg-config \
+            libssl-dev \
+            git
+
+      - name: Set git safe directory
+        run: git config --global --add safe.directory /github/workspace
 
       - name: Install cargo-deny
         run: cargo install cargo-deny || echo "cargo-deny already installed"
 
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
 
       - name: Run cargo-deny check
         run: |
@@ -73,6 +93,11 @@ jobs:
   dependency-review:
     name: Dependency Review
     runs-on: [self-hosted]
+    container:
+      image: rust:1.87-bullseye
+      env:
+        CARGO_TERM_COLOR: always
+        RUST_BACKTRACE: 1
     if: github.event_name == 'pull_request'
     steps:
       - name: Checkout code
@@ -86,17 +111,27 @@ jobs:
   codeql-analysis:
     name: CodeQL Analysis
     runs-on: [self-hosted]
+    container:
+      image: rust:1.87-bullseye
+      env:
+        CARGO_TERM_COLOR: always
+        RUST_BACKTRACE: 1
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: "1.87.0"
+      - name: Install system dependencies
+        run: |
+          apt-get update && apt-get install -y \
+            build-essential \
+            pkg-config \
+            libssl-dev \
+            git
 
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
+      - name: Set git safe directory
+        run: git config --global --add safe.directory /github/workspace
+
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
