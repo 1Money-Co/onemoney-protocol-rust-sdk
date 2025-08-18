@@ -1,8 +1,8 @@
 //! Account-related API operations.
 
-use crate::client::Client;
 use crate::client::config::api_path;
 use crate::client::config::endpoints::accounts::{NONCE, TOKEN_ACCOUNT};
+use crate::client::Client;
 use crate::{AccountNonce, OneMoneyAddress, Result, TokenAccount};
 use serde::Serialize;
 

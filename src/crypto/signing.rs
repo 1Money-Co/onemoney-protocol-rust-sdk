@@ -2,12 +2,12 @@
 
 use super::hashing::Signable;
 use crate::{CryptoError, OneMoneyAddress, Result, Signature};
-use alloy_primitives::{B256, U256, keccak256};
+use alloy_primitives::{keccak256, B256, U256};
 use hex::decode as hex_decode;
 use k256::ecdsa::SigningKey;
 #[cfg(test)]
 use rlp::RlpStream;
-use rlp::{Encodable, encode as rlp_encode};
+use rlp::{encode as rlp_encode, Encodable};
 use serde::Serialize;
 
 /// Sign a transaction payload using the same method as L1.

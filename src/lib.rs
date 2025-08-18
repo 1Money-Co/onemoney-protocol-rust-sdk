@@ -43,7 +43,7 @@ pub use api::{
     UpdateMetadataRequest, WhitelistAction, WhitelistTokenRequest,
 };
 pub use client::{Client, ClientBuilder, Network};
-pub use crypto::{Signable, sign_transaction_payload, *};
+pub use crypto::{sign_transaction_payload, Signable, *};
 pub use error::{ConfigError, CryptoError, Error, Result};
 pub use transport::*;
 pub use types::*;

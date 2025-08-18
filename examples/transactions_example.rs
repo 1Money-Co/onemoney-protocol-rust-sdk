@@ -11,7 +11,7 @@ mod common;
 use common as environment;
 
 use environment::{
-    ExampleConfig, create_example_client, print_detailed_error, print_environment_banner,
+    create_example_client, print_detailed_error, print_environment_banner, ExampleConfig,
 };
 use onemoney_protocol::{FeeEstimateRequest, OneMoneyAddress, PaymentPayload, TokenAmount};
 use std::error::Error;

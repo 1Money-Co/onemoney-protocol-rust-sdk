@@ -1,9 +1,9 @@
 //! Chain-related API operations.
 
-use crate::Result;
-use crate::client::Client;
 use crate::client::config::api_path;
 use crate::client::config::endpoints::chains::CHAIN_ID;
+use crate::client::Client;
+use crate::Result;
 use serde::{Deserialize, Serialize};
 
 /// Chain ID response from the API.

@@ -1,9 +1,9 @@
 //! HTTP client implementation.
 
 use super::{builder::ClientBuilder, config::Network, hooks::Hook};
-use crate::{Error, Result, error::ErrorResponse};
-use reqwest::{Client as HttpClient, header};
-use serde::{Serialize, de::DeserializeOwned};
+use crate::{error::ErrorResponse, Error, Result};
+use reqwest::{header, Client as HttpClient};
+use serde::{de::DeserializeOwned, Serialize};
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use url::Url;
 

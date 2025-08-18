@@ -10,8 +10,8 @@ mod common;
 use common as environment;
 
 use environment::{
-    ExampleConfig, create_example_client, get_example_environment, print_detailed_error,
-    print_environment_banner,
+    create_example_client, get_example_environment, print_detailed_error, print_environment_banner,
+    ExampleConfig,
 };
 use onemoney_protocol::OneMoneyAddress;
 use std::error::Error;

@@ -1,7 +1,7 @@
 //! Cryptographic key operations and address derivation.
 
 use crate::{CryptoError, OneMoneyAddress, Result};
-use alloy_primitives::{Address, keccak256};
+use alloy_primitives::{keccak256, Address};
 use hex::decode as hex_decode;
 use k256::ecdsa::{SigningKey, VerifyingKey};
 
