@@ -285,3 +285,67 @@ The project uses pre-commit hooks (`.pre-commit-config.yaml`) that run:
 - `cliff.toml` - Changelog generation configuration
 - `rustfmt.toml` - Code formatting rules
 - `.editorconfig` - Editor configuration for consistent styling
+
+### Code Coverage with Codecov
+
+The project is configured to generate and upload code coverage reports to Codecov using the latest v4 action with OIDC authentication.
+
+#### Setup Process
+
+**1. Codecov Account Setup**
+- Create an account at [codecov.io](https://codecov.io) if not already done
+- Connect your GitHub repository to Codecov
+- Enable OIDC authentication in your Codecov organization settings (recommended)
+
+**2. OIDC Authentication (Recommended)**
+The CI workflow is configured to use OIDC authentication, which is more secure and doesn't require storing tokens:
+```yaml
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
+- name: Upload coverage to Codecov
+  uses: codecov/codecov-action@v4
+  with:
+    files: lcov.info
+    fail_ci_if_error: false
+    use_oidc: true
+```
+
+**3. Token-Based Authentication (Fallback)**
+If your Codecov account doesn't support OIDC, use token-based authentication:
+1. Get your repository token from Codecov dashboard
+2. Add it as `CODECOV_TOKEN` in GitHub repository secrets
+3. Update the CI workflow to use the token:
+```yaml
+- name: Upload coverage to Codecov
+  uses: codecov/codecov-action@v4
+  with:
+    files: lcov.info
+    fail_ci_if_error: false
+    token: ${{ secrets.CODECOV_TOKEN }}
+```
+
+#### Coverage Configuration
+
+The `codecov.yml` file configures:
+- **Target Coverage**: 80% for project, 75% for patches
+- **Component Tracking**: Separate coverage for crypto, client, api, utils, and transport modules
+- **Ignored Files**: Examples, tests, benchmarks, and documentation
+- **PR Comments**: Detailed coverage reports on pull requests
+
+#### Coverage Generation
+
+Coverage is generated using `cargo-llvm-cov`:
+```bash
+cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+```
+
+This creates an LCOV format file that Codecov can process for detailed line-by-line coverage analysis.
+
+#### Monitoring Coverage
+
+- **Pull Requests**: Codecov will comment on PRs with coverage changes
+- **Status Checks**: GitHub status checks will show if coverage meets thresholds
+- **Dashboard**: Visit codecov.io dashboard for detailed coverage analytics
+- **Component View**: Track coverage by module (crypto, client, api, etc.)

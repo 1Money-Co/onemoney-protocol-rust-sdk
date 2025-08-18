@@ -110,6 +110,10 @@ jobs:
   coverage:
     name: Code Coverage
     runs-on: ubuntu-latest
+    permissions:
+      # Required for OIDC authentication with Codecov
+      id-token: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -130,6 +134,9 @@ jobs:
         with:
           files: lcov.info
           fail_ci_if_error: false
+          use_oidc: true
+          # Alternative: For repositories without OIDC support, use token instead:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   msrv-check:
     name: Minimum Supported Rust Version
