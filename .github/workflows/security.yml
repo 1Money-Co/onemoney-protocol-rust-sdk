@@ -32,7 +32,9 @@ jobs:
         run: cargo install cargo-audit
 
       - name: Run cargo audit
-        run: cargo audit --json | tee audit-results.json
+        run: |
+          set -euo pipefail
+          cargo audit --json | tee audit-results.json
 
       - name: Upload audit results
         uses: actions/upload-artifact@v4
@@ -64,7 +66,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Dependency Review
-        uses: actions/dependency-review-action@v3
+        uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: moderate
 
@@ -76,7 +78,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: rust
 
@@ -87,4 +89,4 @@ jobs:
         run: cargo build --all-features
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3

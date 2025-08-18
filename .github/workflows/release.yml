@@ -68,16 +68,83 @@ jobs:
     runs-on: ubuntu-latest
     needs: publish-crate
     steps:
-      - name: Wait for crate to be available
-        run: sleep 60
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          # Extract version from tag (e.g., v1.2.3 -> 1.2.3)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
 
       - name: Create test project
         run: |
           cargo new test-project
           cd test-project
-          echo 'onemoney-protocol = "^0.1"' >> Cargo.toml
+          echo 'onemoney-protocol = "${{ steps.extract_version.outputs.version }}"' >> Cargo.toml
+          echo "Created test project with dependency version: ${{ steps.extract_version.outputs.version }}"
 
-      - name: Test installation
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Wait for crate availability with retry
         run: |
-          cd test-project
-          cargo check
+          set -euo pipefail
+
+          VERSION="${{ steps.extract_version.outputs.version }}"
+          MAX_ATTEMPTS=20
+          BASE_DELAY=30
+
+          echo "Waiting for crate onemoney-protocol v$VERSION to be available on crates.io..."
+
+          for attempt in $(seq 1 $MAX_ATTEMPTS); do
+            echo "Attempt $attempt/$MAX_ATTEMPTS"
+
+            # Calculate exponential backoff delay with jitter
+            # delay = base_delay * (1.5 ^ (attempt-1)), capped at 300 seconds
+            MULTIPLIER=$((attempt - 1))
+            DELAY=$BASE_DELAY
+            for i in $(seq 1 $MULTIPLIER); do
+              DELAY=$((DELAY * 3 / 2))  # Multiply by 1.5 using integer arithmetic
+              if [ $DELAY -gt 300 ]; then
+                DELAY=300
+                break
+              fi
+            done
+
+            echo "Waiting ${DELAY}s before checking crate availability..."
+            sleep $DELAY
+
+            # Try to check if the crate is available by running cargo check
+            cd test-project
+            echo "Running cargo check to verify crate availability..."
+            if timeout 90 cargo check --verbose 2>&1; then
+              echo "✅ Success! Crate onemoney-protocol v$VERSION is available and working!"
+              exit 0
+            else
+              echo "❌ Cargo check failed - crate not yet available or has issues"
+              cd ..
+            fi
+
+            # Additional check: query crates.io API directly
+            echo "Checking crates.io API for version availability..."
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://crates.io/api/v1/crates/onemoney-protocol/$VERSION" || echo "000")
+            if [ "$HTTP_STATUS" = "200" ]; then
+              echo "✅ Version $VERSION found in crates.io API"
+            else
+              echo "❌ Version $VERSION not found in crates.io API (HTTP $HTTP_STATUS)"
+            fi
+
+            if [ $attempt -eq $MAX_ATTEMPTS ]; then
+              echo "💥 Failed to verify crate availability after $MAX_ATTEMPTS attempts over ~$((MAX_ATTEMPTS * BASE_DELAY / 60)) minutes"
+              echo "This might indicate:"
+              echo "  - Slow crates.io indexing (normal during high traffic)"
+              echo "  - Publishing failure"
+              echo "  - Network connectivity issues"
+              echo ""
+              echo "Manual verification steps:"
+              echo "  1. Check https://crates.io/crates/onemoney-protocol"
+              echo "  2. Verify version $VERSION appears in the version list"
+              echo "  3. Try: cargo search onemoney-protocol"
+              exit 1
+            fi
+          done
