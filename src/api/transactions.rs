@@ -1,14 +1,14 @@
 //! Transaction-related API operations.
 
-use super::client::Client;
-use crate::api::client::api_path;
-use crate::api::client::endpoints::transactions::{
+use crate::client::Client;
+use crate::client::config::api_path;
+use crate::client::config::endpoints::transactions::{
     BY_HASH, ESTIMATE_FEE, PAYMENT, RECEIPT_BY_HASH,
 };
-use crate::crypto::sign_transaction_payload;
 use crate::crypto::Signable;
+use crate::crypto::sign_transaction_payload;
 use crate::{OneMoneyAddress, Result, Signature, TokenAmount, Transaction};
-use alloy_primitives::{keccak256, B256};
+use alloy_primitives::{B256, keccak256};
 #[cfg(test)]
 use rlp::encode as rlp_encode;
 use rlp::{Encodable, RlpStream};
@@ -95,7 +95,7 @@ impl PaymentPayload {
 
 impl Signable for PaymentPayload {
     fn signature_hash(&self) -> B256 {
-        self.signature_hash()
+        PaymentPayload::signature_hash(self)
     }
 }
 
@@ -196,7 +196,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::{Client, PaymentPayload, OneMoneyAddress, TokenAmount};
+    /// use onemoney_protocol::{Client, PaymentPayload, OneMoneyAddress, TokenAmount};
     /// use std::str::FromStr;
     ///
     /// #[tokio::main]
@@ -245,7 +245,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::Client;
+    /// use onemoney_protocol::Client;
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -277,7 +277,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::{Client, FeeEstimateRequest, OneMoneyAddress, TokenAmount};
+    /// use onemoney_protocol::{Client, FeeEstimateRequest, OneMoneyAddress, TokenAmount};
     /// use std::str::FromStr;
     ///
     /// #[tokio::main]
@@ -345,7 +345,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::Client;
+    /// use onemoney_protocol::Client;
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {

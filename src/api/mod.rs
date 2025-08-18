@@ -3,13 +3,12 @@
 pub mod accounts;
 pub mod chains;
 pub mod checkpoints;
-pub mod client;
 pub mod states;
 pub mod tokens;
 pub mod transactions;
 
-// Re-export the Client and related types for easy access
-pub use client::{Client, ClientBuilder, Network};
+// Re-export client types from the new client module
+pub use crate::client::{Client, ClientBuilder, Network};
 
 // Re-export commonly used API types
 pub use accounts::{AccountQuery, TokenAccountQuery};

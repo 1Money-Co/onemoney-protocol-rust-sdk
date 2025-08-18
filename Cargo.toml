@@ -1,17 +1,17 @@
 [package]
-name = "onemoney"
+name = "onemoney-protocol"
 version = "0.1.0"
-edition = "2021"
-description = "Official Rust SDK for OneMoney L1 blockchain REST API"
+edition = "2024"
+description = "Official Rust SDK for OneMoney Protocol - L1 blockchain network client"
 license = "Apache-2.0"
 authors = ["OneMoney Team"]
-repository = "https://github.com/1Money-Co/onemoney-rust-sdk"
-documentation = "https://docs.rs/onemoney"
+repository = "https://github.com/1Money-Co/onemoney-protocol"
+documentation = "https://docs.rs/onemoney-protocol"
 homepage = "https://1money.network"
 readme = "README.md"
-keywords = ["blockchain", "crypto", "api", "sdk", "onemoney"]
+keywords = ["blockchain", "crypto", "protocol", "sdk", "onemoney"]
 categories = ["api-bindings", "cryptography", "web-programming::http-client"]
-rust-version = "1.70"
+rust-version = "1.87"
 exclude = [
     "target/*",
     ".git/*",
@@ -54,7 +54,7 @@ path = "examples/transactions_example.rs"
 
 
 [lib]
-name = "onemoney"
+name = "onemoney_protocol"
 path = "src/lib.rs"
 
 [dependencies]

@@ -4,7 +4,7 @@
 //! without requiring a real OneMoney node.
 
 use mockito::ServerGuard;
-use onemoney::{ClientBuilder, OneMoneyAddress};
+use onemoney_protocol::{ClientBuilder, OneMoneyAddress};
 use std::error::Error;
 use std::str::FromStr;
 use std::time::Duration;

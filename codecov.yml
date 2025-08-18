@@ -1,0 +1,72 @@
+# Codecov configuration for OneMoney Rust SDK
+# This file configures how Codecov analyzes and reports code coverage
+
+# Coverage targets
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 5%
+        if_no_uploads: error
+        if_not_found: success
+        if_ci_failed: error
+    patch:
+      default:
+        target: 75%
+        threshold: 10%
+        if_no_uploads: error
+        if_not_found: success
+        if_ci_failed: error
+
+# Coverage precision
+  precision: 2
+
+# Files to ignore from coverage analysis
+ignore:
+  - "examples/"
+  - "tests/"
+  - "benches/"
+  - "target/"
+  - "*.md"
+  - "src/main.rs"  # Binary entry point if exists
+
+# Comment configuration for pull requests
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false
+
+# GitHub status checks
+github_checks:
+  annotations: true
+
+# Flags for different types of tests
+flags:
+  unit:
+    paths:
+      - src/
+
+# Component-specific coverage tracking
+component_management:
+  individual_components:
+    - component_id: crypto
+      name: Crypto Module
+      paths:
+        - src/crypto/
+    - component_id: client
+      name: Client Module
+      paths:
+        - src/client/
+    - component_id: api
+      name: API Module
+      paths:
+        - src/api/
+    - component_id: utils
+      name: Utils Module
+      paths:
+        - src/utils/
+    - component_id: transport
+      name: Transport Module
+      paths:
+        - src/transport/

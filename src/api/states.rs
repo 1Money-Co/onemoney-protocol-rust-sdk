@@ -1,8 +1,8 @@
 //! State-related API operations.
 
-use super::client::Client;
-use crate::api::client::api_path;
-use crate::api::client::endpoints::states::LATEST_EPOCH_CHECKPOINT;
+use crate::client::Client;
+use crate::client::config::api_path;
+use crate::client::config::endpoints::states::LATEST_EPOCH_CHECKPOINT;
 use crate::{LatestStateResponse, Result};
 
 impl Client {
@@ -18,7 +18,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::Client;
+    /// use onemoney_protocol::Client;
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {

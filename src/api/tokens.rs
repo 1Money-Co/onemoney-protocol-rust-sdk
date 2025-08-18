@@ -1,17 +1,17 @@
 //! Token-related API operations.
 
-use super::client::Client;
-use crate::api::client::api_path;
-use crate::api::client::endpoints::tokens::{
+use crate::client::Client;
+use crate::client::config::api_path;
+use crate::client::config::endpoints::tokens::{
     BURN, GRANT_AUTHORITY, MANAGE_BLACKLIST, MANAGE_WHITELIST, MINT, PAUSE, REVOKE_AUTHORITY,
     TOKEN_METADATA, UPDATE_METADATA,
 };
-use crate::crypto::{sign_transaction_payload, Signable};
+use crate::crypto::{Signable, sign_transaction_payload};
 use crate::{
     Authority, AuthorityAction, MetadataKVPair, MintInfo, OneMoneyAddress, Result, Signature,
     TokenAmount,
 };
-use alloy_primitives::{keccak256, B256};
+use alloy_primitives::{B256, keccak256};
 use rlp::{Encodable, RlpStream};
 use serde::{Deserialize, Serialize};
 
@@ -401,7 +401,7 @@ impl Encodable for TokenMetadataUpdatePayload {
         s.append(&self.name);
         s.append(&self.uri);
         s.append(&self.token.as_slice()); // token at position 7
-                                          // Manually encode Vec<MetadataKVPair> as nested RLP list
+        // Manually encode Vec<MetadataKVPair> as nested RLP list
         let mut metadata_stream = rlp::RlpStream::new_list(self.additional_metadata.len());
         for metadata_item in &self.additional_metadata {
             metadata_stream.append(metadata_item);
@@ -524,7 +524,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::{Client, OneMoneyAddress};
+    /// use onemoney_protocol::{Client, OneMoneyAddress};
     /// use std::str::FromStr;
     ///
     /// #[tokio::main]

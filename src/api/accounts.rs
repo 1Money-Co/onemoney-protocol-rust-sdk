@@ -1,8 +1,8 @@
 //! Account-related API operations.
 
-use super::client::Client;
-use crate::api::client::api_path;
-use crate::api::client::endpoints::accounts::{NONCE, TOKEN_ACCOUNT};
+use crate::client::Client;
+use crate::client::config::api_path;
+use crate::client::config::endpoints::accounts::{NONCE, TOKEN_ACCOUNT};
 use crate::{AccountNonce, OneMoneyAddress, Result, TokenAccount};
 use serde::Serialize;
 
@@ -36,7 +36,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::{Client, OneMoneyAddress};
+    /// use onemoney_protocol::{Client, OneMoneyAddress};
     /// use std::str::FromStr;
     ///
     /// #[tokio::main]
@@ -51,7 +51,7 @@ impl Client {
     /// }
     /// ```
     pub async fn get_account_nonce(&self, address: OneMoneyAddress) -> Result<AccountNonce> {
-        let path = api_path(&format!("{}?address={}", NONCE, address));
+        let path = api_path(&format!("{NONCE}?address={address}"));
         self.get(&path).await
     }
 
@@ -69,7 +69,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::{Client, OneMoneyAddress};
+    /// use onemoney_protocol::{Client, OneMoneyAddress};
     /// use std::str::FromStr;
     ///
     /// #[tokio::main]
@@ -89,10 +89,7 @@ impl Client {
         owner: OneMoneyAddress,
         mint: OneMoneyAddress,
     ) -> Result<TokenAccount> {
-        let path = api_path(&format!(
-            "{}?address={}&token={}",
-            TOKEN_ACCOUNT, owner, mint
-        ));
+        let path = api_path(&format!("{TOKEN_ACCOUNT}?address={owner}&token={mint}"));
         self.get(&path).await
     }
 }

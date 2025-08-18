@@ -3,9 +3,9 @@
 //! These tests verify that error types work correctly and provide
 //! meaningful error messages and proper error propagation.
 
-use onemoney::{
-    error::{Error, Result},
+use onemoney_protocol::{
     ClientBuilder, OneMoneyAddress,
+    error::{Error, Result},
 };
 use std::error::Error as StdError;
 use std::str::FromStr;
@@ -33,7 +33,7 @@ fn test_error_display() {
 
 #[test]
 fn test_error_source() {
-    let base_error = std::io::Error::new(std::io::ErrorKind::Other, "test error");
+    let base_error = std::io::Error::other("test error");
 
     // Test errors that might have sources
     let errors = [
@@ -153,7 +153,7 @@ async fn test_network_error_handling() {
 
 #[tokio::test]
 async fn test_timeout_error() {
-    use tokio::time::{timeout, Duration};
+    use tokio::time::{Duration, timeout};
 
     // Create a client with very short timeout
     let client = ClientBuilder::new()

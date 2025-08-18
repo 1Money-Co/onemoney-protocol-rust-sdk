@@ -3,7 +3,7 @@
 //! These tests verify the complete functionality of the SDK against
 //! a real or mocked OneMoney API server.
 
-use onemoney::{Client, ClientBuilder, Network, OneMoneyAddress};
+use onemoney_protocol::{Client, ClientBuilder, Network, OneMoneyAddress};
 use std::error::Error;
 use std::str::FromStr;
 use std::time::Duration;
@@ -237,7 +237,7 @@ mod integration_with_server {
 
 #[tokio::test]
 async fn test_concurrent_requests() -> Result<(), Box<dyn Error>> {
-    use tokio::time::{timeout, Duration};
+    use tokio::time::{Duration, timeout};
 
     // Create multiple clients for concurrent requests
     let mut handles = Vec::new();

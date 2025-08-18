@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the OneMoney Rust SDK - a Rust library/SDK project for interacting with the L1 blockchain REST API. It is currently in its initial setup phase.
+This is the OneMoney Protocol Rust SDK - a Rust library/SDK project for interacting with the OneMoney Protocol L1 blockchain network REST API. It is currently in its initial setup phase.
 
 ## Related Projects
 
@@ -66,7 +66,7 @@ As this SDK develops, consider organizing the code into:
 - `examples/` - Usage examples
 - `tests/` - Integration tests
 
-The project uses Rust edition 2024 and currently has no external dependencies.
+The project uses Rust edition 2024 and includes dependencies for HTTP client, serialization, cryptography, and error handling.
 
 ## Development Guidelines
 
@@ -170,7 +170,7 @@ When implementing the Rust SDK:
    **Good Example:**
    ```rust
    println!("Transaction sent: {}", tx_hash);
-   println!("✓ Payment completed successfully");
+   println!("Payment completed successfully");
    ```
 
    **Bad Example:**
@@ -211,6 +211,34 @@ When implementing the Rust SDK:
    - Formatting should be run before any quality checks or compilation
    - Never skip formatting due to "minor changes" - consistency is paramount
 
+8. **No Chinese Text or Emojis** - Keep the project completely free of Chinese characters and emoji symbols:
+   - **Zero tolerance**: No Chinese characters, emoji, or Unicode symbols are allowed anywhere in the codebase
+   - **Source code**: Production code, examples, tests, documentation, comments, and any text must be in English only
+   - **Error messages**: Keep error messages professional and in English without emojis or decorative symbols
+   - **Logging**: Use plain English text for all logging statements to ensure compatibility with log parsers and monitoring systems
+   - **API responses**: Never include Chinese text or emojis in API responses, error codes, or structured data
+   - **Documentation**: Use clear, professional English language without decorative Unicode symbols
+   - **Test data**: Use English test data and examples instead of Chinese text or emoji characters
+   - **Comments**: All code comments must be in English only
+
+   **Good Example:**
+   ```rust
+   println!("Transaction sent: {}", tx_hash);
+   println!("Payment completed successfully");
+
+   // Test with multi-byte UTF-8 characters (accented letters)
+   let test_body = "Hello world with accents: café résumé naïve";
+   ```
+
+   **Bad Example:**
+   ```rust
+   println!("✅ Transaction sent: {}", tx_hash);
+   println!("🚀 Payment completed successfully");
+
+   // Test with multi-byte UTF-8 characters (emoji, Chinese, etc)
+   let test_body = "Hello 🌍🚀! 这是中文测试 💯";
+   ```
+
 
 ### Mandatory Quality Checks
 
@@ -242,10 +270,76 @@ When implementing the Rust SDK:
 
 ## CI/CD Setup
 
-### GitHub Actions
+### GitHub Actions with Self-Hosted Runners and Docker
+
+The project uses self-hosted AWS runners with Docker containers to ensure consistent build environments and version control.
+
+#### Architecture
+- **Self-hosted runners**: Runs on AWS EC2 instances for better resource control
+- **Docker containers**: Each job runs in `rust:1.87-bookworm` containers for version consistency
+- **Consistent environment**: Same Rust/Cargo versions across all CI stages
+
+#### CI Jobs
 - **Lint and Test**: Runs on PR/push to main, includes formatting, linting, testing, and documentation build
+- **Security Audit**: Checks for known vulnerabilities using `cargo audit`
+- **Dependency Check**: Monitors for outdated dependencies with `cargo outdated`
+- **Code Coverage**: Generates coverage reports and uploads to Codecov using OIDC
+- **MSRV Check**: Validates minimum supported Rust version (1.87)
+- **Documentation**: Builds and validates project documentation
 - **Release**: Automatically creates releases with changelog generation when version tags are pushed
 - **GitHub Actions Lint**: Validates workflow files when `.github/` changes
+
+#### Docker Configuration
+
+**Dockerfile**: Provides consistent build environment with:
+- Rust 1.87 on Debian Bookworm
+- Pre-installed cargo tools (cargo-llvm-cov, cargo-audit, cargo-outdated)
+- System dependencies (OpenSSL, Git, build tools)
+- Pre-commit hooks support
+
+**Docker Compose**: Simplifies local development with:
+```bash
+# Run CI pipeline locally
+docker-compose up rust-ci
+
+# Development environment
+docker-compose up rust-dev
+
+# Interactive shell
+docker-compose run rust-dev /bin/bash
+```
+
+#### Local Development with Docker
+
+**Build and test locally:**
+```bash
+# Build the Docker image
+docker build -t onemoney-rust-sdk .
+
+# Run tests
+docker run --rm -v $(pwd):/workspace onemoney-rust-sdk cargo test
+
+# Interactive development
+docker-compose run rust-dev /bin/bash
+```
+
+**Use Docker Compose for development:**
+```bash
+# Start development environment
+docker-compose up rust-dev
+
+# Run specific commands
+docker-compose run rust-ci cargo fmt
+docker-compose run rust-ci cargo clippy
+docker-compose run rust-ci cargo test
+```
+
+#### Benefits of Docker CI
+- **Version consistency**: Exact same Rust/Cargo versions across all environments
+- **Reproducible builds**: Identical container images for local and CI
+- **Fast startup**: Pre-installed tools reduce CI run time
+- **Isolation**: Each job runs in a clean container environment
+- **Resource efficiency**: Self-hosted runners provide better performance and cost control
 
 ### Pre-commit Configuration
 The project uses pre-commit hooks (`.pre-commit-config.yaml`) that run:
@@ -257,3 +351,67 @@ The project uses pre-commit hooks (`.pre-commit-config.yaml`) that run:
 - `cliff.toml` - Changelog generation configuration
 - `rustfmt.toml` - Code formatting rules
 - `.editorconfig` - Editor configuration for consistent styling
+
+### Code Coverage with Codecov
+
+The project is configured to generate and upload code coverage reports to Codecov using the latest v4 action with OIDC authentication.
+
+#### Setup Process
+
+**1. Codecov Account Setup**
+- Create an account at [codecov.io](https://codecov.io) if not already done
+- Connect your GitHub repository to Codecov
+- Enable OIDC authentication in your Codecov organization settings (recommended)
+
+**2. OIDC Authentication (Recommended)**
+The CI workflow is configured to use OIDC authentication, which is more secure and doesn't require storing tokens:
+```yaml
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
+- name: Upload coverage to Codecov
+  uses: codecov/codecov-action@v4
+  with:
+    files: lcov.info
+    fail_ci_if_error: false
+    use_oidc: true
+```
+
+**3. Token-Based Authentication (Fallback)**
+If your Codecov account doesn't support OIDC, use token-based authentication:
+1. Get your repository token from Codecov dashboard
+2. Add it as `CODECOV_TOKEN` in GitHub repository secrets
+3. Update the CI workflow to use the token:
+```yaml
+- name: Upload coverage to Codecov
+  uses: codecov/codecov-action@v4
+  with:
+    files: lcov.info
+    fail_ci_if_error: false
+    token: ${{ secrets.CODECOV_TOKEN }}
+```
+
+#### Coverage Configuration
+
+The `codecov.yml` file configures:
+- **Target Coverage**: 80% for project, 75% for patches
+- **Component Tracking**: Separate coverage for crypto, client, api, utils, and transport modules
+- **Ignored Files**: Examples, tests, benchmarks, and documentation
+- **PR Comments**: Detailed coverage reports on pull requests
+
+#### Coverage Generation
+
+Coverage is generated using `cargo-llvm-cov`:
+```bash
+cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+```
+
+This creates an LCOV format file that Codecov can process for detailed line-by-line coverage analysis.
+
+#### Monitoring Coverage
+
+- **Pull Requests**: Codecov will comment on PRs with coverage changes
+- **Status Checks**: GitHub status checks will show if coverage meets thresholds
+- **Dashboard**: Visit codecov.io dashboard for detailed coverage analytics
+- **Component View**: Track coverage by module (crypto, client, api, etc.)
