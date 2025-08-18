@@ -40,9 +40,21 @@ jobs:
 
       - name: Install cargo tools
         run: |
-          cargo install cargo-llvm-cov || echo "cargo-llvm-cov already installed"
-          cargo install cargo-audit || echo "cargo-audit already installed"
-          cargo install cargo-outdated || echo "cargo-outdated already installed"
+          if ! command -v cargo-llvm-cov &> /dev/null; then
+            cargo install cargo-llvm-cov
+          else
+            echo "cargo-llvm-cov already installed"
+          fi
+          if ! command -v cargo-audit &> /dev/null; then
+            cargo install cargo-audit
+          else
+            echo "cargo-audit already installed"
+          fi
+          if ! command -v cargo-outdated &> /dev/null; then
+            cargo install cargo-outdated
+          else
+            echo "cargo-outdated already installed"
+          fi
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
@@ -93,7 +105,12 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Install cargo-audit
-        run: cargo install cargo-audit || echo "cargo-audit already installed"
+        run: |
+          if ! command -v cargo-audit &> /dev/null; then
+            cargo install cargo-audit
+          else
+            echo "cargo-audit already installed"
+          fi
 
 
       - name: Run security audit
@@ -115,7 +132,12 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Install cargo-outdated
-        run: cargo install cargo-outdated || echo "cargo-outdated already installed"
+        run: |
+          if ! command -v cargo-outdated &> /dev/null; then
+            cargo install cargo-outdated
+          else
+            echo "cargo-outdated already installed"
+          fi
 
 
       - name: Check for outdated dependencies

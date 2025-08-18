@@ -34,7 +34,12 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Install cargo-audit
-        run: cargo install cargo-audit || echo "cargo-audit already installed"
+        run: |
+          if ! command -v cargo-audit &> /dev/null; then
+            cargo install cargo-audit
+          else
+            echo "cargo-audit already installed"
+          fi
 
 
       - name: Run cargo audit
@@ -65,8 +70,12 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Install cargo-deny
-        run: cargo install cargo-deny || echo "cargo-deny already installed"
-
+        run: |
+          if ! command -v cargo-deny &> /dev/null; then
+            cargo install cargo-deny --version "0.18.3"
+          else
+            echo "cargo-deny already installed"
+          fi
 
       - name: Run cargo-deny check
         run: |
