@@ -20,16 +20,18 @@ permissions:
 jobs:
   cargo-audit:
     name: Cargo Security Audit
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: rust:1.87-bookworm
+      options: --user root
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - name: Install cargo-audit
-        run: cargo install cargo-audit
+      - name: Setup container environment
+        run: |
+          apt-get update && apt-get install -y git ca-certificates
+          git config --global --add safe.directory /github/workspace
 
       - name: Run cargo audit
         run: |
@@ -45,25 +47,38 @@ jobs:
 
   cargo-deny:
     name: Cargo Deny
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: rust:1.87-bookworm
+      options: --user root
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install cargo-deny
-        uses: EmbarkStudios/cargo-deny-action@v1
-        with:
-          log-level: warn
-          command: check
-          arguments: --all-features
+      - name: Setup container environment
+        run: |
+          apt-get update && apt-get install -y git ca-certificates build-essential pkg-config libssl-dev
+          git config --global --add safe.directory /github/workspace
+
+      - name: Run cargo-deny check
+        run: |
+          cargo deny --log-level warn check --all-features
 
   dependency-review:
     name: Dependency Review
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: rust:1.87-bookworm
+      options: --user root
     if: github.event_name == 'pull_request'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup container environment
+        run: |
+          apt-get update && apt-get install -y git ca-certificates
+          git config --global --add safe.directory /github/workspace
 
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
@@ -72,18 +87,23 @@ jobs:
 
   codeql-analysis:
     name: CodeQL Analysis
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: rust:1.87-bookworm
+      options: --user root
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup container environment
+        run: |
+          apt-get update && apt-get install -y git ca-certificates build-essential pkg-config libssl-dev
+          git config --global --add safe.directory /github/workspace
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: rust
-
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Build for CodeQL
         run: cargo build --all-features

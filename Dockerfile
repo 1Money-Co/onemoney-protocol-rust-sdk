@@ -30,7 +30,8 @@ RUN rustup component add \
 RUN cargo install \
     cargo-llvm-cov \
     cargo-audit \
-    cargo-outdated
+    cargo-outdated \
+    cargo-deny
 
 # Install pre-commit for code quality checks
 RUN apt-get update && apt-get install -y python3 python3-pip \

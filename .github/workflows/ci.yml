@@ -50,8 +50,8 @@ jobs:
           # Install Rust components
           rustup component add rustfmt clippy llvm-tools-preview
 
-          # Install cargo tools
-          cargo install cargo-llvm-cov cargo-audit cargo-outdated
+          # Install cargo tools (note: most tools pre-installed in Docker image)
+          # cargo install cargo-llvm-cov cargo-audit cargo-outdated cargo-deny
 
           # Install pre-commit
           pip3 install pre-commit
@@ -100,7 +100,6 @@ jobs:
       - name: Setup container environment
         run: |
           apt-get update && apt-get install -y git ca-certificates
-          cargo install cargo-audit
           git config --global --add safe.directory /github/workspace
 
       - name: Run security audit
@@ -119,7 +118,6 @@ jobs:
       - name: Setup container environment
         run: |
           apt-get update && apt-get install -y git ca-certificates
-          cargo install cargo-outdated
           git config --global --add safe.directory /github/workspace
 
       - name: Check for outdated dependencies
@@ -144,7 +142,6 @@ jobs:
         run: |
           apt-get update && apt-get install -y git ca-certificates build-essential pkg-config libssl-dev
           rustup component add llvm-tools-preview
-          cargo install cargo-llvm-cov
           git config --global --add safe.directory /github/workspace
 
       - name: Generate code coverage
