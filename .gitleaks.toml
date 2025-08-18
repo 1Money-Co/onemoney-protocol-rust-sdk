@@ -80,7 +80,8 @@ description = "All hex values in documentation and examples are sample data"
 [rules.allowlist]
 paths = [
     '''.*\.md$''',
-    '''.*\.rs$''',
+    '''examples/.*''',
+    '''.*example.*\.rs$''',
 ]
 regexes = [
     # Address examples in documentation (20 bytes = 40 hex characters)
@@ -104,21 +105,6 @@ regexes = [
     '''ONEMONEY_.*=.*''',
     '''export ONEMONEY_.*''',
     '''process\.env\.ONEMONEY_.*''',
-]
-
-[[rules]]
-id = "code-comments-and-strings"
-description = "Test data in code comments and strings"
-[rules.allowlist]
-regexes = [
-    # Hex values in string literals (surrounded by quotes)
-    '''"0x[0-9a-fA-F]+"''',
-    """'0x[0-9a-fA-F]+'""",
-
-    # Hex values in comments
-    '''//.*0x[0-9a-fA-F]+''',
-    '''/\*.*0x[0-9a-fA-F]+.*\*/''',
-    '''#.*0x[0-9a-fA-F]+''',
 ]
 
 # Generic exclusions based on file types

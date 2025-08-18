@@ -1,0 +1,43 @@
+# Docker Compose for OneMoney Protocol Rust SDK
+# Provides consistent development and CI environment
+
+version: '3.8'
+
+services:
+  rust-ci:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: onemoney-rust-ci
+    volumes:
+      - .:/workspace
+      - cargo-cache:/usr/local/cargo/registry
+      - target-cache:/workspace/target
+    working_dir: /workspace
+    environment:
+      - CARGO_HOME=/usr/local/cargo
+      - RUSTUP_HOME=/usr/local/rustup
+    command: cargo test
+
+  rust-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: onemoney-rust-dev
+    volumes:
+      - .:/workspace
+      - cargo-cache:/usr/local/cargo/registry
+      - target-cache:/workspace/target
+    working_dir: /workspace
+    environment:
+      - CARGO_HOME=/usr/local/cargo
+      - RUSTUP_HOME=/usr/local/rustup
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+
+volumes:
+  cargo-cache:
+    driver: local
+  target-cache:
+    driver: local

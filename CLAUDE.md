@@ -270,10 +270,76 @@ When implementing the Rust SDK:
 
 ## CI/CD Setup
 
-### GitHub Actions
+### GitHub Actions with Self-Hosted Runners and Docker
+
+The project uses self-hosted AWS runners with Docker containers to ensure consistent build environments and version control.
+
+#### Architecture
+- **Self-hosted runners**: Runs on AWS EC2 instances for better resource control
+- **Docker containers**: Each job runs in `rust:1.87-bookworm` containers for version consistency
+- **Consistent environment**: Same Rust/Cargo versions across all CI stages
+
+#### CI Jobs
 - **Lint and Test**: Runs on PR/push to main, includes formatting, linting, testing, and documentation build
+- **Security Audit**: Checks for known vulnerabilities using `cargo audit`
+- **Dependency Check**: Monitors for outdated dependencies with `cargo outdated`
+- **Code Coverage**: Generates coverage reports and uploads to Codecov using OIDC
+- **MSRV Check**: Validates minimum supported Rust version (1.87)
+- **Documentation**: Builds and validates project documentation
 - **Release**: Automatically creates releases with changelog generation when version tags are pushed
 - **GitHub Actions Lint**: Validates workflow files when `.github/` changes
+
+#### Docker Configuration
+
+**Dockerfile**: Provides consistent build environment with:
+- Rust 1.87 on Debian Bookworm
+- Pre-installed cargo tools (cargo-llvm-cov, cargo-audit, cargo-outdated)
+- System dependencies (OpenSSL, Git, build tools)
+- Pre-commit hooks support
+
+**Docker Compose**: Simplifies local development with:
+```bash
+# Run CI pipeline locally
+docker-compose up rust-ci
+
+# Development environment
+docker-compose up rust-dev
+
+# Interactive shell
+docker-compose run rust-dev /bin/bash
+```
+
+#### Local Development with Docker
+
+**Build and test locally:**
+```bash
+# Build the Docker image
+docker build -t onemoney-rust-sdk .
+
+# Run tests
+docker run --rm -v $(pwd):/workspace onemoney-rust-sdk cargo test
+
+# Interactive development
+docker-compose run rust-dev /bin/bash
+```
+
+**Use Docker Compose for development:**
+```bash
+# Start development environment
+docker-compose up rust-dev
+
+# Run specific commands
+docker-compose run rust-ci cargo fmt
+docker-compose run rust-ci cargo clippy
+docker-compose run rust-ci cargo test
+```
+
+#### Benefits of Docker CI
+- **Version consistency**: Exact same Rust/Cargo versions across all environments
+- **Reproducible builds**: Identical container images for local and CI
+- **Fast startup**: Pre-installed tools reduce CI run time
+- **Isolation**: Each job runs in a clean container environment
+- **Resource efficiency**: Self-hosted runners provide better performance and cost control
 
 ### Pre-commit Configuration
 The project uses pre-commit hooks (`.pre-commit-config.yaml`) that run:
