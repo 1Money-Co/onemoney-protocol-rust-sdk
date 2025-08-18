@@ -270,9 +270,9 @@ See [LICENSE](LICENSE) for details or visit http://www.apache.org/licenses/LICEN
 
 ## Support
 
-- 📖 [Documentation](https://docs.rs/onemoney-protocol)
-- 🐛 [Issue Tracker](https://github.com/1Money-Co/onemoney-rust-sdk/issues)
-- 💬 [Discussions](https://github.com/1Money-Co/onemoney-rust-sdk/discussions)
+- [Documentation](https://docs.rs/onemoney-protocol)
+- [Issue Tracker](https://github.com/1Money-Co/onemoney-protocol-rust-sdk/issues)
+- [Discussions](https://github.com/1Money-Co/onemoney-protocol-rust-sdk/discussions)
 
 ---
 
