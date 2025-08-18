@@ -1,8 +1,8 @@
 //! Token-related API operations.
 
-use super::client::Client;
-use crate::api::client::api_path;
-use crate::api::client::endpoints::tokens::{
+use crate::client::Client;
+use crate::client::config::api_path;
+use crate::client::config::endpoints::tokens::{
     BURN, GRANT_AUTHORITY, MANAGE_BLACKLIST, MANAGE_WHITELIST, MINT, PAUSE, REVOKE_AUTHORITY,
     TOKEN_METADATA, UPDATE_METADATA,
 };

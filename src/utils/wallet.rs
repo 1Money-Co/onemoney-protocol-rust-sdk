@@ -1,7 +1,7 @@
-//! Utility functions for address and key generation.
+//! EVM wallet utilities for key generation.
 
-use crate::{CryptoError, OneMoneyAddress, Result};
-use alloy_primitives::keccak256;
+use super::address::public_key_to_address;
+use crate::{OneMoneyAddress, Result};
 use hex::encode as hex_encode;
 use k256::ecdsa::{SigningKey, VerifyingKey};
 use k256::elliptic_curve::rand_core::OsRng;
@@ -64,53 +64,13 @@ impl EvmWallet {
         let public_key = format!("0x{}", hex_encode(public_key_bytes));
 
         // Generate address from public key
-        let address = Self::public_key_to_address(&public_key)?;
+        let address = public_key_to_address(&public_key)?;
 
         Ok(EvmWallet {
             private_key,
             public_key,
             address,
         })
-    }
-
-    /// Convert a public key to an Ethereum address.
-    ///
-    /// # Arguments
-    ///
-    /// * `public_key_hex` - Public key as hex string (with or without 0x prefix)
-    ///
-    /// # Returns
-    ///
-    /// The corresponding Ethereum address.
-    fn public_key_to_address(public_key_hex: &str) -> Result<OneMoneyAddress> {
-        let public_key_hex = public_key_hex.strip_prefix("0x").unwrap_or(public_key_hex);
-
-        let public_key_bytes = hex::decode(public_key_hex).map_err(|e| {
-            CryptoError::invalid_private_key(format!("Invalid public key hex: {}", e))
-        })?;
-
-        if public_key_bytes.is_empty() || public_key_bytes[0] != 0x04 {
-            return Err(CryptoError::invalid_private_key(
-                "Public key must start with 0x04 (uncompressed format)",
-            )
-            .into());
-        }
-
-        if public_key_bytes.len() != 65 {
-            return Err(CryptoError::invalid_private_key(
-                "Public key must be 65 bytes (uncompressed format)",
-            )
-            .into());
-        }
-
-        // Hash the public key (skip the 0x04 prefix)
-        let hash = keccak256(&public_key_bytes[1..]);
-
-        // Take the last 20 bytes as the address
-        let address_bytes = &hash[12..];
-        let address = alloy_primitives::Address::from_slice(address_bytes);
-
-        Ok(address)
     }
 }
 

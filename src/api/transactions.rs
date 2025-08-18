@@ -1,8 +1,8 @@
 //! Transaction-related API operations.
 
-use super::client::Client;
-use crate::api::client::api_path;
-use crate::api::client::endpoints::transactions::{
+use crate::client::Client;
+use crate::client::config::api_path;
+use crate::client::config::endpoints::transactions::{
     BY_HASH, ESTIMATE_FEE, PAYMENT, RECEIPT_BY_HASH,
 };
 use crate::crypto::Signable;

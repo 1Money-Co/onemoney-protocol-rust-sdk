@@ -26,21 +26,25 @@
 //! ```
 
 pub mod api;
+pub mod client;
 pub mod crypto;
 pub mod error;
+pub mod transport;
 pub mod types;
 pub mod utils;
 
 // Re-export the main types for easy access
 pub use api::{
-    AccountQuery, BlacklistAction, BlacklistTokenRequest, BurnTokenRequest, Client, ClientBuilder,
-    FeeEstimateRequest, MintTokenRequest, Network, PauseAction, PauseTokenRequest, PaymentPayload,
-    PaymentRequest, PaymentResponse, TokenAccountQuery, TokenAuthorityPayload,
-    TokenAuthorityRequest, TokenBlacklistPayload, TokenBurnPayload, TokenMetadataUpdatePayload,
-    TokenMintPayload, TokenOperationResponse, TokenPausePayload, TokenWhitelistPayload,
-    TransactionReceipt, UpdateMetadataRequest, WhitelistAction, WhitelistTokenRequest,
+    AccountQuery, BlacklistAction, BlacklistTokenRequest, BurnTokenRequest, FeeEstimateRequest,
+    MintTokenRequest, PauseAction, PauseTokenRequest, PaymentPayload, PaymentRequest,
+    PaymentResponse, TokenAccountQuery, TokenAuthorityPayload, TokenAuthorityRequest,
+    TokenBlacklistPayload, TokenBurnPayload, TokenMetadataUpdatePayload, TokenMintPayload,
+    TokenOperationResponse, TokenPausePayload, TokenWhitelistPayload, TransactionReceipt,
+    UpdateMetadataRequest, WhitelistAction, WhitelistTokenRequest,
 };
+pub use client::{Client, ClientBuilder, Network};
 pub use crypto::{Signable, sign_transaction_payload, *};
 pub use error::{ConfigError, CryptoError, Error, Result};
+pub use transport::*;
 pub use types::*;
-pub use utils::EvmWallet;
+pub use utils::*;
