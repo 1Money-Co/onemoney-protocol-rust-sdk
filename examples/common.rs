@@ -139,7 +139,7 @@ pub fn print_environment_banner(example_name: &str) {
     }
 
     println!("To change environment:");
-    println!("  1. Set DEFAULT_ENVIRONMENT in examples/environment.rs");
+    println!("  1. Set DEFAULT_ENVIRONMENT in examples/common.rs");
     println!(
         "  2. Or use: ONEMONEY_EXAMPLE_ENV=mainnet|testnet|local cargo run --example {}",
         example_name.replace("_example", "")

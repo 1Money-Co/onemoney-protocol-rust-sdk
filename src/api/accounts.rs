@@ -51,7 +51,7 @@ impl Client {
     /// }
     /// ```
     pub async fn get_account_nonce(&self, address: OneMoneyAddress) -> Result<AccountNonce> {
-        let path = api_path(&format!("{}?address={}", NONCE, address));
+        let path = api_path(&format!("{NONCE}?address={address}"));
         self.get(&path).await
     }
 
@@ -89,10 +89,7 @@ impl Client {
         owner: OneMoneyAddress,
         mint: OneMoneyAddress,
     ) -> Result<TokenAccount> {
-        let path = api_path(&format!(
-            "{}?address={}&token={}",
-            TOKEN_ACCOUNT, owner, mint
-        ));
+        let path = api_path(&format!("{TOKEN_ACCOUNT}?address={owner}&token={mint}"));
         self.get(&path).await
     }
 }
