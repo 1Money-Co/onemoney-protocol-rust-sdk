@@ -237,7 +237,7 @@ mod integration_with_server {
 
 #[tokio::test]
 async fn test_concurrent_requests() -> Result<(), Box<dyn Error>> {
-    use tokio::time::{timeout, Duration};
+    use tokio::time::{Duration, timeout};
 
     // Create multiple clients for concurrent requests
     let mut handles = Vec::new();

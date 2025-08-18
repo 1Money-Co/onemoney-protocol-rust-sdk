@@ -14,7 +14,7 @@ mod common;
 use common as environment;
 
 use environment::{
-    create_example_client, print_detailed_error, print_environment_banner, ExampleConfig,
+    ExampleConfig, create_example_client, print_detailed_error, print_environment_banner,
 };
 use onemoney_protocol::{
     Authority, AuthorityAction, BlacklistAction, MetadataKVPair, OneMoneyAddress, PauseAction,

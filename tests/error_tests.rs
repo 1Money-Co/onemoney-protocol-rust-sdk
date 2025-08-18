@@ -4,8 +4,8 @@
 //! meaningful error messages and proper error propagation.
 
 use onemoney_protocol::{
-    error::{Error, Result},
     ClientBuilder, OneMoneyAddress,
+    error::{Error, Result},
 };
 use std::error::Error as StdError;
 use std::str::FromStr;
@@ -153,7 +153,7 @@ async fn test_network_error_handling() {
 
 #[tokio::test]
 async fn test_timeout_error() {
-    use tokio::time::{timeout, Duration};
+    use tokio::time::{Duration, timeout};
 
     // Create a client with very short timeout
     let client = ClientBuilder::new()

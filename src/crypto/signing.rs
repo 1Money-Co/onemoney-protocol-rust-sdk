@@ -2,12 +2,12 @@
 
 use super::hashing::Signable;
 use crate::{CryptoError, OneMoneyAddress, Result, Signature};
-use alloy_primitives::{keccak256, B256, U256};
+use alloy_primitives::{B256, U256, keccak256};
 use hex::decode as hex_decode;
 use k256::ecdsa::SigningKey;
 #[cfg(test)]
 use rlp::RlpStream;
-use rlp::{encode as rlp_encode, Encodable};
+use rlp::{Encodable, encode as rlp_encode};
 use serde::Serialize;
 
 /// Sign a transaction payload using the same method as L1.
@@ -25,7 +25,8 @@ pub fn sign_hash(message_hash: &B256, private_key_hex: &str) -> Result<Signature
     let private_key_hex = private_key_hex
         .strip_prefix("0x")
         .unwrap_or(private_key_hex);
-    let private_key_bytes = hex_decode(private_key_hex)?;
+    let private_key_bytes = hex_decode(private_key_hex)
+        .map_err(|e| CryptoError::invalid_private_key(format!("Invalid hex format: {}", e)))?;
 
     if private_key_bytes.len() != 32 {
         return Err(
@@ -74,7 +75,8 @@ where
     let private_key_hex = private_key_hex
         .strip_prefix("0x")
         .unwrap_or(private_key_hex);
-    let private_key_bytes = hex_decode(private_key_hex)?;
+    let private_key_bytes = hex_decode(private_key_hex)
+        .map_err(|e| CryptoError::invalid_private_key(format!("Invalid hex format: {}", e)))?;
 
     if private_key_bytes.len() != 32 {
         return Err(

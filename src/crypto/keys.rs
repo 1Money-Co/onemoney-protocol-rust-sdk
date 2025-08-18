@@ -1,7 +1,7 @@
 //! Cryptographic key operations and address derivation.
 
 use crate::{CryptoError, OneMoneyAddress, Result};
-use alloy_primitives::{keccak256, Address};
+use alloy_primitives::{Address, keccak256};
 use hex::decode as hex_decode;
 use k256::ecdsa::{SigningKey, VerifyingKey};
 
@@ -18,7 +18,8 @@ pub fn private_key_to_address(private_key_hex: &str) -> Result<String> {
     let private_key_hex = private_key_hex
         .strip_prefix("0x")
         .unwrap_or(private_key_hex);
-    let private_key_bytes = hex_decode(private_key_hex)?;
+    let private_key_bytes = hex_decode(private_key_hex)
+        .map_err(|e| CryptoError::invalid_private_key(format!("Invalid hex format: {}", e)))?;
 
     if private_key_bytes.len() != 32 {
         return Err(

@@ -1,8 +1,8 @@
 //! Checkpoint-related API operations.
 
+use crate::client::Client;
 use crate::client::config::api_path;
 use crate::client::config::endpoints::checkpoints::{BY_HASH, BY_NUMBER, NUMBER};
-use crate::client::Client;
 use crate::{Checkpoint, CheckpointNumber, Result};
 
 impl Client {

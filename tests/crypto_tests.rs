@@ -3,11 +3,11 @@
 //! These tests verify that cryptographic operations work correctly,
 //! including signature generation, verification, and hash computation.
 
-use alloy_primitives::{keccak256, U256};
+use alloy_primitives::{U256, keccak256};
 use onemoney_protocol::api::tokens::TokenMintPayload;
 use onemoney_protocol::{
-    crypto::{private_key_to_address, sign_transaction_payload, Signable},
     OneMoneyAddress, TokenAmount,
+    crypto::{Signable, private_key_to_address, sign_transaction_payload},
 };
 use std::error::Error;
 use std::str::FromStr;

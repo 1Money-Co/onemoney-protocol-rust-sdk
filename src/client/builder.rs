@@ -1,7 +1,7 @@
 //! Client builder for configuration and creation.
 
 use super::{
-    config::{Network, DEFAULT_TIMEOUT},
+    config::{DEFAULT_TIMEOUT, Network},
     hooks::Hook,
     http::Client,
 };
