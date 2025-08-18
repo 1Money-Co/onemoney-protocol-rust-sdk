@@ -173,6 +173,7 @@ impl ExampleConfig {
             ExampleEnvironment::Mainnet => {
                 // For mainnet, use more generic placeholder addresses
                 // Users should replace these with their own addresses
+                // NOTE: private_key is a non-sensitive test vector - never use on mainnet!
                 ExampleConfig {
                     wallet_address: "0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0",
                     recipient_address: "0x1234567890abcdef1234567890abcdef12345678",
@@ -182,6 +183,7 @@ impl ExampleConfig {
             }
             ExampleEnvironment::Testnet => {
                 // For testnet, use test-specific addresses that are safe to use
+                // NOTE: This testnet private key is publicly known and safe for testing
                 ExampleConfig {
                     wallet_address: "0x5B630881f7c7c2d67577848A28C4d7483874aF33",
                     recipient_address: "0xc5c795223c69f48166b0ab12f081ce7a908b7786",
@@ -191,6 +193,7 @@ impl ExampleConfig {
             }
             ExampleEnvironment::Local => {
                 // For local, use addresses that work with local development setup
+                // NOTE: private_key is a non-sensitive test vector - safe for local testing
                 ExampleConfig {
                     wallet_address: "0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0",
                     recipient_address: "0x1234567890abcdef1234567890abcdef12345678",

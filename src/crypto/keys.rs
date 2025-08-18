@@ -79,11 +79,13 @@ mod tests {
 
     #[test]
     fn test_private_key_to_address() {
+        // Non-sensitive test vector: well-known pattern used across crypto libraries for testing
+        // This is NOT a real private key and should never be used with actual funds
         let private_key = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
         let result = private_key_to_address(private_key);
         assert!(result.is_ok());
 
-        // Test without 0x prefix
+        // Test without 0x prefix (same non-sensitive test vector)
         let private_key_no_prefix =
             "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
         let result2 = private_key_to_address(private_key_no_prefix);

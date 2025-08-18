@@ -2,19 +2,19 @@
 
 Official Rust SDK for the OneMoney L1 blockchain REST API.
 
-[![Crates.io](https://img.shields.io/crates/v/onemoney.svg)](https://crates.io/crates/onemoney)
-[![Documentation](https://docs.rs/onemoney/badge.svg)](https://docs.rs/onemoney)
+[![Crates.io](https://img.shields.io/crates/v/onemoney-protocol.svg)](https://crates.io/crates/onemoney-protocol)
+[![Documentation](https://docs.rs/onemoney-protocol/badge.svg)](https://docs.rs/onemoney-protocol)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 ## Features
 
-- 🚀 **Async/await support** - Built with Tokio for high-performance async operations
-- 🔐 **Cryptographic utilities** - ECDSA signing, address derivation, and message verification
-- 🏗️ **Type-safe API** - Strongly typed requests and responses with comprehensive error handling
-- 📦 **Modular design** - Organized by functionality (accounts, tokens, transactions, etc.)
-- 🌍 **Network support** - Mainnet and testnet configurations
-- 🔌 **Extensible** - Hook system for middleware and custom logging
-- 📚 **Well documented** - Comprehensive API documentation and examples
+- **Async/await support** - Built with Tokio for high-performance async operations
+- **Cryptographic utilities** - ECDSA signing, address derivation, and message verification
+- **Type-safe API** - Strongly typed requests and responses with comprehensive error handling
+- **Modular design** - Organized by functionality (accounts, tokens, transactions, etc.)
+- **Network support** - Mainnet and testnet configurations
+- **Extensible** - Hook system for middleware and custom logging
+- **Well documented** - Comprehensive API documentation and examples
 
 ## Installation
 
@@ -22,14 +22,14 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-onemoney = "0.1.0"
+onemoney-protocol = "0.1.0"
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 ```
 
 ## Quick Start
 
 ```rust
-use onemoney::{Client, ClientBuilder, Network, OneMoneyAddress, TokenAmount};
+use onemoney_protocol::{Client, ClientBuilder, Network, OneMoneyAddress, TokenAmount};
 use std::str::FromStr;
 
 #[tokio::main]
@@ -62,7 +62,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Client Configuration
 
 ```rust
-use onemoney::{Client, ClientBuilder};
+use onemoney_protocol::{Client, ClientBuilder};
 use std::time::Duration;
 
 // Basic clients
@@ -96,7 +96,7 @@ let token_account_addr = client.derive_token_account_address(wallet, mint);
 ### Token Operations
 
 ```rust
-use onemoney::{TokenMintPayload, Authority};
+use onemoney_protocol::{TokenMintPayload, Authority};
 
 // Mint tokens
 let mint_payload = TokenMintPayload {
@@ -115,7 +115,7 @@ let result = client.mint_token(mint_payload, private_key).await?;
 ### Transaction Operations
 
 ```rust
-use onemoney::PaymentPayload;
+use onemoney_protocol::PaymentPayload;
 
 // Send a payment
 let payment = PaymentPayload {
@@ -161,7 +161,7 @@ println!("Total transactions: {}", stats.total_transactions);
 ### Cryptographic Utilities
 
 ```rust
-use onemoney::crypto;
+use onemoney_protocol::crypto;
 
 // Derive address from private key
 let address = crypto::private_key_to_address(private_key)?;
@@ -178,7 +178,7 @@ let is_valid = crypto::verify_signature(&payload, &signature, signer_address)?;
 The SDK provides comprehensive error handling:
 
 ```rust
-use onemoney::{Error, Result};
+use onemoney_protocol::{Error, Result};
 
 match client.get_account_nonce(address).await {
     Ok(nonce) => println!("Nonce: {}", nonce.nonce),
@@ -270,10 +270,10 @@ See [LICENSE](LICENSE) for details or visit http://www.apache.org/licenses/LICEN
 
 ## Support
 
-- 📖 [Documentation](https://docs.rs/onemoney)
+- 📖 [Documentation](https://docs.rs/onemoney-protocol)
 - 🐛 [Issue Tracker](https://github.com/1Money-Co/onemoney-rust-sdk/issues)
 - 💬 [Discussions](https://github.com/1Money-Co/onemoney-rust-sdk/discussions)
 
 ---
 
-Built with ❤️ by the OneMoney team.
+Built by the OneMoney team.

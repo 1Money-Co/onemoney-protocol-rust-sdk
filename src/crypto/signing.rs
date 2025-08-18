@@ -187,6 +187,7 @@ mod tests {
 
     #[test]
     fn test_sign_and_verify_message() {
+        // Non-sensitive test vector: standard test pattern for crypto operations
         let private_key = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
         let message = TestMessage {
             value: 12345,

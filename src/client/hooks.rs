@@ -81,10 +81,14 @@ impl LoggingHook {
         };
 
         // Create safe preview - first 100 characters with ellipsis if truncated
-        if processed_body.len() <= 100 {
+        // Use character-aware truncation to avoid panics on UTF-8 boundaries
+        if processed_body.chars().count() <= 100 {
             processed_body
         } else {
-            format!("{}...", &processed_body[..100])
+            format!(
+                "{}...",
+                processed_body.chars().take(100).collect::<String>()
+            )
         }
     }
 }
@@ -268,5 +272,34 @@ mod tests {
         assert_eq!(messages.len(), 1);
         assert!(!messages[0].1.contains("0x123456789abcdef"));
         assert!(messages[0].1.contains("***REDACTED***"));
+    }
+
+    #[test]
+    fn test_safe_preview_with_multibyte_characters() {
+        let logger = Box::new(TestLogger::new());
+        let hook = LoggingHook::new(logger);
+
+        // Test with multi-byte UTF-8 characters
+        let multibyte_body = "Hello world with accents: café résumé naïve".repeat(5); // Creates ~215 characters
+        let preview = hook.create_safe_preview(&multibyte_body);
+
+        // Verify no panic occurred and truncation is correct
+        assert!(preview.ends_with("..."));
+        assert!(preview.chars().count() <= 103); // 100 chars + "..."
+
+        // Verify the preview contains valid UTF-8 and doesn't cut multi-byte chars
+        assert!(preview.is_ascii() || std::str::from_utf8(preview.as_bytes()).is_ok());
+
+        // Test exactly 100 characters (no truncation needed)
+        let exactly_100_chars = "a".repeat(97) + "xyz"; // 97 + 3 = 100 chars exactly
+        let preview_exact = hook.create_safe_preview(&exactly_100_chars);
+        assert_eq!(preview_exact, exactly_100_chars);
+        assert!(!preview_exact.contains("..."));
+
+        // Test short multi-byte string (no truncation)
+        let short_multibyte = "Hello world!";
+        let preview_short = hook.create_safe_preview(short_multibyte);
+        assert_eq!(preview_short, short_multibyte);
+        assert!(!preview_short.contains("..."));
     }
 }

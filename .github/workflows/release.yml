@@ -118,10 +118,10 @@ jobs:
             cd test-project
             echo "Running cargo check to verify crate availability..."
             if timeout 90 cargo check --verbose 2>&1; then
-              echo "✅ Success! Crate onemoney-protocol v$VERSION is available and working!"
+              echo "Success! Crate onemoney-protocol v$VERSION is available and working!"
               exit 0
             else
-              echo "❌ Cargo check failed - crate not yet available or has issues"
+              echo "Cargo check failed - crate not yet available or has issues"
               cd ..
             fi
 
@@ -129,9 +129,9 @@ jobs:
             echo "Checking crates.io API for version availability..."
             HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://crates.io/api/v1/crates/onemoney-protocol/$VERSION" || echo "000")
             if [ "$HTTP_STATUS" = "200" ]; then
-              echo "✅ Version $VERSION found in crates.io API"
+              echo "Version $VERSION found in crates.io API"
             else
-              echo "❌ Version $VERSION not found in crates.io API (HTTP $HTTP_STATUS)"
+              echo "Version $VERSION not found in crates.io API (HTTP $HTTP_STATUS)"
             fi
 
             if [ $attempt -eq $MAX_ATTEMPTS ]; then

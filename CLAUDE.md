@@ -211,6 +211,34 @@ When implementing the Rust SDK:
    - Formatting should be run before any quality checks or compilation
    - Never skip formatting due to "minor changes" - consistency is paramount
 
+8. **No Chinese Text or Emojis** - Keep the project completely free of Chinese characters and emoji symbols:
+   - **Zero tolerance**: No Chinese characters, emoji, or Unicode symbols are allowed anywhere in the codebase
+   - **Source code**: Production code, examples, tests, documentation, comments, and any text must be in English only
+   - **Error messages**: Keep error messages professional and in English without emojis or decorative symbols
+   - **Logging**: Use plain English text for all logging statements to ensure compatibility with log parsers and monitoring systems
+   - **API responses**: Never include Chinese text or emojis in API responses, error codes, or structured data
+   - **Documentation**: Use clear, professional English language without decorative Unicode symbols
+   - **Test data**: Use English test data and examples instead of Chinese text or emoji characters
+   - **Comments**: All code comments must be in English only
+
+   **Good Example:**
+   ```rust
+   println!("Transaction sent: {}", tx_hash);
+   println!("Payment completed successfully");
+
+   // Test with multi-byte UTF-8 characters (accented letters)
+   let test_body = "Hello world with accents: café résumé naïve";
+   ```
+
+   **Bad Example:**
+   ```rust
+   println!("✅ Transaction sent: {}", tx_hash);
+   println!("🚀 Payment completed successfully");
+
+   // Test with multi-byte UTF-8 characters (emoji, Chinese, etc)
+   let test_body = "Hello 🌍🚀! 这是中文测试 💯";
+   ```
+
 
 ### Mandatory Quality Checks
 
