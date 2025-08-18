@@ -5,7 +5,7 @@
 //! ## Quick Start
 //!
 //! ```rust
-//! use onemoney::{Client, ClientBuilder, Network};
+//! use onemoney_protocol::{Client, ClientBuilder, Network};
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -40,7 +40,7 @@ pub use api::{
     TokenMintPayload, TokenOperationResponse, TokenPausePayload, TokenWhitelistPayload,
     TransactionReceipt, UpdateMetadataRequest, WhitelistAction, WhitelistTokenRequest,
 };
-pub use crypto::{sign_transaction_payload, Signable, *};
+pub use crypto::{Signable, sign_transaction_payload, *};
 pub use error::{ConfigError, CryptoError, Error, Result};
 pub use types::*;
 pub use utils::EvmWallet;

@@ -42,7 +42,7 @@ impl EvmWallet {
     /// # Example
     ///
     /// ```rust
-    /// use onemoney::utils::EvmWallet;
+    /// use onemoney_protocol::utils::EvmWallet;
     ///
     /// let wallet = EvmWallet::generate_random().unwrap();
     /// println!("Generated wallet: {}", wallet);

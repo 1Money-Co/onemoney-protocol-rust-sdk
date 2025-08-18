@@ -1,9 +1,9 @@
 //! Chain-related API operations.
 
 use super::client::Client;
+use crate::Result;
 use crate::api::client::api_path;
 use crate::api::client::endpoints::chains::CHAIN_ID;
-use crate::Result;
 use serde::{Deserialize, Serialize};
 
 /// Chain ID response from the API.
@@ -22,7 +22,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::Client;
+    /// use onemoney_protocol::Client;
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {

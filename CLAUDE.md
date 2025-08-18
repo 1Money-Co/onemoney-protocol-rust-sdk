@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the OneMoney Rust SDK - a Rust library/SDK project for interacting with the L1 blockchain REST API. It is currently in its initial setup phase.
+This is the OneMoney Protocol Rust SDK - a Rust library/SDK project for interacting with the OneMoney Protocol L1 blockchain network REST API. It is currently in its initial setup phase.
 
 ## Related Projects
 
@@ -66,7 +66,7 @@ As this SDK develops, consider organizing the code into:
 - `examples/` - Usage examples
 - `tests/` - Integration tests
 
-The project uses Rust edition 2024 and currently has no external dependencies.
+The project uses Rust edition 2024 and includes dependencies for HTTP client, serialization, cryptography, and error handling.
 
 ## Development Guidelines
 
@@ -170,7 +170,7 @@ When implementing the Rust SDK:
    **Good Example:**
    ```rust
    println!("Transaction sent: {}", tx_hash);
-   println!("✓ Payment completed successfully");
+   println!("Payment completed successfully");
    ```
 
    **Bad Example:**

@@ -4,7 +4,7 @@
 //! all examples use. Change the DEFAULT_ENVIRONMENT constant to switch
 //! between mainnet, testnet, and local environments globally.
 
-use onemoney::{Client, Error};
+use onemoney_protocol::{Client, Error};
 use std::env;
 
 /// Supported network environments for examples.
@@ -177,8 +177,7 @@ impl ExampleConfig {
                     wallet_address: "0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0",
                     recipient_address: "0x1234567890abcdef1234567890abcdef12345678",
                     token_mint_address: "0x9876543210fedcba9876543210fedcba98765432",
-                    private_key:
-                        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                    private_key: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
                 }
             }
             ExampleEnvironment::Testnet => {
@@ -187,8 +186,7 @@ impl ExampleConfig {
                     wallet_address: "0x5B630881f7c7c2d67577848A28C4d7483874aF33",
                     recipient_address: "0xc5c795223c69f48166b0ab12f081ce7a908b7786",
                     token_mint_address: "0xecc78602d4886808cb4a103e83265207e04353d3",
-                    private_key:
-                        "0x6b4be1d8d5497a6cbf90d0f421cffd7e5fe855e19b177f5814abd084295424b7",
+                    private_key: "0x6b4be1d8d5497a6cbf90d0f421cffd7e5fe855e19b177f5814abd084295424b7",
                 }
             }
             ExampleEnvironment::Local => {
@@ -197,8 +195,7 @@ impl ExampleConfig {
                     wallet_address: "0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0",
                     recipient_address: "0x1234567890abcdef1234567890abcdef12345678",
                     token_mint_address: "0x9876543210fedcba9876543210fedcba98765432",
-                    private_key:
-                        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                    private_key: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
                 }
             }
         }

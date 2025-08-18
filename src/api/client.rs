@@ -1,8 +1,8 @@
 //! HTTP client implementation for the OneMoney SDK.
 
-use crate::{error::ErrorResponse, Error, Result};
-use reqwest::{header, Client as HttpClient};
-use serde::{de::DeserializeOwned, Serialize};
+use crate::{Error, Result, error::ErrorResponse};
+use reqwest::{Client as HttpClient, header};
+use serde::{Serialize, de::DeserializeOwned};
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use std::time::Duration;
 use url::Url;
@@ -461,10 +461,12 @@ mod tests {
             .build()
             .unwrap();
 
-        assert!(client
-            .base_url
-            .as_str()
-            .starts_with("https://custom.api.com"));
+        assert!(
+            client
+                .base_url
+                .as_str()
+                .starts_with("https://custom.api.com")
+        );
     }
 
     #[test]
@@ -487,10 +489,12 @@ mod tests {
             .base_url("https://custom.api.com")
             .build()
             .unwrap();
-        assert!(custom_client
-            .base_url
-            .as_str()
-            .starts_with("https://custom.api.com"));
+        assert!(
+            custom_client
+                .base_url
+                .as_str()
+                .starts_with("https://custom.api.com")
+        );
     }
 
     #[test]

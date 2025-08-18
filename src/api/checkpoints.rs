@@ -20,7 +20,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::Client;
+    /// use onemoney_protocol::Client;
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -51,7 +51,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::Client;
+    /// use onemoney_protocol::Client;
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -78,7 +78,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::Client;
+    /// use onemoney_protocol::Client;
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {

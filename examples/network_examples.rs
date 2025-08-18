@@ -12,7 +12,7 @@ use common as environment;
 use environment::{
     create_example_client, get_example_environment, print_detailed_error, print_environment_banner,
 };
-use onemoney::{ClientBuilder, Network};
+use onemoney_protocol::{ClientBuilder, Network};
 use std::error::Error;
 use std::time::Duration;
 

@@ -36,7 +36,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::{Client, OneMoneyAddress};
+    /// use onemoney_protocol::{Client, OneMoneyAddress};
     /// use std::str::FromStr;
     ///
     /// #[tokio::main]
@@ -69,7 +69,7 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney::{Client, OneMoneyAddress};
+    /// use onemoney_protocol::{Client, OneMoneyAddress};
     /// use std::str::FromStr;
     ///
     /// #[tokio::main]

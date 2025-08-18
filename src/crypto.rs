@@ -1,12 +1,12 @@
 //! Cryptographic utilities for signing and address derivation.
 
 use crate::{CryptoError, OneMoneyAddress, Result, Signature};
-use alloy_primitives::{keccak256, Address, B256, U256};
+use alloy_primitives::{Address, B256, U256, keccak256};
 use hex::decode as hex_decode;
 use k256::ecdsa::{SigningKey, VerifyingKey};
 #[cfg(test)]
 use rlp::RlpStream;
-use rlp::{encode as rlp_encode, Encodable};
+use rlp::{Encodable, encode as rlp_encode};
 use serde::Serialize;
 
 /// Trait for types that can be cryptographically signed.
