@@ -184,8 +184,35 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     sleep(Duration::from_secs(1)).await;
 
-    // 5. Pause token
-    println!("\n5. Pause Token");
+    // 5. Revoke authority
+    println!("\n5. Revoke Authority");
+    println!("===================");
+
+    let revoke_payload = TokenAuthorityPayload {
+        recent_epoch: state.epoch,
+        recent_checkpoint: state.checkpoint,
+        chain_id,
+        nonce: current_nonce,
+        action: AuthorityAction::Revoke,
+        authority_type: Authority::MintBurnTokens,
+        authority_address: recipient_address,
+        token: token_address,
+        value: TokenAmount::from(1000000000000000000u64), // 1 token allowance (same as granted)
+    };
+    current_nonce += 1; // Increment for next transaction
+
+    match client.revoke_authority(revoke_payload, private_key).await {
+        Ok(response) => {
+            println!("Authority revoked - Tx: {}", response.hash);
+        }
+        Err(e) => {
+            print_detailed_error("Could not revoke authority", &e);
+        }
+    }
+    sleep(Duration::from_secs(1)).await;
+
+    // 6. Pause token
+    println!("\n6. Pause Token");
     println!("==============");
 
     let pause_payload = TokenPausePayload {
@@ -208,8 +235,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     sleep(Duration::from_secs(1)).await;
 
-    // 6. Unpause token
-    println!("\n6. Unpause Token");
+    // 7. Unpause token
+    println!("\n7. Unpause Token");
     println!("================");
 
     let unpause_payload = TokenPausePayload {
@@ -232,8 +259,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     sleep(Duration::from_secs(1)).await;
 
-    // 7. Manage blacklist (add address) - only for public tokens
-    println!("\n7. Manage Blacklist");
+    // 8. Manage blacklist (add address) - only for public tokens
+    println!("\n8. Manage Blacklist");
     println!("===================");
 
     if let Some(ref info) = token_info {
@@ -269,8 +296,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     sleep(Duration::from_secs(1)).await;
 
-    // 7.1. Remove address from blacklist - only for public tokens
-    println!("\n7.1. Remove Address from Blacklist");
+    // 8.1. Remove address from blacklist - only for public tokens
+    println!("\n8.1. Remove Address from Blacklist");
     println!("===================================");
 
     if let Some(ref info) = token_info {
@@ -306,8 +333,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     sleep(Duration::from_secs(1)).await;
 
-    // 8. Manage whitelist (add address) - only for private tokens
-    println!("\n8. Manage Whitelist");
+    // 9. Manage whitelist (add address) - only for private tokens
+    println!("\n9. Manage Whitelist");
     println!("===================");
 
     if let Some(ref info) = token_info {
@@ -343,9 +370,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     sleep(Duration::from_secs(1)).await;
 
-    // 9. Update token metadata
-    println!("\n9. Update Token Metadata");
-    println!("========================");
+    // 10. Update token metadata
+    println!("\n10. Update Token Metadata");
+    println!("=========================");
 
     let metadata_payload = TokenMetadataUpdatePayload {
         recent_epoch: state.epoch,
@@ -390,8 +417,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("   - GET /v1/tokens/token_metadata - Get token metadata");
     println!("   - POST /v1/tokens/mint - Mint tokens");
     println!("   - POST /v1/tokens/burn - Burn tokens");
-    println!("   - POST /v1/tokens/grant_authority - Grant token authority");
-    println!("   - POST /v1/tokens/revoke_authority - Revoke token authority");
+    println!("   - POST /v1/tokens/grant_authority - Grant/revoke token authority");
     println!("   - POST /v1/tokens/pause - Pause/unpause token");
     println!("   - POST /v1/tokens/manage_blacklist - Manage token blacklist");
     println!("   - POST /v1/tokens/manage_whitelist - Manage token whitelist");

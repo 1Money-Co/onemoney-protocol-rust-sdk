@@ -88,7 +88,6 @@ pub mod endpoints {
         pub const MINT: &str = "/tokens/mint";
         pub const BURN: &str = "/tokens/burn";
         pub const GRANT_AUTHORITY: &str = "/tokens/grant_authority";
-        pub const REVOKE_AUTHORITY: &str = "/tokens/revoke_authority";
         pub const UPDATE_METADATA: &str = "/tokens/update_metadata";
         pub const MANAGE_BLACKLIST: &str = "/tokens/manage_blacklist";
         pub const MANAGE_WHITELIST: &str = "/tokens/manage_whitelist";

@@ -3,8 +3,8 @@
 use crate::client::Client;
 use crate::client::config::api_path;
 use crate::client::config::endpoints::tokens::{
-    BURN, GRANT_AUTHORITY, MANAGE_BLACKLIST, MANAGE_WHITELIST, MINT, PAUSE, REVOKE_AUTHORITY,
-    TOKEN_METADATA, UPDATE_METADATA,
+    BURN, GRANT_AUTHORITY, MANAGE_BLACKLIST, MANAGE_WHITELIST, MINT, PAUSE, TOKEN_METADATA,
+    UPDATE_METADATA,
 };
 use crate::crypto::{Signable, sign_transaction_payload};
 use crate::{
@@ -477,9 +477,12 @@ impl Client {
 
     /// Revoke authority for a token from an address.
     ///
+    /// Note: This method uses the same `/v1/tokens/grant_authority` endpoint as grant_authority(),
+    /// but with `AuthorityAction::Revoke` in the payload to indicate a revoke operation.
+    ///
     /// # Arguments
     ///
-    /// * `payload` - Authority revoke parameters
+    /// * `payload` - Authority revoke parameters (with action set to AuthorityAction::Revoke)
     /// * `private_key` - Private key for signing the transaction (must have master authority)
     ///
     /// # Returns
@@ -493,7 +496,7 @@ impl Client {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = TokenAuthorityRequest { payload, signature };
 
-        self.post(&api_path(REVOKE_AUTHORITY), &request).await
+        self.post(&api_path(GRANT_AUTHORITY), &request).await
     }
 
     /// Get token metadata by mint address.
