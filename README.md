@@ -29,7 +29,8 @@ tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 ## Quick Start
 
 ```rust
-use onemoney_protocol::{Client, ClientBuilder, Network, OneMoneyAddress, TokenAmount};
+use onemoney_protocol::{Client, ClientBuilder, Network};
+use alloy_primitives::{Address, U256};
 use std::str::FromStr;
 
 #[tokio::main]
@@ -45,7 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()?;
 
     // Get account nonce
-    let address = OneMoneyAddress::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?;
+    let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?;
     let nonce = client.get_account_nonce(address).await?;
     println!("Account nonce: {}", nonce.nonce);
 
@@ -106,7 +107,7 @@ let mint_payload = TokenMintPayload {
     nonce: 1,
     token: token_address,
     recipient: recipient_address,
-    value: TokenAmount::from(1000000000000000000u64), // 1 token
+    value: U256::from(1000000000000000000u64), // 1 token
 };
 
 let result = client.mint_token(mint_payload, private_key).await?;
@@ -124,7 +125,7 @@ let payment = PaymentPayload {
     chain_id: 1212101,
     nonce: 2,
     recipient: recipient_address,
-    value: TokenAmount::from(500000000000000000u64), // 0.5 tokens
+    value: U256::from(500000000000000000u64), // 0.5 tokens
     token: token_address,
 };
 

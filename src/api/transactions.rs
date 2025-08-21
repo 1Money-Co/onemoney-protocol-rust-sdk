@@ -7,7 +7,8 @@ use crate::client::config::endpoints::transactions::{
 };
 use crate::crypto::Signable;
 use crate::crypto::sign_transaction_payload;
-use crate::{Hash, OneMoneyAddress, Result, Signature, TokenAmount, Transaction};
+use crate::{Hash, Result, Signature, Transaction};
+use alloy_primitives::{Address, U256};
 use alloy_primitives::{B256, keccak256};
 #[cfg(test)]
 use rlp::encode as rlp_encode;
@@ -27,17 +28,17 @@ pub struct PaymentPayload {
     /// Account nonce.
     pub nonce: u64,
     /// Recipient address.
-    pub recipient: OneMoneyAddress,
+    pub recipient: Address,
     /// Amount to transfer.
     #[serde(serialize_with = "serialize_token_amount_decimal")]
-    pub value: TokenAmount,
+    pub value: U256,
     /// Token address (use native token address for native transfers).
-    pub token: OneMoneyAddress,
+    pub token: Address,
 }
 
-/// Serialize TokenAmount as decimal string instead of hex (L1 compatibility).
+/// Serialize U256 as decimal string instead of hex (L1 compatibility).
 fn serialize_token_amount_decimal<S>(
-    value: &TokenAmount,
+    value: &U256,
     serializer: S,
 ) -> std::result::Result<S::Ok, S::Error>
 where
@@ -112,11 +113,11 @@ pub struct PaymentRequest {
 #[derive(Debug, Clone, Serialize)]
 pub struct FeeEstimateRequest {
     /// From address.
-    pub from: OneMoneyAddress,
+    pub from: Address,
     /// Value to transfer.
-    pub value: Option<TokenAmount>,
+    pub value: Option<U256>,
     /// Token address (optional).
-    pub token: Option<OneMoneyAddress>,
+    pub token: Option<Address>,
 }
 
 /// Transaction receipt response.
@@ -183,7 +184,8 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney_protocol::{Client, PaymentPayload, OneMoneyAddress, TokenAmount};
+    /// use onemoney_protocol::{Client, PaymentPayload};
+    /// use alloy_primitives::{Address, U256};
     /// use std::str::FromStr;
     ///
     /// #[tokio::main]
@@ -195,9 +197,9 @@ impl Client {
     ///         recent_checkpoint: 456,
     ///         chain_id: 1212101,
     ///         nonce: 0,
-    ///         recipient: OneMoneyAddress::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?,
-    ///         value: TokenAmount::from(1000000000000000000u64), // 1 token
-    ///         token: OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
+    ///         recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?,
+    ///         value: U256::from(1000000000000000000u64), // 1 token
+    ///         token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
     ///     };
     ///
     ///     let private_key = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
@@ -260,7 +262,8 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney_protocol::{Client, FeeEstimateRequest, OneMoneyAddress, TokenAmount};
+    /// use onemoney_protocol::{Client, FeeEstimateRequest};
+    /// use alloy_primitives::{Address, U256};
     /// use std::str::FromStr;
     ///
     /// #[tokio::main]
@@ -268,8 +271,8 @@ impl Client {
     ///     let client = Client::mainnet();
     ///
     ///     let request = FeeEstimateRequest {
-    ///         from: OneMoneyAddress::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?,
-    ///         value: Some(TokenAmount::from(1000000000000000000u64)),
+    ///         from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?,
+    ///         value: Some(U256::from(1000000000000000000u64)),
     ///         token: None,
     ///     };
     ///
@@ -302,7 +305,7 @@ impl Client {
         }
 
         let response: EstimateFeeResponse = self.get(&api_path(&path)).await?;
-        // Parse the fee string as TokenAmount
+        // Parse the fee string as U256
         let fee_amount = response
             .fee
             .parse::<u128>()
@@ -310,8 +313,8 @@ impl Client {
 
         Ok(crate::FeeEstimate {
             gas_limit: 21000, // Default gas limit for simple transactions
-            gas_price: TokenAmount::from(fee_amount / 21000), // Calculated gas price
-            total_fee: TokenAmount::from(fee_amount),
+            gas_price: U256::from(fee_amount / 21000), // Calculated gas price
+            total_fee: U256::from(fee_amount),
         })
     }
 
@@ -361,10 +364,9 @@ mod tests {
             recent_checkpoint: 456,
             chain_id: 1212101,
             nonce: 0,
-            recipient: OneMoneyAddress::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
-                .unwrap(),
-            value: TokenAmount::from(1000000000000000000u64),
-            token: OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(1000000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
         };
 
         let encoded = rlp_encode(&payload);
@@ -374,8 +376,8 @@ mod tests {
     #[test]
     fn test_fee_estimate_request() {
         let request = FeeEstimateRequest {
-            from: OneMoneyAddress::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
-            value: Some(TokenAmount::from(1000000000000000000u64)),
+            from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: Some(U256::from(1000000000000000000u64)),
             token: None,
         };
 

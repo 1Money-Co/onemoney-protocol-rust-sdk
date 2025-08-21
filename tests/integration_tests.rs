@@ -3,9 +3,11 @@
 //! These tests verify the complete functionality of the SDK against
 //! a real or mocked OneMoney API server.
 
-use onemoney_protocol::{Client, ClientBuilder, Network, OneMoneyAddress};
+use alloy_primitives::Address;
+use onemoney_protocol::{Client, ClientBuilder, Network};
 use std::error::Error;
 use std::str::FromStr;
+
 use std::time::Duration;
 
 // Test configuration
@@ -24,9 +26,8 @@ mod test_utils {
     }
 
     /// Generate a test address
-    pub fn test_address() -> OneMoneyAddress {
-        OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")
-            .expect("Valid test address")
+    pub fn test_address() -> Address {
+        Address::from_str("0x1234567890abcdef1234567890abcdef12345678").expect("Valid test address")
     }
 }
 
@@ -88,7 +89,7 @@ async fn test_address_validation() -> Result<(), Box<dyn Error>> {
     ];
 
     for addr_str in &valid_addresses {
-        let result = OneMoneyAddress::from_str(addr_str);
+        let result = Address::from_str(addr_str);
         assert!(result.is_ok(), "Address {} should be valid", addr_str);
     }
 
@@ -103,7 +104,7 @@ async fn test_address_validation() -> Result<(), Box<dyn Error>> {
     ];
 
     for addr_str in &invalid_addresses {
-        let result = OneMoneyAddress::from_str(addr_str);
+        let result = Address::from_str(addr_str);
         assert!(result.is_err(), "Address {} should be invalid", addr_str);
     }
 
@@ -165,8 +166,8 @@ async fn test_account_operations_offline() -> Result<(), Box<dyn Error>> {
     assert_eq!(address_str.len(), 42); // 0x + 40 hex chars
 
     // Test round-trip conversion
-    let parsed_address = OneMoneyAddress::from_str(&address_str)
-        .map_err(|e| format!("Failed to parse address: {}", e))?;
+    let parsed_address =
+        Address::from_str(&address_str).map_err(|e| format!("Failed to parse address: {}", e))?;
     assert_eq!(address, parsed_address);
 
     Ok(())

@@ -1,6 +1,7 @@
 //! Address utilities and validation functions.
 
-use crate::{CryptoError, OneMoneyAddress, Result};
+use crate::{CryptoError, Result};
+use alloy_primitives::Address;
 use alloy_primitives::keccak256;
 
 /// Convert a public key to an Ethereum address.
@@ -12,7 +13,7 @@ use alloy_primitives::keccak256;
 /// # Returns
 ///
 /// The corresponding Ethereum address.
-pub fn public_key_to_address(public_key_hex: &str) -> Result<OneMoneyAddress> {
+pub fn public_key_to_address(public_key_hex: &str) -> Result<Address> {
     let public_key_hex = public_key_hex.strip_prefix("0x").unwrap_or(public_key_hex);
 
     let public_key_bytes = hex::decode(public_key_hex)

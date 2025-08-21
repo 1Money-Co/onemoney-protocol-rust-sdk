@@ -1,6 +1,6 @@
 //! Cryptographic key operations and address derivation.
 
-use crate::{CryptoError, OneMoneyAddress, Result};
+use crate::{CryptoError, Result};
 use alloy_primitives::{Address, keccak256};
 use hex::decode as hex_decode;
 use k256::ecdsa::{SigningKey, VerifyingKey};
@@ -59,10 +59,7 @@ pub fn private_key_to_address(private_key_hex: &str) -> Result<String> {
 /// # Returns
 ///
 /// The derived token account address.
-pub fn derive_token_account_address(
-    wallet_address: OneMoneyAddress,
-    mint_address: OneMoneyAddress,
-) -> OneMoneyAddress {
+pub fn derive_token_account_address(wallet_address: Address, mint_address: Address) -> Address {
     let mut data = Vec::new();
     data.extend_from_slice(&wallet_address[..]);
     data.extend_from_slice(&mint_address[..]);

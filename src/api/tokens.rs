@@ -7,10 +7,8 @@ use crate::client::config::endpoints::tokens::{
     UPDATE_METADATA,
 };
 use crate::crypto::{Signable, sign_transaction_payload};
-use crate::{
-    Authority, AuthorityAction, Hash, MetadataKVPair, MintInfo, OneMoneyAddress, Result, Signature,
-    TokenAmount,
-};
+use crate::{Authority, AuthorityAction, Hash, MetadataKVPair, MintInfo, Result, Signature};
+use alloy_primitives::{Address, U256};
 use alloy_primitives::{B256, keccak256};
 use rlp::{Encodable, RlpStream};
 use serde::{Deserialize, Serialize};
@@ -27,11 +25,11 @@ pub struct TokenMintPayload {
     /// Account nonce.
     pub nonce: u64,
     /// Recipient address.
-    pub recipient: OneMoneyAddress,
+    pub recipient: Address,
     /// Amount to mint.
-    pub value: TokenAmount,
+    pub value: U256,
     /// Token address.
-    pub token: OneMoneyAddress,
+    pub token: Address,
 }
 
 impl Encodable for TokenMintPayload {
@@ -84,11 +82,11 @@ pub struct TokenBurnPayload {
     /// Account nonce.
     pub nonce: u64,
     /// Token account to burn from.
-    pub recipient: OneMoneyAddress,
+    pub recipient: Address,
     /// Amount to burn.
-    pub value: TokenAmount,
+    pub value: U256,
     /// Token address.
-    pub token: OneMoneyAddress,
+    pub token: Address,
 }
 
 impl Encodable for TokenBurnPayload {
@@ -145,11 +143,11 @@ pub struct TokenAuthorityPayload {
     /// Authority type.
     pub authority_type: Authority,
     /// Address to grant/revoke authority to/from.
-    pub authority_address: OneMoneyAddress,
+    pub authority_address: Address,
     /// Token address.
-    pub token: OneMoneyAddress,
+    pub token: Address,
     /// Allowance value (for MintBurnTokens authority type).
-    pub value: TokenAmount,
+    pub value: U256,
 }
 
 impl Encodable for TokenAuthorityPayload {
@@ -216,7 +214,7 @@ pub struct TokenPausePayload {
     /// Pause action.
     pub action: PauseAction,
     /// Token address.
-    pub token: OneMoneyAddress,
+    pub token: Address,
 }
 
 impl Encodable for TokenPausePayload {
@@ -271,9 +269,9 @@ pub struct TokenBlacklistPayload {
     /// Blacklist action.
     pub action: BlacklistAction,
     /// Address to blacklist/unblacklist.
-    pub address: OneMoneyAddress,
+    pub address: Address,
     /// Token address.
-    pub token: OneMoneyAddress,
+    pub token: Address,
 }
 
 impl Encodable for TokenBlacklistPayload {
@@ -329,9 +327,9 @@ pub struct TokenWhitelistPayload {
     /// Whitelist action.
     pub action: WhitelistAction,
     /// Address to whitelist/unwhitelist.
-    pub address: OneMoneyAddress,
+    pub address: Address,
     /// Token address.
-    pub token: OneMoneyAddress,
+    pub token: Address,
 }
 
 impl Encodable for TokenWhitelistPayload {
@@ -379,7 +377,7 @@ pub struct TokenMetadataUpdatePayload {
     /// Metadata URI.
     pub uri: String,
     /// Token address.
-    pub token: OneMoneyAddress,
+    pub token: Address,
     /// Additional metadata as key-value pairs.
     pub additional_metadata: Vec<MetadataKVPair>,
 }
@@ -512,13 +510,14 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney_protocol::{Client, OneMoneyAddress};
+    /// use onemoney_protocol::Client;
+    /// use alloy_primitives::Address;
     /// use std::str::FromStr;
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///     let client = Client::mainnet();
-    ///     let mint = OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?;
+    ///     let mint = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?;
     ///
     ///     let mint_info = client.get_token_metadata(mint).await?;
     ///     println!("Token: {}", mint_info.symbol);
@@ -526,7 +525,7 @@ impl Client {
     ///     Ok(())
     /// }
     /// ```
-    pub async fn get_token_metadata(&self, mint_address: OneMoneyAddress) -> Result<MintInfo> {
+    pub async fn get_token_metadata(&self, mint_address: Address) -> Result<MintInfo> {
         let path = api_path(&format!("{}?token={}", TOKEN_METADATA, mint_address));
         let response: MintInfo = self.get(&path).await?;
         Ok(response)

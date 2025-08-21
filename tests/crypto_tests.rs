@@ -3,12 +3,9 @@
 //! These tests verify that cryptographic operations work correctly,
 //! including signature generation, verification, and hash computation.
 
-use alloy_primitives::{U256, keccak256};
+use alloy_primitives::{Address, U256, keccak256};
 use onemoney_protocol::api::tokens::TokenMintPayload;
-use onemoney_protocol::{
-    OneMoneyAddress, TokenAmount,
-    crypto::{Signable, private_key_to_address, sign_transaction_payload},
-};
+use onemoney_protocol::crypto::{Signable, private_key_to_address, sign_transaction_payload};
 use std::error::Error;
 use std::str::FromStr;
 
@@ -76,9 +73,9 @@ fn test_signature_generation() -> Result<(), Box<dyn Error>> {
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 0,
-        recipient: OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
-        value: TokenAmount::from(1000u64),
-        token: OneMoneyAddress::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
+        recipient: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
+        value: U256::from(1000u64),
+        token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
     };
 
     // Sign the payload
@@ -116,9 +113,9 @@ fn test_signature_deterministic() -> Result<(), Box<dyn Error>> {
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 0,
-        recipient: OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
-        value: TokenAmount::from(1000u64),
-        token: OneMoneyAddress::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
+        recipient: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
+        value: U256::from(1000u64),
+        token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
     };
 
     let payload2 = TokenMintPayload {
@@ -126,9 +123,9 @@ fn test_signature_deterministic() -> Result<(), Box<dyn Error>> {
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 0,
-        recipient: OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
-        value: TokenAmount::from(1000u64),
-        token: OneMoneyAddress::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
+        recipient: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
+        value: U256::from(1000u64),
+        token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
     };
 
     // Sign both payloads
@@ -162,9 +159,9 @@ fn test_different_payloads_produce_different_signatures() -> Result<(), Box<dyn 
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 0,
-        recipient: OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
-        value: TokenAmount::from(1000u64),
-        token: OneMoneyAddress::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
+        recipient: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
+        value: U256::from(1000u64),
+        token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
     };
 
     let payload2 = TokenMintPayload {
@@ -172,9 +169,9 @@ fn test_different_payloads_produce_different_signatures() -> Result<(), Box<dyn 
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1, // Different nonce
-        recipient: OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
-        value: TokenAmount::from(1000u64),
-        token: OneMoneyAddress::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
+        recipient: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
+        value: U256::from(1000u64),
+        token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
     };
 
     // Sign both payloads
@@ -197,9 +194,9 @@ fn test_hash_computation() -> Result<(), Box<dyn Error>> {
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 0,
-        recipient: OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
-        value: TokenAmount::from(1000u64),
-        token: OneMoneyAddress::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
+        recipient: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
+        value: U256::from(1000u64),
+        token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
     };
 
     // Test signature hash computation
@@ -224,9 +221,9 @@ fn test_hash_changes_with_payload_changes() -> Result<(), Box<dyn Error>> {
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 0,
-        recipient: OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
-        value: TokenAmount::from(1000u64),
-        token: OneMoneyAddress::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
+        recipient: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
+        value: U256::from(1000u64),
+        token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
     };
 
     let payload2 = TokenMintPayload {
@@ -234,9 +231,9 @@ fn test_hash_changes_with_payload_changes() -> Result<(), Box<dyn Error>> {
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 0,
-        recipient: OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
-        value: TokenAmount::from(1000u64),
-        token: OneMoneyAddress::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
+        recipient: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
+        value: U256::from(1000u64),
+        token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
     };
 
     let hash1 = payload1.signature_hash();
@@ -277,9 +274,9 @@ fn test_rlp_encoding_affects_hash() -> Result<(), Box<dyn Error>> {
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 0,
-        recipient: OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
-        value: TokenAmount::from(1000u64),
-        token: OneMoneyAddress::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
+        recipient: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?,
+        value: U256::from(1000u64),
+        token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")?,
     };
 
     // Encode the same payload multiple times
@@ -312,9 +309,9 @@ fn test_edge_case_values() -> Result<(), Box<dyn Error>> {
         recent_checkpoint: u64::MAX,
         chain_id: u64::MAX,
         nonce: u64::MAX,
-        recipient: OneMoneyAddress::from_str("0x0000000000000000000000000000000000000000")?,
-        value: TokenAmount::from(u64::MAX),
-        token: OneMoneyAddress::from_str("0xffffffffffffffffffffffffffffffffffffffff")?,
+        recipient: Address::from_str("0x0000000000000000000000000000000000000000")?,
+        value: U256::from(u64::MAX),
+        token: Address::from_str("0xffffffffffffffffffffffffffffffffffffffff")?,
     };
 
     // Should be able to compute hash without panicking
@@ -334,9 +331,9 @@ fn test_zero_values() -> Result<(), Box<dyn Error>> {
         recent_checkpoint: 0,
         chain_id: 0,
         nonce: 0,
-        recipient: OneMoneyAddress::from_str("0x0000000000000000000000000000000000000000")?,
-        value: TokenAmount::from(0u64),
-        token: OneMoneyAddress::from_str("0x0000000000000000000000000000000000000000")?,
+        recipient: Address::from_str("0x0000000000000000000000000000000000000000")?,
+        value: U256::from(0u64),
+        token: Address::from_str("0x0000000000000000000000000000000000000000")?,
     };
 
     // Should be able to compute hash without panicking

@@ -1,14 +1,8 @@
 //! Common types used throughout the OneMoney SDK.
 
-use alloy_primitives::{Address, U256};
+use alloy_primitives::U256;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
-
-/// Ethereum-compatible address type using alloy primitives.
-pub type OneMoneyAddress = Address;
-
-/// Large integer type for token amounts and values using alloy primitives.
-pub type TokenAmount = U256;
 
 /// ECDSA signature components.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

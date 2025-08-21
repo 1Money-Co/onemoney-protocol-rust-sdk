@@ -1,7 +1,8 @@
 //! EVM wallet utilities for key generation.
 
 use super::address::public_key_to_address;
-use crate::{OneMoneyAddress, Result};
+use crate::Result;
+use alloy_primitives::Address;
 use hex::encode as hex_encode;
 use k256::ecdsa::{SigningKey, VerifyingKey};
 use k256::elliptic_curve::rand_core::OsRng;
@@ -16,7 +17,7 @@ pub struct EvmWallet {
     /// Public key as hex string (with 0x prefix).
     pub public_key: String,
     /// Ethereum-style address as hex string (with 0x prefix).
-    pub address: OneMoneyAddress,
+    pub address: Address,
 }
 
 impl Display for EvmWallet {
@@ -91,7 +92,7 @@ mod tests {
         assert!(wallet.public_key.starts_with("0x"));
         assert_eq!(wallet.public_key.len(), 132); // 0x + 130 hex chars (65 bytes * 2)
 
-        assert_ne!(wallet.address, OneMoneyAddress::ZERO);
+        assert_ne!(wallet.address, Address::ZERO);
 
         println!("Generated wallet: {}", wallet);
     }

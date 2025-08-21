@@ -3,12 +3,14 @@
 //! These tests verify that error types work correctly and provide
 //! meaningful error messages and proper error propagation.
 
+use alloy_primitives::Address;
 use onemoney_protocol::{
-    ClientBuilder, OneMoneyAddress,
+    ClientBuilder,
     error::{Error, Result},
 };
 use std::error::Error as StdError;
 use std::str::FromStr;
+
 use std::time::Duration;
 
 #[test]
@@ -102,7 +104,7 @@ fn test_address_parsing_errors() {
     ];
 
     for invalid_addr in &invalid_addresses {
-        let result = OneMoneyAddress::from_str(invalid_addr);
+        let result = Address::from_str(invalid_addr);
         assert!(
             result.is_err(),
             "Address '{}' should be invalid",

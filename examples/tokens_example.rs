@@ -13,14 +13,14 @@
 mod common;
 use common as environment;
 
+use alloy_primitives::{Address, U256};
 use environment::{
     ExampleConfig, create_example_client, print_detailed_error, print_environment_banner,
 };
 use onemoney_protocol::{
-    Authority, AuthorityAction, BlacklistAction, MetadataKVPair, OneMoneyAddress, PauseAction,
-    TokenAmount, TokenAuthorityPayload, TokenBlacklistPayload, TokenBurnPayload,
-    TokenMetadataUpdatePayload, TokenMintPayload, TokenPausePayload, TokenWhitelistPayload,
-    WhitelistAction,
+    Authority, AuthorityAction, BlacklistAction, MetadataKVPair, PauseAction,
+    TokenAuthorityPayload, TokenBlacklistPayload, TokenBurnPayload, TokenMetadataUpdatePayload,
+    TokenMintPayload, TokenPausePayload, TokenWhitelistPayload, WhitelistAction,
 };
 use std::error::Error;
 use std::str::FromStr;
@@ -37,10 +37,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let config = ExampleConfig::get();
     config.print_config_warning();
 
-    let sender_address = OneMoneyAddress::from_str(config.wallet_address)?;
-    let recipient_address = OneMoneyAddress::from_str(config.recipient_address)?;
+    let sender_address = Address::from_str(config.wallet_address)?;
+    let recipient_address = Address::from_str(config.recipient_address)?;
     let private_key = config.private_key;
-    let token_address = OneMoneyAddress::from_str(config.token_mint_address)?;
+    let token_address = Address::from_str(config.token_mint_address)?;
 
     println!("\nDemo Configuration:");
     println!("   Sender: {}", sender_address);
@@ -117,7 +117,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         chain_id,
         nonce: current_nonce,
         recipient: sender_address, // Mint to sender's own account
-        value: TokenAmount::from(1000000000000000000u64), // 1 token
+        value: U256::from(1000000000000000000u64), // 1 token
         token: token_address,
     };
     current_nonce += 1; // Increment for next transaction
@@ -142,7 +142,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         chain_id,
         nonce: current_nonce,
         recipient: sender_address, // Burn from sender's own account
-        value: TokenAmount::from(500000000000000000u64), // 0.5 tokens
+        value: U256::from(500000000000000000u64), // 0.5 tokens
         token: token_address,
     };
     current_nonce += 1; // Increment for next transaction
@@ -170,7 +170,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         authority_type: Authority::MintBurnTokens,
         authority_address: recipient_address,
         token: token_address,
-        value: TokenAmount::from(1000000000000000000u64), // 1 token allowance
+        value: U256::from(1000000000000000000u64), // 1 token allowance
     };
     current_nonce += 1; // Increment for next transaction
 
@@ -197,7 +197,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         authority_type: Authority::MintBurnTokens,
         authority_address: recipient_address,
         token: token_address,
-        value: TokenAmount::from(1000000000000000000u64), // 1 token allowance (same as granted)
+        value: U256::from(1000000000000000000u64), // 1 token allowance (same as granted)
     };
     current_nonce += 1; // Increment for next transaction
 

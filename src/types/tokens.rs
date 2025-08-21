@@ -1,6 +1,6 @@
 //! Token-related type definitions.
 
-use super::common::OneMoneyAddress;
+use alloy_primitives::Address;
 use rlp::{Encodable, RlpStream};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
@@ -75,7 +75,7 @@ impl Encodable for MetadataKVPair {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MinterAllowance {
     /// Minter address.
-    pub minter: OneMoneyAddress,
+    pub minter: Address,
     /// Allowance amount as string.
     pub allowance: String,
 }
@@ -86,21 +86,21 @@ pub struct MintInfo {
     /// Token symbol.
     pub symbol: String,
     /// Master authority address.
-    pub master_authority: OneMoneyAddress,
+    pub master_authority: Address,
     /// Master mint/burn authority address.
-    pub master_mint_burn_authority: OneMoneyAddress,
+    pub master_mint_burn_authority: Address,
     /// Mint/burn authorities with allowances.
     pub mint_burn_authorities: Vec<MinterAllowance>,
     /// Pause authorities.
-    pub pause_authorities: Vec<OneMoneyAddress>,
+    pub pause_authorities: Vec<Address>,
     /// List management authorities.
-    pub list_authorities: Vec<OneMoneyAddress>,
+    pub list_authorities: Vec<Address>,
     /// Blacklisted addresses.
-    pub black_list: Vec<OneMoneyAddress>,
+    pub black_list: Vec<Address>,
     /// Whitelisted addresses.
-    pub white_list: Vec<OneMoneyAddress>,
+    pub white_list: Vec<Address>,
     /// Metadata update authorities.
-    pub metadata_update_authorities: Vec<OneMoneyAddress>,
+    pub metadata_update_authorities: Vec<Address>,
     /// Total supply as string.
     pub supply: String,
     /// Number of decimal places.
@@ -217,7 +217,7 @@ impl Display for MintInfo {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AssociatedTokenAccount {
     /// The derived token account address.
-    pub token_account_address: OneMoneyAddress,
+    pub token_account_address: Address,
     /// Token balance as string.
     pub balance: String,
     /// Owner account nonce.

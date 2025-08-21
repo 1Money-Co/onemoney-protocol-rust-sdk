@@ -1,7 +1,8 @@
 //! Digital signature operations.
 
 use super::hashing::Signable;
-use crate::{CryptoError, OneMoneyAddress, Result, Signature};
+use crate::{CryptoError, Result, Signature};
+use alloy_primitives::Address;
 use alloy_primitives::{B256, U256, keccak256};
 use hex::decode as hex_decode;
 use k256::ecdsa::SigningKey;
@@ -128,7 +129,7 @@ where
 pub fn verify_signature<T>(
     message: &T,
     signature: &Signature,
-    _expected_signer: OneMoneyAddress,
+    _expected_signer: Address,
 ) -> Result<bool>
 where
     T: Serialize + Encodable,

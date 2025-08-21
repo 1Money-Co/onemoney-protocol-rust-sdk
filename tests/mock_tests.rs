@@ -3,10 +3,12 @@
 //! These tests use mock HTTP servers to test API interactions
 //! without requiring a real OneMoney node.
 
+use alloy_primitives::Address;
 use mockito::ServerGuard;
-use onemoney_protocol::{ClientBuilder, OneMoneyAddress};
+use onemoney_protocol::ClientBuilder;
 use std::error::Error;
 use std::str::FromStr;
+
 use std::time::Duration;
 
 /// Setup a mock server for testing
@@ -110,7 +112,7 @@ async fn test_account_nonce_mock() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(5))
         .build()?;
 
-    let address = OneMoneyAddress::from_str(test_address)?;
+    let address = Address::from_str(test_address)?;
     let nonce_info = client.get_account_nonce(address).await?;
 
     println!("Nonce info: {}", nonce_info);
@@ -158,7 +160,7 @@ async fn test_token_metadata_mock() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(5))
         .build()?;
 
-    let token_addr = OneMoneyAddress::from_str(token_address)?;
+    let token_addr = Address::from_str(token_address)?;
     let metadata = client.get_token_metadata(token_addr).await?;
 
     println!("Token metadata: {}", metadata);

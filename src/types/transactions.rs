@@ -1,6 +1,7 @@
 //! Transaction-related type definitions.
 
-use super::common::{OneMoneyAddress, Signature, TokenAmount};
+use super::common::Signature;
+use alloy_primitives::{Address, U256};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
@@ -22,7 +23,7 @@ pub struct Transaction {
     /// Chain ID.
     pub chain_id: u64,
     /// From address.
-    pub from: OneMoneyAddress,
+    pub from: Address,
     /// Nonce.
     pub nonce: u64,
     /// Transaction data.
@@ -81,7 +82,7 @@ pub enum TransactionData {
         /// Token decimals.
         decimals: u8,
         /// Master authority.
-        master_authority: OneMoneyAddress,
+        master_authority: Address,
         /// Whether token is private.
         is_private: bool,
         /// Token name.
@@ -92,92 +93,92 @@ pub enum TransactionData {
         /// Transfer value.
         value: String,
         /// Recipient address.
-        to: OneMoneyAddress,
+        to: Address,
         /// Token address (None for native token).
-        token: Option<OneMoneyAddress>,
+        token: Option<Address>,
     },
     /// Grant authority.
     TokenGrantAuthority {
         /// Authority type.
         authority_type: String,
         /// New authority address.
-        new_authority: OneMoneyAddress,
+        new_authority: Address,
         /// Amount of tokens to mint (optional).
         mint_tokens: Option<String>,
         /// Token address.
-        token: OneMoneyAddress,
+        token: Address,
     },
     /// Revoke authority.
     TokenRevokeAuthority {
         /// Authority type.
         authority_type: String,
         /// Authority address to revoke.
-        new_authority: OneMoneyAddress,
+        new_authority: Address,
         /// Amount of tokens to mint (optional).
         mint_tokens: Option<String>,
         /// Token address.
-        token: OneMoneyAddress,
+        token: Address,
     },
     /// Blacklist account.
     TokenBlacklistAccount {
         /// Address to blacklist.
-        address: OneMoneyAddress,
+        address: Address,
         /// Token address.
-        token: OneMoneyAddress,
+        token: Address,
     },
     /// Whitelist account.
     TokenWhitelistAccount {
         /// Address to whitelist.
-        address: OneMoneyAddress,
+        address: Address,
         /// Token address.
-        token: OneMoneyAddress,
+        token: Address,
     },
     /// Mint tokens.
     TokenMint {
         /// Amount to mint.
         value: String,
         /// Address to mint to.
-        address: OneMoneyAddress,
+        address: Address,
         /// Token address.
-        token: OneMoneyAddress,
+        token: Address,
     },
     /// Burn tokens.
     TokenBurn {
         /// Amount to burn.
         value: String,
         /// Address to burn from.
-        address: OneMoneyAddress,
+        address: Address,
         /// Token address.
-        token: OneMoneyAddress,
+        token: Address,
     },
     /// Close account.
     TokenCloseAccount {
         /// Token address.
-        token: OneMoneyAddress,
+        token: Address,
     },
     /// Pause token.
     TokenPause {
         /// Token address.
-        token: OneMoneyAddress,
+        token: Address,
     },
     /// Unpause token.
     TokenUnpause {
         /// Token address.
-        token: OneMoneyAddress,
+        token: Address,
     },
     /// Update metadata.
     TokenUpdateMetadata {
         /// New metadata.
         metadata: serde_json::Value, // Using Value for flexibility
         /// Token address.
-        token: OneMoneyAddress,
+        token: Address,
     },
     /// Raw transaction data.
     Raw {
         /// Input data.
         input: String,
         /// Token address.
-        token: OneMoneyAddress,
+        token: Address,
     },
     /// Governance transaction.
     Governance,
@@ -330,9 +331,9 @@ pub struct FeeEstimate {
     /// Estimated gas limit.
     pub gas_limit: u64,
     /// Estimated gas price.
-    pub gas_price: TokenAmount,
+    pub gas_price: U256,
     /// Total estimated fee.
-    pub total_fee: TokenAmount,
+    pub total_fee: U256,
 }
 
 impl Display for FeeEstimate {
@@ -364,7 +365,7 @@ pub struct HashWithToken {
     /// Transaction hash.
     pub hash: String,
     /// Token address created by the transaction.
-    pub token: OneMoneyAddress,
+    pub token: Address,
 }
 
 impl Display for HashWithToken {

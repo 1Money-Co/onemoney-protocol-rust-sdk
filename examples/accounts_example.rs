@@ -9,11 +9,11 @@
 mod common;
 use common as environment;
 
+use alloy_primitives::Address;
 use environment::{
     ExampleConfig, create_example_client, get_example_environment, print_detailed_error,
     print_environment_banner,
 };
-use onemoney_protocol::OneMoneyAddress;
 use std::error::Error;
 use std::str::FromStr;
 
@@ -27,8 +27,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let config = ExampleConfig::get();
     config.print_config_warning();
 
-    let wallet_address = OneMoneyAddress::from_str(config.wallet_address)?;
-    let token_mint_address = OneMoneyAddress::from_str(config.token_mint_address)?;
+    let wallet_address = Address::from_str(config.wallet_address)?;
+    let token_mint_address = Address::from_str(config.token_mint_address)?;
 
     let current_env = get_example_environment();
     println!(
@@ -75,13 +75,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Invalid address format
     println!("Testing invalid address format:");
-    match OneMoneyAddress::from_str("invalid_address") {
+    match Address::from_str("invalid_address") {
         Ok(_) => println!("   Unexpectedly parsed invalid address"),
         Err(e) => println!("   Correctly rejected invalid address: {}", e),
     }
 
     // Non-existent account (should handle gracefully)
-    let fake_address = OneMoneyAddress::from_str("0x0000000000000000000000000000000000000000")?;
+    let fake_address = Address::from_str("0x0000000000000000000000000000000000000000")?;
     println!("Testing non-existent account:");
     match client.get_account_nonce(fake_address).await {
         Ok(nonce) => println!("   Zero address: {}", nonce),
@@ -92,7 +92,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Test invalid token mint
     println!("Testing invalid token mint:");
-    let invalid_mint = OneMoneyAddress::from_str("0x1111111111111111111111111111111111111111")?;
+    let invalid_mint = Address::from_str("0x1111111111111111111111111111111111111111")?;
     match client
         .get_associated_token_account(wallet_address, invalid_mint)
         .await
