@@ -80,7 +80,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Check token account balance
     println!("\nChecking sender's token balance...");
     match client
-        .get_token_account(sender_address, token_address)
+        .get_associated_token_account(sender_address, token_address)
         .await
     {
         Ok(token_account) => {

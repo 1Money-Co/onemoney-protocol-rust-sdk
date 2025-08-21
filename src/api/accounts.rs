@@ -3,7 +3,7 @@
 use crate::client::Client;
 use crate::client::config::api_path;
 use crate::client::config::endpoints::accounts::{NONCE, TOKEN_ACCOUNT};
-use crate::{AccountNonce, OneMoneyAddress, Result, TokenAccount};
+use crate::{AccountNonce, AssociatedTokenAccount, OneMoneyAddress, Result};
 use serde::Serialize;
 
 /// Account query parameters.
@@ -55,16 +55,19 @@ impl Client {
         self.get(&path).await
     }
 
-    /// Get token account information for a specific owner and mint.
+    /// Get associated token account information for a specific address and token.
+    ///
+    /// This method queries the L1 server's `/v1/accounts/token_account` endpoint
+    /// to retrieve token account details including balance and nonce.
     ///
     /// # Arguments
     ///
-    /// * `owner` - The wallet owner address
-    /// * `mint` - The token mint address
+    /// * `address` - The wallet owner address
+    /// * `token` - The token mint address
     ///
     /// # Returns
     ///
-    /// The token account information.
+    /// The associated token account information.
     ///
     /// # Example
     ///
@@ -75,21 +78,21 @@ impl Client {
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///     let client = Client::mainnet();
-    ///     let owner = OneMoneyAddress::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?;
-    ///     let mint = OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?;
+    ///     let address = OneMoneyAddress::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?;
+    ///     let token = OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?;
     ///
-    ///     let account = client.get_token_account(owner, mint).await?;
+    ///     let account = client.get_associated_token_account(address, token).await?;
     ///     println!("Token balance: {}", account.balance);
     ///
     ///     Ok(())
     /// }
     /// ```
-    pub async fn get_token_account(
+    pub async fn get_associated_token_account(
         &self,
-        owner: OneMoneyAddress,
-        mint: OneMoneyAddress,
-    ) -> Result<TokenAccount> {
-        let path = api_path(&format!("{TOKEN_ACCOUNT}?address={owner}&token={mint}"));
+        address: OneMoneyAddress,
+        token: OneMoneyAddress,
+    ) -> Result<AssociatedTokenAccount> {
+        let path = api_path(&format!("{TOKEN_ACCOUNT}?address={address}&token={token}"));
         self.get(&path).await
     }
 }

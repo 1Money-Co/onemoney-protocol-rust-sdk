@@ -57,7 +57,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("============================");
 
     match client
-        .get_token_account(wallet_address, token_mint_address)
+        .get_associated_token_account(wallet_address, token_mint_address)
         .await
     {
         Ok(token_account) => {
@@ -93,7 +93,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Test invalid token mint
     println!("Testing invalid token mint:");
     let invalid_mint = OneMoneyAddress::from_str("0x1111111111111111111111111111111111111111")?;
-    match client.get_token_account(wallet_address, invalid_mint).await {
+    match client
+        .get_associated_token_account(wallet_address, invalid_mint)
+        .await
+    {
         Ok(account) => println!("   Unexpected: {}", account),
         Err(e) => {
             print_detailed_error("Invalid token mint error", &e);

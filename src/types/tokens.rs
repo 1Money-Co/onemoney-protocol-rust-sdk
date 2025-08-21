@@ -212,10 +212,10 @@ impl Display for MintInfo {
     }
 }
 
-/// Token account information from API response.
+/// Associated token account information from API response.
 /// Matches the L1 server's AssociatedTokenAccount structure.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TokenAccount {
+pub struct AssociatedTokenAccount {
     /// The derived token account address.
     pub token_account_address: OneMoneyAddress,
     /// Token balance as string.
@@ -224,11 +224,11 @@ pub struct TokenAccount {
     pub nonce: u64,
 }
 
-impl Display for TokenAccount {
+impl Display for AssociatedTokenAccount {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         write!(
             f,
-            "Token Account {}: balance = {}, owner nonce = {}",
+            "Associated Token Account {}: balance = {}, owner nonce = {}",
             self.token_account_address, self.balance, self.nonce
         )
     }

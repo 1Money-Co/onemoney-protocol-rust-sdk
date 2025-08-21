@@ -83,7 +83,7 @@ let client = ClientBuilder::new()
 let nonce = client.get_account_nonce(address).await?;
 
 // Get token account balance
-let token_account = client.get_token_account(owner, mint_address).await?;
+let token_account = client.get_associated_token_account(owner, mint_address).await?;
 println!("Balance: {}", token_account.amount);
 
 // List all token accounts for an address
