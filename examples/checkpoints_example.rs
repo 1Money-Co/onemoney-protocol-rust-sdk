@@ -44,7 +44,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     {
         Ok(checkpoint) => {
             println!("{}", checkpoint);
-            checkpoint.header.hash.clone()
+            checkpoint.hash.clone()
         }
         Err(e) => {
             print_detailed_error(

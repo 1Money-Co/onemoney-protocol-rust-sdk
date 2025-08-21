@@ -5,23 +5,6 @@ use crate::client::config::api_path;
 use crate::client::config::endpoints::accounts::{NONCE, TOKEN_ACCOUNT};
 use crate::{AccountNonce, AssociatedTokenAccount, Result};
 use alloy_primitives::Address;
-use serde::Serialize;
-
-/// Account query parameters.
-#[derive(Debug, Clone, Serialize)]
-pub struct AccountQuery {
-    /// Account address to query.
-    pub address: Address,
-}
-
-/// Token account query parameters.
-#[derive(Debug, Clone, Serialize)]
-pub struct TokenAccountQuery {
-    /// Owner wallet address.
-    pub owner: Address,
-    /// Token mint address.
-    pub mint: Address,
-}
 
 impl Client {
     /// Get the nonce for an account.

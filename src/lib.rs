@@ -33,18 +33,14 @@ pub mod transport;
 pub mod types;
 pub mod utils;
 
-// Re-export the main types for easy access
-pub use api::{
-    AccountQuery, BlacklistAction, BlacklistTokenRequest, BurnTokenRequest, FeeEstimateRequest,
-    MintTokenRequest, PauseAction, PauseTokenRequest, PaymentPayload, PaymentRequest,
-    TokenAccountQuery, TokenAuthorityPayload, TokenAuthorityRequest, TokenBlacklistPayload,
-    TokenBurnPayload, TokenMetadataUpdatePayload, TokenMintPayload, TokenPausePayload,
-    TokenWhitelistPayload, TransactionReceipt, UpdateMetadataRequest, WhitelistAction,
-    WhitelistTokenRequest,
-};
+// Re-export payload types from requests module
 pub use client::{Client, ClientBuilder, Network};
 pub use crypto::{Signable, sign_transaction_payload, *};
 pub use error::{ConfigError, CryptoError, Error, Result};
+pub use requests::{
+    PaymentPayload, TokenAuthorityPayload, TokenBlacklistPayload, TokenBurnPayload,
+    TokenMetadataUpdatePayload, TokenMintPayload, TokenPausePayload, TokenWhitelistPayload,
+};
 pub use transport::*;
 pub use types::*;
 pub use utils::*;

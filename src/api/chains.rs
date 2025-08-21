@@ -4,13 +4,7 @@ use crate::Result;
 use crate::client::Client;
 use crate::client::config::api_path;
 use crate::client::config::endpoints::chains::CHAIN_ID;
-use serde::{Deserialize, Serialize};
-
-/// Chain ID response from the API.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ChainIdResponse {
-    pub chain_id: u64,
-}
+use crate::responses::ChainIdResponse;
 
 impl Client {
     /// Get the current chain ID.

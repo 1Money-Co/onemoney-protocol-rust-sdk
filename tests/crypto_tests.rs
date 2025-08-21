@@ -4,7 +4,7 @@
 //! including signature generation, verification, and hash computation.
 
 use alloy_primitives::{Address, U256, keccak256};
-use onemoney_protocol::api::tokens::TokenMintPayload;
+use onemoney_protocol::TokenMintPayload;
 use onemoney_protocol::crypto::{Signable, private_key_to_address, sign_transaction_payload};
 use std::error::Error;
 use std::str::FromStr;

@@ -1,0 +1,359 @@
+//! Transaction-related API response types.
+
+use alloy_primitives::{Address, B256, Bytes, U256};
+use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter, Result as FmtResult};
+
+use super::{accounts::Nonce, tokens::TokenMetadata};
+use crate::api_signature::RestSignature;
+
+/// Chain ID type from L1 primitives
+pub type ChainId = u64;
+
+/// Fee estimation result.
+#[derive(Debug, Clone)]
+pub struct FeeEstimate {
+    /// Estimated gas limit.
+    pub gas_limit: u64,
+    /// Estimated gas price.
+    pub gas_price: U256,
+    /// Total estimated fee.
+    pub total_fee: U256,
+}
+
+impl Display for FeeEstimate {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(
+            f,
+            "Fee Estimate: {} gas @ {} per unit = {} total",
+            self.gas_limit, self.gas_price, self.total_fee
+        )
+    }
+}
+
+/// Represents a transaction hash returned by the API.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct Hash {
+    pub hash: B256,
+}
+
+impl Display for Hash {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(f, "Transaction Hash: {}", self.hash)
+    }
+}
+
+/// Represents a transaction hash and the token that created by the transaction.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct HashWithToken {
+    /// The hash of the transaction.
+    pub hash: B256,
+    /// The token that created by the transaction, only works for issuing new
+    /// tokens.
+    pub token: Address,
+}
+
+impl Display for HashWithToken {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(f, "Transaction Hash: {} (Token: {})", self.hash, self.token)
+    }
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Transaction {
+    /// Hash
+    pub hash: B256,
+
+    /// Checkpoint hash
+    #[serde(default)]
+    pub checkpoint_hash: Option<B256>,
+    /// Checkpoint number
+    #[serde(default)]
+    pub checkpoint_number: Option<u64>,
+    /// Transaction Index
+    #[serde(default)]
+    pub transaction_index: Option<u64>,
+
+    /// Epoch
+    pub epoch: u64,
+
+    /// Checkpoint
+    pub checkpoint: u64,
+
+    /// The chain id of the transaction, if any.
+    pub chain_id: ChainId,
+    /// Sender
+    pub from: Address,
+    /// Nonce
+    pub nonce: Nonce,
+
+    #[serde(flatten)]
+    pub data: TxPayload,
+
+    /// All _flattened_ fields of the transaction signature.
+    /// Note: this is an option so special transaction types without a signature (e.g. <https://github.com/ethereum-optimism/optimism/blob/0bf643c4147b43cd6f25a759d331ef3a2a61a2a3/specs/deposits.md#the-deposited-transaction-type>) can be supported.
+    pub signature: RestSignature,
+}
+
+impl Display for Transaction {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(
+            f,
+            "Transaction {}: from {} at epoch {} checkpoint {} (nonce: {})",
+            self.hash, self.from, self.epoch, self.checkpoint, self.nonce
+        )?;
+        if let Some(checkpoint_hash) = &self.checkpoint_hash {
+            write!(f, " in checkpoint {}", checkpoint_hash)?;
+        }
+        Ok(())
+    }
+}
+
+/// Transaction receipt response.
+#[derive(Debug, Clone, Deserialize)]
+pub struct TransactionReceipt {
+    /// If transaction is executed successfully.
+    pub success: bool,
+    /// Transaction Hash.
+    pub transaction_hash: String,
+    /// Index within the block.
+    pub transaction_index: Option<u64>,
+    /// Hash of the checkpoint this transaction was included within.
+    pub checkpoint_hash: Option<String>,
+    /// Number of the checkpoint this transaction was included within.
+    pub checkpoint_number: Option<u64>,
+    /// Fee used.
+    pub fee_used: u128,
+    /// Address of the sender.
+    pub from: String,
+    /// Address of the receiver. None when its a contract creation transaction.
+    pub to: Option<String>,
+    /// Token address created, or None if not a deployment.
+    pub token_address: Option<String>,
+}
+
+impl Display for TransactionReceipt {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        writeln!(f, "Transaction Receipt:")?;
+        writeln!(f, "  Success: {}", self.success)?;
+        writeln!(f, "  Transaction Hash: {}", self.transaction_hash)?;
+        writeln!(f, "  Fee Used: {}", self.fee_used)?;
+        if let Some(idx) = self.transaction_index {
+            writeln!(f, "  Transaction Index: {}", idx)?;
+        }
+        if let Some(hash) = &self.checkpoint_hash {
+            writeln!(f, "  Checkpoint Hash: {}", hash)?;
+        }
+        if let Some(num) = self.checkpoint_number {
+            writeln!(f, "  Checkpoint Number: {}", num)?;
+        }
+        writeln!(f, "  From: {}", self.from)?;
+        if let Some(to) = &self.to {
+            writeln!(f, "  To: {}", to)?;
+        }
+        if let Some(token) = &self.token_address {
+            write!(f, "  Token Address: {}", token)?;
+        }
+        Ok(())
+    }
+}
+
+/// Instructions supported by mint token
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "transaction_type", content = "data")]
+pub enum TxPayload {
+    /// Create a new mint token. After the token is created, the
+    /// `master_authority` of the token is initialized with the signer of the
+    /// message.
+    ///
+    /// Refer to `TokenInstruction::CreateNewToken`.
+    TokenCreate {
+        /// The symbol of the token to create.
+        symbol: String,
+
+        /// Number of base 10 digits to the right of the decimal place.
+        decimals: u8,
+
+        /// The master authority of the token.
+        master_authority: Address,
+
+        /// `true` if this token is private and only whitelisted addresses can
+        /// operate with the tokens
+        is_private: bool,
+
+        /// The name of the token to create.
+        name: String,
+    },
+
+    /// Transfer tokens from one account to another. The signer of message must
+    /// be the owner of the source account. Otherwise the transaction may fail.
+    ///
+    /// Refer to `TokenInstruction::Transfer`.
+    TokenTransfer {
+        /// The amount of tokens to transfer.
+        value: String,
+
+        /// The real recipient address.
+        to: Address,
+
+        /// The token address, if it's native token, token address is `None`.
+        token: Option<Address>,
+    },
+
+    /// Grant authority to another account. The signer of message must be the
+    /// Mint's `master_authority`. Otherwise the transaction may fail.
+    ///
+    /// Refer to `TokenInstruction::GrantAuthority`.
+    TokenGrantAuthority {
+        /// The type of authority to update.
+        authority_type: String,
+        /// The new authority
+        new_authority: Address,
+        /// The amount of tokens to mint.
+        mint_tokens: Option<String>,
+
+        /// The token address
+        token: Address,
+    },
+
+    /// Revoke authority to another account. The signer of message must be the
+    /// Mint's `master_authority`. Otherwise the transaction may fail.
+    ///
+    /// Refer to `TokenInstruction::RevokeAuthority`.
+    TokenRevokeAuthority {
+        /// The type of authority to update.
+        authority_type: String,
+        /// The new authority
+        new_authority: Address,
+        /// The amount of tokens to mint.
+        mint_tokens: Option<String>,
+
+        /// The token address
+        token: Address,
+    },
+
+    /// Add the account to the blacklisted accounts. The signer of message must
+    /// be the Mint's `blacklist_authority`. Otherwise the transaction may fail.
+    ///
+    /// Refer to `TokenInstruction::BlacklistAccount`.
+    TokenBlacklistAccount {
+        /// The account to blacklist
+        address: Address,
+
+        /// The token address
+        token: Address,
+    },
+
+    /// Whitelist the a previously blacklisted account. The signer of message
+    /// must be the Mint's `blacklist_authority`. Otherwise the transaction may
+    /// fail.
+    ///
+    /// Refer to `TokenInstruction::WhitelistAccount`.
+    TokenWhitelistAccount {
+        /// The account to whitelist
+        address: Address,
+
+        /// The token address
+        token: Address,
+    },
+
+    /// Mints new tokens to an account. The signer of the message must be Mint's
+    /// `mint_authority`. Otherwise the transaction may fail.
+    ///
+    /// Refer to `TokenInstruction::MintTo`.
+    TokenMint {
+        /// The amount of new tokens to mint.
+        value: String,
+        /// The address to mint the tokens to.
+        address: Address,
+
+        /// The token address
+        token: Address,
+    },
+
+    /// Burns tokens by removing them from an account. The signer of the message
+    /// must be Mint's `mint_burn` authority. Otherwise the transaction may
+    /// fail.
+    ///
+    /// Refer to `TokenInstruction::BurnFromAccount`.
+    TokenBurn {
+        /// The amount of tokens to burn.
+        value: String,
+        /// The address to burn the tokens from.
+        address: Address,
+
+        /// The token address
+        token: Address,
+    },
+
+    /// Close an account. Note that an account can be closed only if the token
+    /// balance is zero.
+    ///
+    /// Refer to `TokenInstruction::CloseAccount`.
+    TokenCloseAccount {
+        /// The token address
+        token: Address,
+    },
+
+    /// Pause all transactions associated with the Mint. The signer of the
+    /// message must be the Mint's `pause_authority`. Otherwise the
+    /// transaction may fail.
+    ///
+    /// Refer to `TokenInstruction::Pause`.
+    TokenPause {
+        /// The token address
+        token: Address,
+    },
+
+    /// Unpause transactions for the Mint. The signer of the message must be the
+    /// Mint's `pause_authority`. Otherwise the transaction may fail.
+    ///
+    /// Refer to `TokenInstruction::Unpause`.
+    TokenUnpause {
+        /// The token address
+        token: Address,
+    },
+
+    /// Update token metadata. The signer of the message must be the Mint's
+    /// `metadata_update_authority`. Otherwise the transaction may fail.
+    ///
+    /// Refer to `TokenInstruction::UpdateMetadata`.
+    TokenUpdateMetadata {
+        /// The metadata to update
+        metadata: TokenMetadata,
+
+        /// The token address
+        token: Address,
+    },
+
+    /// Raw transaction data, all unsupported instructions are encoded as raw
+    /// data.
+    ///
+    /// This variant is used for all instructions that are not supported by the
+    /// current version of the RPC. Just for compatibility.
+    Raw {
+        /// The input data of the transaction.
+        input: Bytes,
+        /// The token address
+        token: Address,
+    },
+
+    // *FIXLATER*: for governance, we don't support them for now.
+    Governance,
+}
+
+impl TxPayload {
+    pub fn is_raw(&self) -> bool {
+        matches!(self, TxPayload::Raw { .. })
+    }
+}
+
+impl Default for TxPayload {
+    fn default() -> Self {
+        Self::TokenTransfer {
+            value: String::default(),
+            to: Address::default(),
+            token: None,
+        }
+    }
+}
