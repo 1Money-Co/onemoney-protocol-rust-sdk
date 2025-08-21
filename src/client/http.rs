@@ -142,16 +142,70 @@ impl Client {
 
     /// Handle error responses from the API.
     fn handle_error_response(&self, status_code: u16, body: &str) -> Error {
-        // Try to parse as structured error response
+        // Try to parse as structured error response first (L1 compatible)
         if let Ok(error_response) = serde_json::from_str::<ErrorResponse>(body) {
-            Error::api(
+            // Classify error based on status code and error code
+            Self::classify_error(
                 status_code,
-                error_response.error_code,
-                error_response.message,
+                &error_response.error_code,
+                &error_response.message,
             )
         } else {
-            // Fallback to generic error
-            Error::api(status_code, "unknown".to_string(), body.to_string())
+            // Fallback based on status code
+            match status_code {
+                400 => Error::invalid_parameter("request", body),
+                401 => Error::authentication(body),
+                403 => Error::authorization(body),
+                404 => Error::resource_not_found("unknown", body),
+                408 => Error::request_timeout("unknown", 0),
+                422 => Error::business_logic("validation", body),
+                429 => Error::rate_limit_exceeded(None),
+                500..=599 => Error::http_transport(body, Some(status_code)),
+                _ => Error::api(status_code, "unknown".to_string(), body.to_string()),
+            }
+        }
+    }
+
+    /// Classify structured errors based on L1 error patterns.
+    fn classify_error(status_code: u16, error_code: &str, message: &str) -> Error {
+        match (status_code, error_code) {
+            // 400 Bad Request - Validation Errors
+            (400, code) if code.starts_with("validation_") => {
+                let param = code.strip_prefix("validation_").unwrap_or("unknown");
+                Error::invalid_parameter(param, message)
+            }
+
+            // 401 Unauthorized
+            (401, _) => Error::authentication(message),
+
+            // 403 Forbidden
+            (403, _) => Error::authorization(message),
+
+            // 404 Not Found - Resource Errors
+            (404, code) if code.starts_with("resource_") => {
+                let resource = code.strip_prefix("resource_").unwrap_or("unknown");
+                Error::resource_not_found(resource, message)
+            }
+
+            // 408 Request Timeout
+            (408, "request_timeout") => Error::request_timeout(message, 0),
+
+            // 422 Unprocessable Entity - Business Logic
+            (422, code) if code.starts_with("business_") => {
+                let operation = code.strip_prefix("business_").unwrap_or("unknown");
+                Error::business_logic(operation, message)
+            }
+
+            // 429 Too Many Requests
+            (429, "rate_limit_exceeded") => Error::rate_limit_exceeded(None),
+
+            // 500+ Server Errors
+            (500..=599, code) if code.starts_with("system_") => {
+                Error::http_transport(message, Some(status_code))
+            }
+
+            // Default to generic API error
+            _ => Error::api(status_code, error_code.to_string(), message.to_string()),
         }
     }
 }
