@@ -344,3 +344,35 @@ impl Display for FeeEstimate {
         )
     }
 }
+
+/// Transaction hash response (matching REST API).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Hash {
+    /// Transaction hash.
+    pub hash: String,
+}
+
+impl Display for Hash {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(f, "Transaction hash: {}", self.hash)
+    }
+}
+
+/// Transaction hash with token address response (matching REST API).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HashWithToken {
+    /// Transaction hash.
+    pub hash: String,
+    /// Token address created by the transaction.
+    pub token: OneMoneyAddress,
+}
+
+impl Display for HashWithToken {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(
+            f,
+            "Transaction hash: {}, Token address: {}",
+            self.hash, self.token
+        )
+    }
+}

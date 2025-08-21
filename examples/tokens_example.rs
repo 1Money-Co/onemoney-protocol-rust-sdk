@@ -269,6 +269,43 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     sleep(Duration::from_secs(1)).await;
 
+    // 7.1. Remove address from blacklist - only for public tokens
+    println!("\n7.1. Remove Address from Blacklist");
+    println!("===================================");
+
+    if let Some(ref info) = token_info {
+        if !info.is_private {
+            println!("Token is public - proceeding with blacklist removal operation");
+            let remove_blacklist_payload = TokenBlacklistPayload {
+                recent_epoch: state.epoch,
+                recent_checkpoint: state.checkpoint,
+                chain_id,
+                nonce: current_nonce,
+                action: BlacklistAction::Remove,
+                address: recipient_address,
+                token: token_address,
+            };
+            current_nonce += 1; // Increment for next transaction
+
+            match client
+                .manage_blacklist(remove_blacklist_payload, private_key)
+                .await
+            {
+                Ok(response) => {
+                    println!("Address removed from blacklist - Tx: {}", response.hash);
+                }
+                Err(e) => {
+                    print_detailed_error("Could not remove address from blacklist", &e);
+                }
+            }
+        } else {
+            println!("Token is private - skipping blacklist removal operation (not applicable)");
+        }
+    } else {
+        println!("Token metadata not available - skipping blacklist removal operation");
+    }
+    sleep(Duration::from_secs(1)).await;
+
     // 8. Manage whitelist (add address) - only for private tokens
     println!("\n8. Manage Whitelist");
     println!("===================");

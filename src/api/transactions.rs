@@ -7,7 +7,7 @@ use crate::client::config::endpoints::transactions::{
 };
 use crate::crypto::Signable;
 use crate::crypto::sign_transaction_payload;
-use crate::{OneMoneyAddress, Result, Signature, TokenAmount, Transaction};
+use crate::{Hash, OneMoneyAddress, Result, Signature, TokenAmount, Transaction};
 use alloy_primitives::{B256, keccak256};
 #[cfg(test)]
 use rlp::encode as rlp_encode;
@@ -119,19 +119,6 @@ pub struct FeeEstimateRequest {
     pub token: Option<OneMoneyAddress>,
 }
 
-/// Payment response (matches server's Hash type).
-#[derive(Debug, Clone, Deserialize)]
-pub struct PaymentResponse {
-    /// Transaction hash.
-    pub hash: String,
-}
-
-impl Display for PaymentResponse {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        write!(f, "Transaction hash: {}", self.hash)
-    }
-}
-
 /// Transaction receipt response.
 #[derive(Debug, Clone, Deserialize)]
 pub struct TransactionReceipt {
@@ -220,11 +207,7 @@ impl Client {
     ///     Ok(())
     /// }
     /// ```
-    pub async fn send_payment(
-        &self,
-        payload: PaymentPayload,
-        private_key: &str,
-    ) -> Result<PaymentResponse> {
+    pub async fn send_payment(&self, payload: PaymentPayload, private_key: &str) -> Result<Hash> {
         // Use the L1-compatible signing method
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = PaymentRequest { payload, signature };
