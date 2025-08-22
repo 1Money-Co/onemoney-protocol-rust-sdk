@@ -116,7 +116,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///     let mint = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?;
     ///
     ///     let mint_info = client.get_token_metadata(mint).await?;

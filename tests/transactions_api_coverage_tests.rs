@@ -465,11 +465,12 @@ fn test_signature_structure_comprehensive() {
 }
 
 #[test]
-fn test_client_creation_for_transaction_operations() {
+fn test_client_creation_for_transaction_operations()
+-> std::result::Result<(), Box<dyn std::error::Error>> {
     // Test that clients can be created for transaction operations
-    let mainnet_client = Client::mainnet();
-    let testnet_client = Client::testnet();
-    let local_client = Client::local();
+    let mainnet_client = Client::mainnet()?;
+    let testnet_client = Client::testnet()?;
+    let local_client = Client::local()?;
 
     // Verify they're client instances (via debug output)
     let mainnet_debug = format!("{:?}", mainnet_client);
@@ -479,6 +480,8 @@ fn test_client_creation_for_transaction_operations() {
     assert!(mainnet_debug.contains("Client"));
     assert!(testnet_debug.contains("Client"));
     assert!(local_debug.contains("Client"));
+
+    Ok(())
 }
 
 #[test]

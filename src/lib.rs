@@ -10,9 +10,9 @@
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     // Create clients for different networks
-//!     let mainnet_client = Client::mainnet();          // Mainnet
-//!     let testnet_client = Client::testnet();          // Testnet
-//!     let local_client = Client::local();              // Local development
+//!     let mainnet_client = Client::mainnet()?;         // Mainnet
+//!     let testnet_client = Client::testnet()?;         // Testnet
+//!     let local_client = Client::local()?;             // Local development
 //!
 //!     // Or use the builder pattern
 //!     let client = ClientBuilder::new()

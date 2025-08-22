@@ -32,11 +32,11 @@ mod test_utils {
 }
 
 #[tokio::test]
-async fn test_client_creation() -> Result<(), Box<dyn Error>> {
+async fn test_client_creation() -> std::result::Result<(), Box<dyn Error>> {
     // Test different client creation methods
-    let _mainnet_client = Client::mainnet();
-    let _testnet_client = Client::testnet();
-    let _local_client = Client::local();
+    let _mainnet_client = Client::mainnet()?;
+    let _testnet_client = Client::testnet()?;
+    let _local_client = Client::local()?;
 
     // Test ClientBuilder
     let _builder_client = ClientBuilder::new()

@@ -22,7 +22,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///
     ///     let state = client.get_latest_epoch_checkpoint().await?;
     ///     println!("Latest state: epoch {} checkpoint {}", state.epoch, state.checkpoint);

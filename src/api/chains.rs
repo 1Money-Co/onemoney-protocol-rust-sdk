@@ -20,7 +20,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///
     ///     let chain_id = client.get_chain_id().await?;
     ///     println!("Current chain ID: {}", chain_id);

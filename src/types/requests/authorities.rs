@@ -39,3 +39,26 @@ impl Display for Authority {
         write!(f, "{}", authority_name)
     }
 }
+
+impl Authority {
+    /// Returns a stable string representation for RLP encoding.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Authority::MasterMintBurn => "MasterMintBurn",
+            Authority::MintBurnTokens => "MintBurnTokens",
+            Authority::Pause => "Pause",
+            Authority::ManageList => "ManageList",
+            Authority::UpdateMetadata => "UpdateMetadata",
+        }
+    }
+}
+
+impl AuthorityAction {
+    /// Returns a stable string representation for RLP encoding.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            AuthorityAction::Grant => "Grant",
+            AuthorityAction::Revoke => "Revoke",
+        }
+    }
+}

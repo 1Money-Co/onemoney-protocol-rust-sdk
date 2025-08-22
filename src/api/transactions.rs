@@ -34,7 +34,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///
     ///     let payload = PaymentPayload {
     ///         recent_epoch: 123,
@@ -78,7 +78,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///
     ///     let tx_hash = "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
     ///     let transaction = client.get_transaction_by_hash(tx_hash).await?;
@@ -110,7 +110,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///
     ///     let request = FeeEstimateRequest {
     ///         from: "0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0".to_string(),
@@ -159,7 +159,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///
     ///     let tx_hash = "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
     ///     let receipt = client.get_transaction_receipt_by_hash(tx_hash).await?;

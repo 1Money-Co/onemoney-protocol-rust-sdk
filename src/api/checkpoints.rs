@@ -24,7 +24,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///
     ///     let checkpoint = client.get_checkpoint_by_number(456, false).await?;
     ///     println!("Checkpoint number: {}", checkpoint.number);
@@ -55,7 +55,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///
     ///     let hash = "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777";
     ///     let checkpoint = client.get_checkpoint_by_hash(hash, false).await?;
@@ -82,7 +82,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///
     ///     let checkpoint_number = client.get_checkpoint_number().await?;
     ///     println!("Latest checkpoint number: {}", checkpoint_number.number);

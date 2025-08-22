@@ -5,6 +5,21 @@ use alloy_primitives::{Address, B256, U256};
 use rlp::{Encodable, RlpStream};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
+use std::result::Result;
+
+/// Creates a compact byte representation of U256 by removing leading zeros.
+/// Returns vec![0] if all bytes are zero.
+fn compact_u256_bytes(value: &U256) -> Vec<u8> {
+    let value_bytes = value.to_be_bytes_vec();
+
+    // Find the first non-zero byte index
+    let first_non_zero = value_bytes.iter().position(|&b| b != 0);
+
+    match first_non_zero {
+        Some(index) => value_bytes[index..].to_vec(),
+        None => vec![0], // All bytes are zero
+    }
+}
 
 /// Payment transaction payload.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -27,10 +42,7 @@ pub struct PaymentPayload {
 }
 
 /// Serialize U256 as decimal string instead of hex (L1 compatibility).
-fn serialize_token_amount_decimal<S>(
-    value: &U256,
-    serializer: S,
-) -> std::result::Result<S::Ok, S::Error>
+fn serialize_token_amount_decimal<S>(value: &U256, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,
 {
@@ -62,14 +74,7 @@ impl Encodable for PaymentPayload {
         s.append(&self.nonce);
         s.append(&self.recipient.as_slice());
         // Encode U256 as compact bytes (no leading zeros) to match L1
-        let value_bytes = self.value.to_be_bytes_vec();
-        let mut compact_bytes = value_bytes;
-        while !compact_bytes.is_empty() && compact_bytes[0] == 0 {
-            compact_bytes.remove(0);
-        }
-        if compact_bytes.is_empty() {
-            compact_bytes = vec![0];
-        }
+        let compact_bytes = compact_u256_bytes(&self.value);
         s.append(&compact_bytes);
         s.append(&self.token.as_slice());
     }

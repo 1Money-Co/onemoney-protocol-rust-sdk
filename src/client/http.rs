@@ -4,6 +4,7 @@ use super::{builder::ClientBuilder, config::Network, hooks::Hook};
 use crate::{Error, Result, error::ErrorResponse};
 use reqwest::{Client as HttpClient, header};
 use serde::{Serialize, de::DeserializeOwned};
+use serde_json;
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use url::Url;
 
@@ -25,39 +26,18 @@ impl Debug for Client {
 
 impl Client {
     /// Create a new client for mainnet.
-    ///
-    /// # Panics
-    ///
-    /// This method should never panic as it uses default, valid configuration.
-    pub fn mainnet() -> Self {
-        ClientBuilder::new()
-            .network(Network::Mainnet)
-            .build()
-            .expect("Failed to create mainnet client with default configuration")
+    pub fn mainnet() -> Result<Self> {
+        ClientBuilder::new().network(Network::Mainnet).build()
     }
 
     /// Create a new client for testnet.
-    ///
-    /// # Panics
-    ///
-    /// This method should never panic as it uses default, valid configuration.
-    pub fn testnet() -> Self {
-        ClientBuilder::new()
-            .network(Network::Testnet)
-            .build()
-            .expect("Failed to create testnet client with default configuration")
+    pub fn testnet() -> Result<Self> {
+        ClientBuilder::new().network(Network::Testnet).build()
     }
 
     /// Create a new client for local development.
-    ///
-    /// # Panics
-    ///
-    /// This method should never panic as it uses default, valid configuration.
-    pub fn local() -> Self {
-        ClientBuilder::new()
-            .network(Network::Local)
-            .build()
-            .expect("Failed to create local client with default configuration")
+    pub fn local() -> Result<Self> {
+        ClientBuilder::new().network(Network::Local).build()
     }
 
     /// Create a new client instance.

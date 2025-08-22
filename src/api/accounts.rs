@@ -26,7 +26,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///     let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?;
     ///
     ///     let nonce = client.get_account_nonce(address).await?;
@@ -63,7 +63,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///     let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?;
     ///     let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?;
     ///

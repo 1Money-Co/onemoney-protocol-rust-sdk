@@ -7,6 +7,20 @@ use alloy_primitives::{Address, B256, U256, keccak256};
 use rlp::{Encodable, RlpStream};
 use serde::{Deserialize, Serialize};
 
+/// Creates a compact byte representation of U256 by removing leading zeros.
+/// Returns vec![0] if all bytes are zero.
+fn compact_u256_bytes(value: &U256) -> Vec<u8> {
+    let value_bytes = value.to_be_bytes_vec();
+
+    // Find the first non-zero byte index
+    let first_non_zero = value_bytes.iter().position(|&b| b != 0);
+
+    match first_non_zero {
+        Some(index) => value_bytes[index..].to_vec(),
+        None => vec![0], // All bytes are zero
+    }
+}
+
 /// Token mint payload.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenMintPayload {
@@ -35,14 +49,7 @@ impl Encodable for TokenMintPayload {
         s.append(&self.nonce);
         s.append(&self.recipient.as_slice());
         // Encode U256 as compact bytes (no leading zeros) to match L1
-        let value_bytes = self.value.to_be_bytes_vec();
-        let mut compact_bytes = value_bytes;
-        while !compact_bytes.is_empty() && compact_bytes[0] == 0 {
-            compact_bytes.remove(0);
-        }
-        if compact_bytes.is_empty() {
-            compact_bytes = vec![0];
-        }
+        let compact_bytes = compact_u256_bytes(&self.value);
         s.append(&compact_bytes);
         s.append(&self.token.as_slice());
     }
@@ -83,14 +90,7 @@ impl Encodable for TokenBurnPayload {
         s.append(&self.nonce);
         s.append(&self.recipient.as_slice());
         // Encode U256 as compact bytes (no leading zeros) to match L1
-        let value_bytes = self.value.to_be_bytes_vec();
-        let mut compact_bytes = value_bytes;
-        while !compact_bytes.is_empty() && compact_bytes[0] == 0 {
-            compact_bytes.remove(0);
-        }
-        if compact_bytes.is_empty() {
-            compact_bytes = vec![0];
-        }
+        let compact_bytes = compact_u256_bytes(&self.value);
         s.append(&compact_bytes);
         s.append(&self.token.as_slice());
     }
@@ -133,19 +133,12 @@ impl Encodable for TokenAuthorityPayload {
         s.append(&self.recent_checkpoint);
         s.append(&self.chain_id);
         s.append(&self.nonce);
-        s.append(&format!("{:?}", self.action));
-        s.append(&format!("{:?}", self.authority_type));
+        s.append(&self.action.as_str());
+        s.append(&self.authority_type.as_str());
         s.append(&self.authority_address.as_slice());
         s.append(&self.token.as_slice());
         // Encode U256 as compact bytes (no leading zeros) to match L1
-        let value_bytes = self.value.to_be_bytes_vec();
-        let mut compact_bytes = value_bytes;
-        while !compact_bytes.is_empty() && compact_bytes[0] == 0 {
-            compact_bytes.remove(0);
-        }
-        if compact_bytes.is_empty() {
-            compact_bytes = vec![0];
-        }
+        let compact_bytes = compact_u256_bytes(&self.value);
         s.append(&compact_bytes);
     }
 }
@@ -165,6 +158,16 @@ pub enum PauseAction {
     Pause,
     /// Unpause token operations.
     Unpause,
+}
+
+impl PauseAction {
+    /// Returns a stable string representation for RLP encoding.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            PauseAction::Pause => "Pause",
+            PauseAction::Unpause => "Unpause",
+        }
+    }
 }
 
 /// Token pause payload.
@@ -191,7 +194,7 @@ impl Encodable for TokenPausePayload {
         s.append(&self.recent_checkpoint);
         s.append(&self.chain_id);
         s.append(&self.nonce);
-        s.append(&format!("{:?}", self.action));
+        s.append(&self.action.as_str());
         s.append(&self.token.as_slice());
     }
 }
@@ -211,6 +214,16 @@ pub enum BlacklistAction {
     Add,
     /// Remove address from blacklist.
     Remove,
+}
+
+impl BlacklistAction {
+    /// Returns a stable string representation for RLP encoding.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            BlacklistAction::Add => "Add",
+            BlacklistAction::Remove => "Remove",
+        }
+    }
 }
 
 /// Token blacklist management payload.
@@ -239,7 +252,7 @@ impl Encodable for TokenBlacklistPayload {
         s.append(&self.recent_checkpoint);
         s.append(&self.chain_id);
         s.append(&self.nonce);
-        s.append(&format!("{:?}", self.action));
+        s.append(&self.action.as_str());
         s.append(&self.address.as_slice());
         s.append(&self.token.as_slice());
     }
@@ -260,6 +273,16 @@ pub enum WhitelistAction {
     Add,
     /// Remove address from whitelist.
     Remove,
+}
+
+impl WhitelistAction {
+    /// Returns a stable string representation for RLP encoding.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            WhitelistAction::Add => "Add",
+            WhitelistAction::Remove => "Remove",
+        }
+    }
 }
 
 /// Token whitelist management payload.
@@ -288,7 +311,7 @@ impl Encodable for TokenWhitelistPayload {
         s.append(&self.recent_checkpoint);
         s.append(&self.chain_id);
         s.append(&self.nonce);
-        s.append(&format!("{:?}", self.action));
+        s.append(&self.action.as_str());
         s.append(&self.address.as_slice());
         s.append(&self.token.as_slice());
     }
@@ -332,12 +355,8 @@ impl Encodable for TokenMetadataUpdatePayload {
         s.append(&self.name);
         s.append(&self.uri);
         s.append(&self.token.as_slice()); // token at position 7
-        // Manually encode Vec<MetadataKVPair> as nested RLP list
-        let mut metadata_stream = rlp::RlpStream::new_list(self.additional_metadata.len());
-        for metadata_item in &self.additional_metadata {
-            metadata_stream.append(metadata_item);
-        }
-        s.append_raw(&metadata_stream.out(), 1);
+        // Encode Vec<MetadataKVPair> as nested RLP list
+        s.append_list(&self.additional_metadata);
     }
 }
 

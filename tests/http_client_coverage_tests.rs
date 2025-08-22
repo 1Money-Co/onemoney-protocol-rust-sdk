@@ -6,23 +6,25 @@ use onemoney_protocol::client::http::Client;
 use onemoney_protocol::error::ErrorResponse;
 
 #[test]
-fn test_client_creation_methods() {
+fn test_client_creation_methods() -> std::result::Result<(), Box<dyn std::error::Error>> {
     // Test mainnet client creation
-    let mainnet_client = Client::mainnet();
+    let mainnet_client = Client::mainnet()?;
     let mainnet_debug = format!("{:?}", mainnet_client);
     assert!(mainnet_debug.contains("Client"));
     assert!(mainnet_debug.contains("base_url"));
     assert!(mainnet_debug.contains("hooks_count"));
 
     // Test testnet client creation
-    let testnet_client = Client::testnet();
+    let testnet_client = Client::testnet()?;
     let testnet_debug = format!("{:?}", testnet_client);
     assert!(testnet_debug.contains("Client"));
 
     // Test local client creation
-    let local_client = Client::local();
+    let local_client = Client::local()?;
     let local_debug = format!("{:?}", local_client);
     assert!(local_debug.contains("Client"));
+
+    Ok(())
 }
 
 #[test]
@@ -39,8 +41,8 @@ fn test_client_builder_creation() {
 }
 
 #[test]
-fn test_client_debug_implementation() {
-    let client = Client::mainnet();
+fn test_client_debug_implementation() -> std::result::Result<(), Box<dyn std::error::Error>> {
+    let client = Client::mainnet()?;
     let debug_str = format!("{:?}", client);
 
     // Verify debug output contains expected fields
@@ -50,6 +52,8 @@ fn test_client_debug_implementation() {
 
     // Test that hooks_count shows 0 for default client
     assert!(debug_str.contains("hooks_count: 0"));
+
+    Ok(())
 }
 
 #[test]
@@ -82,10 +86,10 @@ fn test_error_response_serialization() {
 }
 
 #[test]
-fn test_network_client_creation() {
-    let mainnet = Client::mainnet();
-    let testnet = Client::testnet();
-    let local = Client::local();
+fn test_network_client_creation() -> std::result::Result<(), Box<dyn std::error::Error>> {
+    let mainnet = Client::mainnet()?;
+    let testnet = Client::testnet()?;
+    let local = Client::local()?;
 
     // Test that they're created successfully
     let mainnet_debug = format!("{:?}", mainnet);
@@ -96,6 +100,8 @@ fn test_network_client_creation() {
     assert!(mainnet_debug.contains("Client"));
     assert!(testnet_debug.contains("Client"));
     assert!(local_debug.contains("Client"));
+
+    Ok(())
 }
 
 #[test]

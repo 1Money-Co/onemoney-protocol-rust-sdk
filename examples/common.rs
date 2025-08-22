@@ -110,9 +110,9 @@ pub fn get_example_environment() -> ExampleEnvironment {
 pub fn create_example_client() -> Client {
     let env = get_example_environment();
     match env {
-        ExampleEnvironment::Mainnet => Client::mainnet(),
-        ExampleEnvironment::Testnet => Client::testnet(),
-        ExampleEnvironment::Local => Client::local(),
+        ExampleEnvironment::Mainnet => Client::mainnet().expect("Failed to create mainnet client"),
+        ExampleEnvironment::Testnet => Client::testnet().expect("Failed to create testnet client"),
+        ExampleEnvironment::Local => Client::local().expect("Failed to create local client"),
     }
 }
 

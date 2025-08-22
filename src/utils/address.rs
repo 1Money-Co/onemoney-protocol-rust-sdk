@@ -38,7 +38,7 @@ pub fn public_key_to_address(public_key_hex: &str) -> Result<Address> {
 
     // Take the last 20 bytes as the address
     let address_bytes = &hash[12..];
-    let address = alloy_primitives::Address::from_slice(address_bytes);
+    let address = Address::from_slice(address_bytes);
 
     Ok(address)
 }
