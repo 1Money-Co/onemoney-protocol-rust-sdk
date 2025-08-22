@@ -1,5 +1,7 @@
 //! Checkpoint-related API response types.
 
+use crate::Transaction;
+use crate::types::responses::transactions::Hash;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
@@ -9,9 +11,9 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 #[serde(untagged)]
 pub enum CheckpointTransactions {
     /// Full transaction objects
-    Full(Vec<crate::Transaction>),
+    Full(Vec<Transaction>),
     /// Only transaction hashes
-    Hashes(Vec<String>),
+    Hashes(Vec<Hash>),
 }
 
 impl Display for CheckpointTransactions {
@@ -36,15 +38,15 @@ impl Display for CheckpointTransactions {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Checkpoint {
     /// Hash of the checkpoint.
-    pub hash: String,
+    pub hash: Hash,
     /// Hash of the parent.
-    pub parent_hash: String,
+    pub parent_hash: Hash,
     /// State root hash.
-    pub state_root: String,
+    pub state_root: Hash,
     /// Transactions root hash.
-    pub transactions_root: String,
+    pub transactions_root: Hash,
     /// Transactions receipts root hash.
-    pub receipts_root: String,
+    pub receipts_root: Hash,
     /// Checkpoint number.
     pub number: u64,
     /// Timestamp.
@@ -60,11 +62,11 @@ pub struct Checkpoint {
 impl Display for Checkpoint {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         writeln!(f, "Checkpoint #{}:", self.number)?;
-        writeln!(f, "  Hash: {}", self.hash)?;
-        writeln!(f, "  Parent Hash: {}", self.parent_hash)?;
-        writeln!(f, "  State Root: {}", self.state_root)?;
-        writeln!(f, "  Transactions Root: {}", self.transactions_root)?;
-        writeln!(f, "  Receipts Root: {}", self.receipts_root)?;
+        writeln!(f, "  Hash: {}", self.hash.hash)?;
+        writeln!(f, "  Parent Hash: {}", self.parent_hash.hash)?;
+        writeln!(f, "  State Root: {}", self.state_root.hash)?;
+        writeln!(f, "  Transactions Root: {}", self.transactions_root.hash)?;
+        writeln!(f, "  Receipts Root: {}", self.receipts_root.hash)?;
         writeln!(f, "  Timestamp: {}", self.timestamp)?;
         writeln!(f, "  Extra Data: {}", self.extra_data)?;
 
@@ -114,7 +116,7 @@ impl Display for Checkpoint {
             CheckpointTransactions::Hashes(hashes) => {
                 writeln!(f, "    Count: {} (hashes only)", hashes.len())?;
                 for (i, hash) in hashes.iter().enumerate() {
-                    writeln!(f, "    {}: {}", i + 1, hash)?;
+                    writeln!(f, "    {}: {}", i + 1, hash.hash)?;
                 }
             }
         }
@@ -128,15 +130,15 @@ impl Display for Checkpoint {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CheckpointHeader {
     /// Hash of the checkpoint.
-    pub hash: String,
+    pub hash: Hash,
     /// Hash of the parent.
-    pub parent_hash: String,
+    pub parent_hash: Hash,
     /// State root hash.
-    pub state_root: String,
+    pub state_root: Hash,
     /// Transactions root hash.
-    pub transactions_root: String,
+    pub transactions_root: Hash,
     /// Transactions receipts root hash.
-    pub receipts_root: String,
+    pub receipts_root: Hash,
     /// Checkpoint number.
     pub number: u64,
     /// Timestamp.

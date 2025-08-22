@@ -167,7 +167,7 @@ async fn test_account_operations_offline() -> Result<(), Box<dyn Error>> {
 
     // Test round-trip conversion
     let parsed_address =
-        Address::from_str(&address_str).map_err(|e| format!("Failed to parse address: {}", e))?;
+        Address::from_str(&address_str).map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
     assert_eq!(address, parsed_address);
 
     Ok(())

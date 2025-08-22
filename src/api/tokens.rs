@@ -1,5 +1,6 @@
 //! Token-related API operations.
 
+use crate::Result;
 use crate::client::Client;
 use crate::client::config::api_path;
 use crate::client::config::endpoints::tokens::{
@@ -14,7 +15,7 @@ use crate::requests::{
     UpdateMetadataRequest, WhitelistTokenRequest,
 };
 use crate::responses::MintInfo;
-use crate::{Hash, Result};
+use crate::responses::TransactionResponse;
 use alloy_primitives::Address;
 
 impl Client {
@@ -28,7 +29,11 @@ impl Client {
     /// # Returns
     ///
     /// The transaction result.
-    pub async fn mint_token(&self, payload: TokenMintPayload, private_key: &str) -> Result<Hash> {
+    pub async fn mint_token(
+        &self,
+        payload: TokenMintPayload,
+        private_key: &str,
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = MintTokenRequest { payload, signature };
 
@@ -45,7 +50,11 @@ impl Client {
     /// # Returns
     ///
     /// The transaction result.
-    pub async fn burn_token(&self, payload: TokenBurnPayload, private_key: &str) -> Result<Hash> {
+    pub async fn burn_token(
+        &self,
+        payload: TokenBurnPayload,
+        private_key: &str,
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = BurnTokenRequest { payload, signature };
 
@@ -66,7 +75,7 @@ impl Client {
         &self,
         payload: TokenAuthorityPayload,
         private_key: &str,
-    ) -> Result<Hash> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = TokenAuthorityRequest { payload, signature };
 
@@ -90,7 +99,7 @@ impl Client {
         &self,
         payload: TokenAuthorityPayload,
         private_key: &str,
-    ) -> Result<Hash> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = TokenAuthorityRequest { payload, signature };
 
@@ -141,7 +150,11 @@ impl Client {
     /// # Returns
     ///
     /// The transaction result.
-    pub async fn pause_token(&self, payload: TokenPausePayload, private_key: &str) -> Result<Hash> {
+    pub async fn pause_token(
+        &self,
+        payload: TokenPausePayload,
+        private_key: &str,
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = PauseTokenRequest { payload, signature };
 
@@ -162,7 +175,7 @@ impl Client {
         &self,
         payload: TokenBlacklistPayload,
         private_key: &str,
-    ) -> Result<Hash> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = BlacklistTokenRequest { payload, signature };
 
@@ -183,7 +196,7 @@ impl Client {
         &self,
         payload: TokenWhitelistPayload,
         private_key: &str,
-    ) -> Result<Hash> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = WhitelistTokenRequest { payload, signature };
 
@@ -204,7 +217,7 @@ impl Client {
         &self,
         payload: TokenMetadataUpdatePayload,
         private_key: &str,
-    ) -> Result<Hash> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = UpdateMetadataRequest { payload, signature };
 

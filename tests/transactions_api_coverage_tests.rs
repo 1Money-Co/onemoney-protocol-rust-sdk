@@ -1,6 +1,6 @@
 //! Comprehensive transactions API coverage tests
 
-use alloy_primitives::{Address, U256};
+use alloy_primitives::{Address, B256, U256};
 use onemoney_protocol::client::config::api_path;
 use onemoney_protocol::client::config::endpoints::transactions::*;
 use onemoney_protocol::client::http::Client;
@@ -163,7 +163,7 @@ fn test_payment_payload_comprehensive() {
 
     // Test signature hash calculation
     let hash = payload.signature_hash();
-    assert_ne!(hash, alloy_primitives::B256::default());
+    assert_ne!(hash, B256::default());
 
     // Test deterministic hash
     let hash2 = payload.signature_hash();
@@ -386,7 +386,7 @@ fn test_payment_payload_edge_cases() {
     };
 
     let hash_zero = zero_payload.signature_hash();
-    assert_ne!(hash_zero, alloy_primitives::B256::default());
+    assert_ne!(hash_zero, B256::default());
 
     // Test with maximum values
     let max_payload = PaymentPayload {
@@ -400,7 +400,7 @@ fn test_payment_payload_edge_cases() {
     };
 
     let hash_max = max_payload.signature_hash();
-    assert_ne!(hash_max, alloy_primitives::B256::default());
+    assert_ne!(hash_max, B256::default());
     assert_ne!(hash_zero, hash_max);
 
     // Test serialization of edge cases

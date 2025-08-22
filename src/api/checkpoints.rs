@@ -99,20 +99,44 @@ impl Client {
 mod tests {
     use super::*;
     use crate::CheckpointTransactions;
+    use crate::types::responses::transactions::Hash;
+    use alloy_primitives::B256;
+    use std::str::FromStr;
 
     #[test]
     fn test_checkpoint_structure() {
         // Test that Checkpoint can be serialized/deserialized
         let checkpoint = Checkpoint {
-            hash: "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777".to_string(),
-            parent_hash: "0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f"
-                .to_string(),
-            state_root: "0x18b2b9746b15451d1f9bc414f1c12bda8249c63d4a46926e661ae74c69defd9a"
-                .to_string(),
-            transactions_root: "0xa1e7ed47e548fa45c30232a7e7dfaad6495cff595a0ee1458aa470e574f3f6e4"
-                .to_string(),
-            receipts_root: "0x59ff04f73d9f934800687c60fb80e2de6e8233817b46d144aec724b569d80c3b"
-                .to_string(),
+            hash: Hash {
+                hash: B256::from_str(
+                    "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
+                )
+                .expect("Test data should be valid"),
+            },
+            parent_hash: Hash {
+                hash: B256::from_str(
+                    "0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f",
+                )
+                .expect("Test data should be valid"),
+            },
+            state_root: Hash {
+                hash: B256::from_str(
+                    "0x18b2b9746b15451d1f9bc414f1c12bda8249c63d4a46926e661ae74c69defd9a",
+                )
+                .expect("Test data should be valid"),
+            },
+            transactions_root: Hash {
+                hash: B256::from_str(
+                    "0xa1e7ed47e548fa45c30232a7e7dfaad6495cff595a0ee1458aa470e574f3f6e4",
+                )
+                .expect("Test data should be valid"),
+            },
+            receipts_root: Hash {
+                hash: B256::from_str(
+                    "0x59ff04f73d9f934800687c60fb80e2de6e8233817b46d144aec724b569d80c3b",
+                )
+                .expect("Test data should be valid"),
+            },
             number: 1500,
             timestamp: 1739760890,
             extra_data: String::new(),

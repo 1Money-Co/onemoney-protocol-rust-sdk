@@ -1,6 +1,6 @@
 //! Comprehensive tokens API coverage tests
 
-use alloy_primitives::{Address, U256};
+use alloy_primitives::{Address, B256, U256};
 use onemoney_protocol::client::config::api_path;
 use onemoney_protocol::client::config::endpoints::tokens::*;
 use onemoney_protocol::client::http::Client;
@@ -92,7 +92,7 @@ fn test_token_mint_payload_comprehensive() {
 
     // Test signature hash
     let hash = payload.signature_hash();
-    assert_ne!(hash, alloy_primitives::B256::default());
+    assert_ne!(hash, B256::default());
 
     // Test deterministic hash
     let hash2 = payload.signature_hash();
@@ -130,7 +130,7 @@ fn test_token_burn_payload_comprehensive() {
 
     // Test signature hash
     let hash = payload.signature_hash();
-    assert_ne!(hash, alloy_primitives::B256::default());
+    assert_ne!(hash, B256::default());
 }
 
 #[test]
@@ -192,7 +192,7 @@ fn test_token_authority_payload_comprehensive() {
         assert!(json.contains("Grant"));
 
         let hash = payload.signature_hash();
-        assert_ne!(hash, alloy_primitives::B256::default());
+        assert_ne!(hash, B256::default());
     }
 
     // Test serialization
@@ -251,7 +251,7 @@ fn test_token_pause_payload_comprehensive() {
 
         // Test signature hash
         let hash = payload.signature_hash();
-        assert_ne!(hash, alloy_primitives::B256::default());
+        assert_ne!(hash, B256::default());
     }
 
     // Test different actions produce different hashes
@@ -304,7 +304,7 @@ fn test_token_blacklist_payload_comprehensive() {
 
         // Test signature hash
         let hash = payload.signature_hash();
-        assert_ne!(hash, alloy_primitives::B256::default());
+        assert_ne!(hash, B256::default());
     }
 
     // Test different actions produce different hashes
@@ -357,7 +357,7 @@ fn test_token_whitelist_payload_comprehensive() {
 
         // Test signature hash
         let hash = payload.signature_hash();
-        assert_ne!(hash, alloy_primitives::B256::default());
+        assert_ne!(hash, B256::default());
     }
 
     // Test different actions produce different hashes
@@ -405,7 +405,7 @@ fn test_token_metadata_update_payload_comprehensive() {
 
     // Test signature hash
     let hash = payload.signature_hash();
-    assert_ne!(hash, alloy_primitives::B256::default());
+    assert_ne!(hash, B256::default());
 
     // Test with empty additional metadata
     let minimal_payload = TokenMetadataUpdatePayload {
@@ -572,7 +572,7 @@ fn test_payload_edge_cases() {
     };
 
     let hash_zero = zero_payload.signature_hash();
-    assert_ne!(hash_zero, alloy_primitives::B256::default());
+    assert_ne!(hash_zero, B256::default());
 
     // Test with maximum values
     let max_payload = TokenMintPayload {
@@ -586,6 +586,6 @@ fn test_payload_edge_cases() {
     };
 
     let hash_max = max_payload.signature_hash();
-    assert_ne!(hash_max, alloy_primitives::B256::default());
+    assert_ne!(hash_max, B256::default());
     assert_ne!(hash_zero, hash_max);
 }

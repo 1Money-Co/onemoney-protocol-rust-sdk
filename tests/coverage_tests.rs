@@ -2,8 +2,24 @@
 
 use alloy_primitives::{Address, B256, U256};
 use onemoney_protocol::types::responses::tokens::MinterAllowance;
+use onemoney_protocol::types::responses::transactions::Hash;
 use onemoney_protocol::*;
 use std::str::FromStr;
+
+/// Helper function to create Hash from hex string
+fn create_hash(hex_str: &str) -> Hash {
+    // Pad short hex strings to 32 bytes (64 hex chars + 0x prefix)
+    let padded_hex = if hex_str.len() < 66 {
+        let without_prefix = hex_str.strip_prefix("0x").unwrap_or(hex_str);
+        format!("0x{:0<64}", without_prefix)
+    } else {
+        hex_str.to_string()
+    };
+
+    Hash {
+        hash: B256::from_str(&padded_hex).expect("Test data should be valid"),
+    }
+}
 
 #[test]
 fn test_client_config_api_paths() {
@@ -219,8 +235,8 @@ fn test_token_metadata_structure() {
 fn test_checkpoint_transactions_display() {
     // Test hashes display
     let hashes = CheckpointTransactions::Hashes(vec![
-        "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777".to_string(),
-        "0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f".to_string(),
+        create_hash("0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777"),
+        create_hash("0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f"),
     ]);
 
     let display_str = format!("{}", hashes);

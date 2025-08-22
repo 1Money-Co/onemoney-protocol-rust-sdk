@@ -75,7 +75,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("\n4. Get Checkpoint by Hash");
     println!("==========================");
 
-    match client.get_checkpoint_by_hash(&checkpoint_hash, false).await {
+    match client
+        .get_checkpoint_by_hash(&checkpoint_hash.hash.to_string(), false)
+        .await
+    {
         Ok(checkpoint) => {
             println!("{}", checkpoint);
         }

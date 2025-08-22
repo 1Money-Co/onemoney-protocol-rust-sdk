@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 use super::{accounts::Nonce, tokens::TokenMetadata};
+use crate::Signature;
 
 /// Chain ID type from L1 primitives
 pub type ChainId = u64;
@@ -25,6 +26,7 @@ impl Display for FeeEstimate {
 
 /// Represents a transaction hash returned by the API.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct Hash {
     pub hash: B256,
 }
@@ -84,7 +86,7 @@ pub struct Transaction {
 
     /// All _flattened_ fields of the transaction signature.
     /// Note: this is an option so special transaction types without a signature (e.g. <https://github.com/ethereum-optimism/optimism/blob/0bf643c4147b43cd6f25a759d331ef3a2a61a2a3/specs/deposits.md#the-deposited-transaction-type>) can be supported.
-    pub signature: crate::Signature,
+    pub signature: Signature,
 }
 
 impl Display for Transaction {
@@ -453,7 +455,7 @@ mod tests {
                 .expect("Test data should be valid"),
             nonce: 5,
             data: TxPayload::default(),
-            signature: crate::Signature::default(),
+            signature: Signature::default(),
         };
 
         let json = serde_json::to_string(&transaction).expect("Test data should be valid");
@@ -604,5 +606,139 @@ mod tests {
             }
             _ => panic!("Default payload should be TokenTransfer"),
         }
+    }
+
+    #[test]
+    fn test_hash_with_token_display() {
+        let hash_with_token = HashWithToken {
+            hash: B256::from_str(
+                "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
+            )
+            .expect("Test data should be valid"),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                .expect("Test data should be valid"),
+        };
+
+        let display_str = format!("{}", hash_with_token);
+        assert_eq!(
+            display_str,
+            "Transaction Hash: 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777 (Token: 0x1234567890AbcdEF1234567890aBcdef12345678)"
+        );
+    }
+
+    #[test]
+    fn test_transaction_display_with_checkpoint_hash() {
+        let transaction = Transaction {
+            hash: B256::from_str(
+                "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
+            )
+            .expect("Test data should be valid"),
+            checkpoint_hash: Some(
+                B256::from_str(
+                    "0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f",
+                )
+                .expect("Test data should be valid"),
+            ),
+            checkpoint_number: Some(200),
+            transaction_index: Some(1),
+            epoch: 100,
+            checkpoint: 200,
+            chain_id: 1212101,
+            from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .expect("Test data should be valid"),
+            nonce: 5,
+            data: TxPayload::default(),
+            signature: Signature::default(),
+        };
+
+        let display_str = format!("{}", transaction);
+        assert_eq!(
+            display_str,
+            "Transaction 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777: from 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0 at epoch 100 checkpoint 200 (nonce: 5) in checkpoint 0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f"
+        );
+    }
+
+    #[test]
+    fn test_transaction_display_without_checkpoint_hash() {
+        let transaction = Transaction {
+            hash: B256::from_str(
+                "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
+            )
+            .expect("Test data should be valid"),
+            checkpoint_hash: None, // This tests the None branch
+            checkpoint_number: None,
+            transaction_index: None,
+            epoch: 100,
+            checkpoint: 200,
+            chain_id: 1212101,
+            from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .expect("Test data should be valid"),
+            nonce: 5,
+            data: TxPayload::default(),
+            signature: Signature::default(),
+        };
+
+        let display_str = format!("{}", transaction);
+        assert_eq!(
+            display_str,
+            "Transaction 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777: from 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0 at epoch 100 checkpoint 200 (nonce: 5)"
+        );
+    }
+
+    #[test]
+    fn test_transaction_receipt_display() {
+        let receipt = TransactionReceipt {
+            success: true,
+            transaction_hash: B256::from_str(
+                "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
+            )
+            .expect("Test data should be valid"),
+            transaction_index: Some(5),
+            checkpoint_hash: Some(
+                B256::from_str(
+                    "0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f",
+                )
+                .expect("Test data should be valid"),
+            ),
+            checkpoint_number: Some(200),
+            fee_used: 1000000000000000000u128,
+            from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .expect("Test data should be valid"),
+            to: Some(
+                Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                    .expect("Test data should be valid"),
+            ),
+            token_address: Some(
+                Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")
+                    .expect("Test data should be valid"),
+            ),
+        };
+
+        let display_str = format!("{}", receipt);
+        let expected = "Transaction Receipt:\n  Success: true\n  Transaction Hash: 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777\n  Fee Used: 1000000000000000000\n  Transaction Index: 5\n  Checkpoint Hash: 0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f\n  Checkpoint Number: 200\n  From: 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0\n  To: 0x1234567890AbcdEF1234567890aBcdef12345678\n  Token Address: 0xabCDEF1234567890ABcDEF1234567890aBCDeF12";
+        assert_eq!(display_str, expected);
+    }
+
+    #[test]
+    fn test_transaction_receipt_display_minimal() {
+        let receipt = TransactionReceipt {
+            success: false,
+            transaction_hash: B256::from_str(
+                "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
+            )
+            .expect("Test data should be valid"),
+            transaction_index: None, // Test None branch
+            checkpoint_hash: None,   // Test None branch
+            checkpoint_number: None, // Test None branch
+            fee_used: 500000000000000000u128,
+            from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .expect("Test data should be valid"),
+            to: None,            // Test None branch
+            token_address: None, // Test None branch
+        };
+
+        let display_str = format!("{}", receipt);
+        let expected = "Transaction Receipt:\n  Success: false\n  Transaction Hash: 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777\n  Fee Used: 500000000000000000\n  From: 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0\n";
+        assert_eq!(display_str, expected);
     }
 }

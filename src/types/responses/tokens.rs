@@ -1,6 +1,7 @@
 //! Token-related API response types.
 
 use alloy_primitives::Address;
+use rlp::RlpStream;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
@@ -134,7 +135,7 @@ impl Display for MetadataKVPair {
 }
 
 impl rlp::Encodable for MetadataKVPair {
-    fn rlp_append(&self, s: &mut rlp::RlpStream) {
+    fn rlp_append(&self, s: &mut RlpStream) {
         s.begin_list(2);
         s.append(&self.key);
         s.append(&self.value);

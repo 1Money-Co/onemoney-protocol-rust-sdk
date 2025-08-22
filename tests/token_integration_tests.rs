@@ -74,7 +74,7 @@ mod test_utils {
 
     /// Validate hash format and properties
     pub fn validate_hash_response(
-        hash: &onemoney_protocol::Hash,
+        hash: &onemoney_protocol::responses::TransactionResponse,
     ) -> Result<(), Box<dyn std::error::Error>> {
         // Hash should not be empty (all zeros)
         let hash_str = hash.hash.to_string();

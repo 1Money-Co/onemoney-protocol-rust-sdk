@@ -9,7 +9,8 @@ use crate::crypto::sign_transaction_payload;
 use crate::requests::{FeeEstimateRequest, PaymentPayload, PaymentRequest};
 use crate::responses::FeeEstimate;
 use crate::responses::TransactionReceipt;
-use crate::{Hash, Result, Transaction};
+use crate::responses::TransactionResponse;
+use crate::{Result, Transaction};
 #[cfg(test)]
 use rlp::encode as rlp_encode;
 
@@ -53,7 +54,11 @@ impl Client {
     ///     Ok(())
     /// }
     /// ```
-    pub async fn send_payment(&self, payload: PaymentPayload, private_key: &str) -> Result<Hash> {
+    pub async fn send_payment(
+        &self,
+        payload: PaymentPayload,
+        private_key: &str,
+    ) -> Result<TransactionResponse> {
         // Use the L1-compatible signing method
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = PaymentRequest { payload, signature };

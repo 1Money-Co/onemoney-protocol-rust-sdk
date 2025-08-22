@@ -4,8 +4,9 @@
 //! and ensure reliable testing without requiring a live test server.
 
 use alloy_primitives::{Address, B256, U256};
+use onemoney_protocol::responses::TransactionResponse;
 use onemoney_protocol::{
-    Authority, AuthorityAction, BlacklistAction, Client, ClientBuilder, Hash, MetadataKVPair,
+    Authority, AuthorityAction, BlacklistAction, Client, ClientBuilder, MetadataKVPair,
     PauseAction, Signable, TokenAuthorityPayload, TokenBlacklistPayload, TokenBurnPayload,
     TokenMetadataUpdatePayload, TokenMintPayload, TokenPausePayload, TokenWhitelistPayload,
     WhitelistAction,
@@ -55,19 +56,21 @@ mod mock_utils {
     }
 
     /// Create a mock hash for testing
-    pub fn create_mock_hash() -> Hash {
+    pub fn create_mock_hash() -> TransactionResponse {
         let mock_hash_bytes = [
             0x12, 0x34, 0x56, 0x78, 0x90, 0xab, 0xcd, 0xef, 0x12, 0x34, 0x56, 0x78, 0x90, 0xab,
             0xcd, 0xef, 0x12, 0x34, 0x56, 0x78, 0x90, 0xab, 0xcd, 0xef, 0x12, 0x34, 0x56, 0x78,
             0x90, 0xab, 0xcd, 0xef,
         ];
-        Hash {
+        TransactionResponse {
             hash: B256::from(mock_hash_bytes),
         }
     }
 
     /// Validate hash format and properties
-    pub fn validate_mock_hash(hash: &Hash) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn validate_mock_hash(
+        hash: &TransactionResponse,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let hash_str = hash.hash.to_string();
         assert!(!hash_str.is_empty(), "Hash string should not be empty");
         assert!(hash_str.starts_with("0x"), "Hash should start with 0x");
@@ -94,16 +97,17 @@ async fn test_hash_response_structure() -> Result<(), Box<dyn Error>> {
     let mock_hash = mock_utils::create_mock_hash();
     mock_utils::validate_mock_hash(&mock_hash)?;
 
-    // Test serialization/deserialization
+    // Test serialization/deserialization (TransactionResponse serializes as JSON object {"hash": "0x..."})
     let json = serde_json::to_string(&mock_hash)?;
-    assert!(json.contains("hash"));
+    assert!(json.contains("\"hash\""), "JSON should contain hash field");
+    assert!(json.contains("\"0x"), "JSON should contain hex hash value");
 
-    let deserialized: Hash = serde_json::from_str(&json)?;
+    let deserialized: TransactionResponse = serde_json::from_str(&json)?;
     assert_eq!(mock_hash.hash, deserialized.hash);
 
     // Test display implementation
     let display_str = format!("{}", mock_hash);
-    assert!(display_str.contains("Transaction Hash"));
+    assert!(display_str.contains("Transaction"));
     assert!(display_str.contains("0x1234567890abcdef"));
 
     println!("Hash structure validation completed");
@@ -136,7 +140,7 @@ async fn test_token_payload_serialization() -> Result<(), Box<dyn Error>> {
 
     // Test signature hash generation
     let hash = mint_payload.signature_hash();
-    assert_ne!(hash, alloy_primitives::B256::default());
+    assert_ne!(hash, B256::default());
 
     // Test deterministic hashing
     let hash2 = mint_payload.signature_hash();
@@ -205,7 +209,7 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
     };
 
     // These will fail due to unreachable endpoint, but we're testing signatures
-    let _: Result<Hash, _> = client.mint_token(mint_payload, private_key).await;
+    let _: Result<TransactionResponse, _> = client.mint_token(mint_payload, private_key).await;
 
     // 2. burn_token
     let burn_payload = TokenBurnPayload {
@@ -218,7 +222,7 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
         token: addresses.token_mint,
     };
 
-    let _: Result<Hash, _> = client.burn_token(burn_payload, private_key).await;
+    let _: Result<TransactionResponse, _> = client.burn_token(burn_payload, private_key).await;
 
     // 3. grant_authority
     let authority_payload = TokenAuthorityPayload {
@@ -233,7 +237,7 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
         value: U256::from(10000000000000000000u64),
     };
 
-    let _: Result<Hash, _> = client
+    let _: Result<TransactionResponse, _> = client
         .grant_authority(authority_payload.clone(), private_key)
         .await;
 
@@ -244,7 +248,8 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
         ..authority_payload
     };
 
-    let _: Result<Hash, _> = client.revoke_authority(revoke_payload, private_key).await;
+    let _: Result<TransactionResponse, _> =
+        client.revoke_authority(revoke_payload, private_key).await;
 
     // 5. pause_token
     let pause_payload = TokenPausePayload {
@@ -256,7 +261,7 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
         token: addresses.token_mint,
     };
 
-    let _: Result<Hash, _> = client.pause_token(pause_payload, private_key).await;
+    let _: Result<TransactionResponse, _> = client.pause_token(pause_payload, private_key).await;
 
     // 6. manage_blacklist
     let blacklist_payload = TokenBlacklistPayload {
@@ -269,7 +274,7 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
         token: addresses.token_mint,
     };
 
-    let _: Result<Hash, _> = client
+    let _: Result<TransactionResponse, _> = client
         .manage_blacklist(blacklist_payload, private_key)
         .await;
 
@@ -284,7 +289,7 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
         token: addresses.token_mint,
     };
 
-    let _: Result<Hash, _> = client
+    let _: Result<TransactionResponse, _> = client
         .manage_whitelist(whitelist_payload, private_key)
         .await;
 
@@ -303,7 +308,7 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
         }],
     };
 
-    let _: Result<Hash, _> = client
+    let _: Result<TransactionResponse, _> = client
         .update_token_metadata(metadata_payload, private_key)
         .await;
 
@@ -334,7 +339,7 @@ async fn test_payload_edge_cases() -> Result<(), Box<dyn Error>> {
     assert!(json.contains(&u64::MAX.to_string()));
 
     let hash = max_payload.signature_hash();
-    assert_ne!(hash, alloy_primitives::B256::default());
+    assert_ne!(hash, B256::default());
 
     // Test with zero values
     let zero_payload = TokenMintPayload {
@@ -352,7 +357,7 @@ async fn test_payload_edge_cases() -> Result<(), Box<dyn Error>> {
     assert!(json_zero.contains("\"recent_epoch\":0") || json_zero.contains("\"nonce\":0"));
 
     let hash_zero = zero_payload.signature_hash();
-    assert_ne!(hash_zero, alloy_primitives::B256::default());
+    assert_ne!(hash_zero, B256::default());
     assert_ne!(hash_zero, hash); // Different payloads should have different hashes
 
     println!("Edge case validation completed");

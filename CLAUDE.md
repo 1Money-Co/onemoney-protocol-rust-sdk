@@ -122,7 +122,7 @@ When implementing the Rust SDK:
    use std::error::Error;
    use crate::{Address, U256, Result};
 
-   async fn create_payment(address: Address, amount: U256) -> Result<(), Box<dyn Error>> {
+   async fn create_payment(address: Address, amount: U256) -> Result<()> {
        // implementation
    }
    ```

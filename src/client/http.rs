@@ -188,4 +188,20 @@ impl Client {
             _ => Error::api(status_code, error_code.to_string(), message.to_string()),
         }
     }
+
+    /// Test helper method to expose handle_error_response for comprehensive testing.
+    ///
+    /// **This method is intended only for testing and should not be used in production code.**
+    #[doc(hidden)]
+    pub fn test_handle_error_response(&self, status_code: u16, body: &str) -> Error {
+        self.handle_error_response(status_code, body)
+    }
+
+    /// Test helper method to expose classify_error for comprehensive testing.
+    ///
+    /// **This method is intended only for testing and should not be used in production code.**
+    #[doc(hidden)]
+    pub fn test_classify_error(status_code: u16, error_code: &str, message: &str) -> Error {
+        Self::classify_error(status_code, error_code, message)
+    }
 }

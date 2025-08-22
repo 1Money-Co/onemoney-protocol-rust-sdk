@@ -142,7 +142,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let payment_response = match client.send_payment(payment_payload, private_key).await {
         Ok(payment_response) => {
-            println!("{:?}", payment_response);
+            println!("{}", payment_response);
             println!("Payment transaction sent successfully");
             payment_response
         }

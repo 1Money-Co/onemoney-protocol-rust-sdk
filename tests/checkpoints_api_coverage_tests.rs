@@ -1,8 +1,26 @@
 //! Comprehensive checkpoints API coverage tests
 
+use alloy_primitives::B256;
 use onemoney_protocol::client::config::api_path;
 use onemoney_protocol::client::config::endpoints::checkpoints::*;
+use onemoney_protocol::types::responses::transactions::Hash;
 use onemoney_protocol::*;
+use std::str::FromStr;
+
+/// Helper function to create Hash from hex string
+fn create_hash(hex_str: &str) -> Hash {
+    // Pad short hex strings to 32 bytes (64 hex chars + 0x prefix)
+    let padded_hex = if hex_str.len() < 66 {
+        let without_prefix = hex_str.strip_prefix("0x").unwrap_or(hex_str);
+        format!("0x{:0<64}", without_prefix)
+    } else {
+        hex_str.to_string()
+    };
+
+    Hash {
+        hash: B256::from_str(&padded_hex).expect("Test data should be valid"),
+    }
+}
 
 #[test]
 fn test_checkpoint_api_path_construction() {
@@ -65,11 +83,11 @@ fn test_checkpoint_number_various_values() {
 #[test]
 fn test_checkpoint_with_various_sizes() {
     let checkpoint_with_size = Checkpoint {
-        hash: "0x123abc".to_string(),
-        parent_hash: "0x000abc".to_string(),
-        state_root: "0xabc123".to_string(),
-        transactions_root: "0xdef456".to_string(),
-        receipts_root: "0x789012".to_string(),
+        hash: create_hash("0x123abc"),
+        parent_hash: create_hash("0x000abc"),
+        state_root: create_hash("0xabc123"),
+        transactions_root: create_hash("0xdef456"),
+        receipts_root: create_hash("0x789012"),
         number: 100,
         timestamp: 1703097600,
         extra_data: "0x".to_string(),
@@ -78,11 +96,11 @@ fn test_checkpoint_with_various_sizes() {
     };
 
     let checkpoint_without_size = Checkpoint {
-        hash: "0x123abc".to_string(),
-        parent_hash: "0x000abc".to_string(),
-        state_root: "0xabc123".to_string(),
-        transactions_root: "0xdef456".to_string(),
-        receipts_root: "0x789012".to_string(),
+        hash: create_hash("0x123abc"),
+        parent_hash: create_hash("0x000abc"),
+        state_root: create_hash("0xabc123"),
+        transactions_root: create_hash("0xdef456"),
+        receipts_root: create_hash("0x789012"),
         number: 100,
         timestamp: 1703097600,
         extra_data: "0x".to_string(),
@@ -147,21 +165,25 @@ fn test_checkpoint_hash_parameter_encoding() {
 #[test]
 fn test_checkpoint_all_fields_serialization() {
     let checkpoint = Checkpoint {
-        hash: "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777".to_string(),
-        parent_hash: "0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f"
-            .to_string(),
-        state_root: "0x18b2b9746b15451d1f9bc414f1c12bda8249c63d4a46926e661ae74c69defd9a"
-            .to_string(),
-        transactions_root: "0xa1e7ed47e548fa45c30232a7e7dfaad6495cff595a0ee1458aa470e574f3f6e4"
-            .to_string(),
-        receipts_root: "0x59ff04f73d9f934800687c60fb80e2de6e8233817b46d144aec724b569d80c3b"
-            .to_string(),
+        hash: create_hash("0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777"),
+        parent_hash: create_hash(
+            "0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f",
+        ),
+        state_root: create_hash(
+            "0x18b2b9746b15451d1f9bc414f1c12bda8249c63d4a46926e661ae74c69defd9a",
+        ),
+        transactions_root: create_hash(
+            "0xa1e7ed47e548fa45c30232a7e7dfaad6495cff595a0ee1458aa470e574f3f6e4",
+        ),
+        receipts_root: create_hash(
+            "0x59ff04f73d9f934800687c60fb80e2de6e8233817b46d144aec724b569d80c3b",
+        ),
         number: 1500,
         timestamp: 1703097600,
         extra_data: "checkpoint_data_v1".to_string(),
         transactions: CheckpointTransactions::Hashes(vec![
-            "0x1111111111111111111111111111111111111111111111111111111111111111".to_string(),
-            "0x2222222222222222222222222222222222222222222222222222222222222222".to_string(),
+            create_hash("0x1111111111111111111111111111111111111111111111111111111111111111"),
+            create_hash("0x2222222222222222222222222222222222222222222222222222222222222222"),
         ]),
         size: Some(4096),
     };
@@ -197,14 +219,19 @@ fn test_checkpoint_all_fields_serialization() {
 fn test_checkpoint_edge_case_values() {
     // Test with edge case values
     let checkpoint = Checkpoint {
-        hash: String::new(),           // Empty hash
-        parent_hash: "0x".to_string(), // Minimal hash
-        state_root: "0x0000000000000000000000000000000000000000000000000000000000000000"
-            .to_string(),
-        transactions_root: "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-            .to_string(),
-        receipts_root: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
-            .to_string(),
+        hash: create_hash("0x0000000000000000000000000000000000000000000000000000000000000000"), // Empty hash
+        parent_hash: create_hash(
+            "0x0000000000000000000000000000000000000000000000000000000000000000",
+        ), // Minimal hash
+        state_root: create_hash(
+            "0x0000000000000000000000000000000000000000000000000000000000000000",
+        ),
+        transactions_root: create_hash(
+            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        ),
+        receipts_root: create_hash(
+            "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        ),
         number: 0,                    // Minimum number
         timestamp: u64::MAX,          // Maximum timestamp
         extra_data: "a".repeat(1000), // Long extra data
@@ -226,15 +253,17 @@ fn test_checkpoint_edge_case_values() {
 #[test]
 fn test_checkpoint_clone_and_debug() {
     let checkpoint = Checkpoint {
-        hash: "0x123abc".to_string(),
-        parent_hash: "0x000abc".to_string(),
-        state_root: "0xabc123".to_string(),
-        transactions_root: "0xdef456".to_string(),
-        receipts_root: "0x789012".to_string(),
+        hash: create_hash("0x123abc"),
+        parent_hash: create_hash("0x000abc"),
+        state_root: create_hash("0xabc123"),
+        transactions_root: create_hash("0xdef456"),
+        receipts_root: create_hash("0x789012"),
         number: 100,
         timestamp: 1703097600,
         extra_data: "test".to_string(),
-        transactions: CheckpointTransactions::Hashes(vec!["0x1234".to_string()]),
+        transactions: CheckpointTransactions::Hashes(vec![create_hash(
+            "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        )]),
         size: Some(1024),
     };
 
