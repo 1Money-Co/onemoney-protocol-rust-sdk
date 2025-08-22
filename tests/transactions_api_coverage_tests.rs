@@ -485,7 +485,7 @@ fn test_query_parameter_handling() {
     assert_eq!(path, "/test");
 
     // Test single query parameter
-    let single_param = vec!["param1=value1".to_string()];
+    let single_param = ["param1=value1".to_string()];
     let mut path2 = "/test".to_string();
 
     if !single_param.is_empty() {
@@ -496,7 +496,7 @@ fn test_query_parameter_handling() {
     assert_eq!(path2, "/test?param1=value1");
 
     // Test multiple query parameters
-    let multiple_params = vec![
+    let multiple_params = [
         "from=0x123".to_string(),
         "value=1000".to_string(),
         "token=0x456".to_string(),
