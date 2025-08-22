@@ -87,13 +87,18 @@ mod tests {
             "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
         let result2 = private_key_to_address(private_key_no_prefix);
         assert!(result2.is_ok());
-        assert_eq!(result.unwrap(), result2.unwrap());
+        assert_eq!(
+            result.expect("Valid address conversion"),
+            result2.expect("Valid address conversion")
+        );
     }
 
     #[test]
     fn test_derive_token_account_address() {
-        let wallet = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
-        let mint = Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12").unwrap();
+        let wallet = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Valid wallet address");
+        let mint = Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")
+            .expect("Valid mint address");
 
         let token_account = derive_token_account_address(wallet, mint);
         assert_ne!(token_account, Address::ZERO);

@@ -90,7 +90,7 @@ mod test_utils {
         let zero_hash = "0x0000000000000000000000000000000000000000000000000000000000000000";
         assert_ne!(hash_str, zero_hash, "Hash should not be all zeros");
 
-        println!("✅ Valid hash format: {}", hash_str);
+        println!("Valid hash format: {}", hash_str);
         Ok(())
     }
 }
@@ -103,7 +103,7 @@ async fn test_mint_token_integration() -> Result<(), Box<dyn Error>> {
 
     // Skip test if no test server is available
     if client.get_chain_id().await.is_err() {
-        println!("⏭️  Skipping mint_token test - no test server available");
+        println!("Skipping mint_token test - no test server available");
         return Ok(());
     }
 
@@ -119,7 +119,7 @@ async fn test_mint_token_integration() -> Result<(), Box<dyn Error>> {
         token: addresses.token_mint,
     };
 
-    println!("🪙 Testing token mint operation...");
+    println!("Testing token mint operation...");
     match client
         .mint_token(mint_payload, test_utils::test_private_key())
         .await
@@ -130,14 +130,11 @@ async fn test_mint_token_integration() -> Result<(), Box<dyn Error>> {
             // Verify the operation by checking token metadata or balance
             // This might fail if the test environment doesn't support queries
             if let Ok(metadata) = client.get_token_metadata(addresses.token_mint).await {
-                println!(
-                    "✅ Token metadata accessible after mint: {}",
-                    metadata.symbol
-                );
+                println!("Token metadata accessible after mint: {}", metadata.symbol);
             }
         }
         Err(e) => {
-            println!("⚠️  Mint failed (expected in test environment): {}", e);
+            println!("Mint failed (expected in test environment): {}", e);
             // Don't fail the test - this is expected without proper test fixtures
         }
     }
@@ -152,7 +149,7 @@ async fn test_burn_token_integration() -> Result<(), Box<dyn Error>> {
     let addresses = test_utils::TestAddresses::new();
 
     if client.get_chain_id().await.is_err() {
-        println!("⏭️  Skipping burn_token test - no test server available");
+        println!("Skipping burn_token test - no test server available");
         return Ok(());
     }
 
@@ -168,17 +165,17 @@ async fn test_burn_token_integration() -> Result<(), Box<dyn Error>> {
         token: addresses.token_mint,
     };
 
-    println!("🔥 Testing token burn operation...");
+    println!("Testing token burn operation...");
     match client
         .burn_token(burn_payload, test_utils::test_private_key())
         .await
     {
         Ok(hash) => {
             test_utils::validate_hash_response(&hash)?;
-            println!("✅ Burn operation returned valid hash");
+            println!("Burn operation returned valid hash");
         }
         Err(e) => {
-            println!("⚠️  Burn failed (expected in test environment): {}", e);
+            println!("Burn failed (expected in test environment): {}", e);
         }
     }
 
@@ -192,7 +189,7 @@ async fn test_grant_authority_integration() -> Result<(), Box<dyn Error>> {
     let addresses = test_utils::TestAddresses::new();
 
     if client.get_chain_id().await.is_err() {
-        println!("⏭️  Skipping grant_authority test - no test server available");
+        println!("Skipping grant_authority test - no test server available");
         return Ok(());
     }
 
@@ -210,18 +207,18 @@ async fn test_grant_authority_integration() -> Result<(), Box<dyn Error>> {
         value: U256::from(10000000000000000000u64), // 10 token allowance
     };
 
-    println!("🔑 Testing authority grant operation...");
+    println!("Testing authority grant operation...");
     match client
         .grant_authority(authority_payload, test_utils::test_private_key())
         .await
     {
         Ok(hash) => {
             test_utils::validate_hash_response(&hash)?;
-            println!("✅ Authority grant returned valid hash");
+            println!("Authority grant returned valid hash");
         }
         Err(e) => {
             println!(
-                "⚠️  Authority grant failed (expected in test environment): {}",
+                "Authority grant failed (expected in test environment): {}",
                 e
             );
         }
@@ -237,7 +234,7 @@ async fn test_revoke_authority_integration() -> Result<(), Box<dyn Error>> {
     let addresses = test_utils::TestAddresses::new();
 
     if client.get_chain_id().await.is_err() {
-        println!("⏭️  Skipping revoke_authority test - no test server available");
+        println!("Skipping revoke_authority test - no test server available");
         return Ok(());
     }
 
@@ -255,18 +252,18 @@ async fn test_revoke_authority_integration() -> Result<(), Box<dyn Error>> {
         value: U256::from(0u64), // No value needed for revoke
     };
 
-    println!("🚫 Testing authority revoke operation...");
+    println!("Testing authority revoke operation...");
     match client
         .revoke_authority(revoke_payload, test_utils::test_private_key())
         .await
     {
         Ok(hash) => {
             test_utils::validate_hash_response(&hash)?;
-            println!("✅ Authority revoke returned valid hash");
+            println!("Authority revoke returned valid hash");
         }
         Err(e) => {
             println!(
-                "⚠️  Authority revoke failed (expected in test environment): {}",
+                "Authority revoke failed (expected in test environment): {}",
                 e
             );
         }
@@ -282,7 +279,7 @@ async fn test_pause_token_integration() -> Result<(), Box<dyn Error>> {
     let addresses = test_utils::TestAddresses::new();
 
     if client.get_chain_id().await.is_err() {
-        println!("⏭️  Skipping pause_token test - no test server available");
+        println!("Skipping pause_token test - no test server available");
         return Ok(());
     }
 
@@ -298,20 +295,17 @@ async fn test_pause_token_integration() -> Result<(), Box<dyn Error>> {
         token: addresses.token_mint,
     };
 
-    println!("⏸️  Testing token pause operation...");
+    println!("Testing token pause operation...");
     match client
         .pause_token(pause_payload.clone(), test_utils::test_private_key())
         .await
     {
         Ok(hash) => {
             test_utils::validate_hash_response(&hash)?;
-            println!("✅ Token pause returned valid hash");
+            println!("Token pause returned valid hash");
         }
         Err(e) => {
-            println!(
-                "⚠️  Token pause failed (expected in test environment): {}",
-                e
-            );
+            println!("Token pause failed (expected in test environment): {}", e);
         }
     }
 
@@ -322,20 +316,17 @@ async fn test_pause_token_integration() -> Result<(), Box<dyn Error>> {
         ..pause_payload
     };
 
-    println!("▶️  Testing token unpause operation...");
+    println!("Testing token unpause operation...");
     match client
         .pause_token(unpause_payload, test_utils::test_private_key())
         .await
     {
         Ok(hash) => {
             test_utils::validate_hash_response(&hash)?;
-            println!("✅ Token unpause returned valid hash");
+            println!("Token unpause returned valid hash");
         }
         Err(e) => {
-            println!(
-                "⚠️  Token unpause failed (expected in test environment): {}",
-                e
-            );
+            println!("Token unpause failed (expected in test environment): {}", e);
         }
     }
 
@@ -349,7 +340,7 @@ async fn test_manage_blacklist_integration() -> Result<(), Box<dyn Error>> {
     let addresses = test_utils::TestAddresses::new();
 
     if client.get_chain_id().await.is_err() {
-        println!("⏭️  Skipping manage_blacklist test - no test server available");
+        println!("Skipping manage_blacklist test - no test server available");
         return Ok(());
     }
 
@@ -366,7 +357,7 @@ async fn test_manage_blacklist_integration() -> Result<(), Box<dyn Error>> {
         token: addresses.token_mint,
     };
 
-    println!("🚫 Testing blacklist add operation...");
+    println!("Testing blacklist add operation...");
     match client
         .manage_blacklist(
             add_blacklist_payload.clone(),
@@ -376,13 +367,10 @@ async fn test_manage_blacklist_integration() -> Result<(), Box<dyn Error>> {
     {
         Ok(hash) => {
             test_utils::validate_hash_response(&hash)?;
-            println!("✅ Blacklist add returned valid hash");
+            println!("Blacklist add returned valid hash");
         }
         Err(e) => {
-            println!(
-                "⚠️  Blacklist add failed (expected in test environment): {}",
-                e
-            );
+            println!("Blacklist add failed (expected in test environment): {}", e);
         }
     }
 
@@ -393,18 +381,18 @@ async fn test_manage_blacklist_integration() -> Result<(), Box<dyn Error>> {
         ..add_blacklist_payload
     };
 
-    println!("✅ Testing blacklist remove operation...");
+    println!("Testing blacklist remove operation...");
     match client
         .manage_blacklist(remove_blacklist_payload, test_utils::test_private_key())
         .await
     {
         Ok(hash) => {
             test_utils::validate_hash_response(&hash)?;
-            println!("✅ Blacklist remove returned valid hash");
+            println!("Blacklist remove returned valid hash");
         }
         Err(e) => {
             println!(
-                "⚠️  Blacklist remove failed (expected in test environment): {}",
+                "Blacklist remove failed (expected in test environment): {}",
                 e
             );
         }
@@ -420,7 +408,7 @@ async fn test_manage_whitelist_integration() -> Result<(), Box<dyn Error>> {
     let addresses = test_utils::TestAddresses::new();
 
     if client.get_chain_id().await.is_err() {
-        println!("⏭️  Skipping manage_whitelist test - no test server available");
+        println!("Skipping manage_whitelist test - no test server available");
         return Ok(());
     }
 
@@ -437,7 +425,7 @@ async fn test_manage_whitelist_integration() -> Result<(), Box<dyn Error>> {
         token: addresses.token_mint,
     };
 
-    println!("✅ Testing whitelist add operation...");
+    println!("Testing whitelist add operation...");
     match client
         .manage_whitelist(
             add_whitelist_payload.clone(),
@@ -447,13 +435,10 @@ async fn test_manage_whitelist_integration() -> Result<(), Box<dyn Error>> {
     {
         Ok(hash) => {
             test_utils::validate_hash_response(&hash)?;
-            println!("✅ Whitelist add returned valid hash");
+            println!("Whitelist add returned valid hash");
         }
         Err(e) => {
-            println!(
-                "⚠️  Whitelist add failed (expected in test environment): {}",
-                e
-            );
+            println!("Whitelist add failed (expected in test environment): {}", e);
         }
     }
 
@@ -464,18 +449,18 @@ async fn test_manage_whitelist_integration() -> Result<(), Box<dyn Error>> {
         ..add_whitelist_payload
     };
 
-    println!("❌ Testing whitelist remove operation...");
+    println!("Testing whitelist remove operation...");
     match client
         .manage_whitelist(remove_whitelist_payload, test_utils::test_private_key())
         .await
     {
         Ok(hash) => {
             test_utils::validate_hash_response(&hash)?;
-            println!("✅ Whitelist remove returned valid hash");
+            println!("Whitelist remove returned valid hash");
         }
         Err(e) => {
             println!(
-                "⚠️  Whitelist remove failed (expected in test environment): {}",
+                "Whitelist remove failed (expected in test environment): {}",
                 e
             );
         }
@@ -491,7 +476,7 @@ async fn test_update_token_metadata_integration() -> Result<(), Box<dyn Error>> 
     let addresses = test_utils::TestAddresses::new();
 
     if client.get_chain_id().await.is_err() {
-        println!("⏭️  Skipping update_token_metadata test - no test server available");
+        println!("Skipping update_token_metadata test - no test server available");
         return Ok(());
     }
 
@@ -517,23 +502,23 @@ async fn test_update_token_metadata_integration() -> Result<(), Box<dyn Error>> 
         ],
     };
 
-    println!("📝 Testing token metadata update operation...");
+    println!("Testing token metadata update operation...");
     match client
         .update_token_metadata(metadata_payload, test_utils::test_private_key())
         .await
     {
         Ok(hash) => {
             test_utils::validate_hash_response(&hash)?;
-            println!("✅ Metadata update returned valid hash");
+            println!("Metadata update returned valid hash");
 
             // Try to verify the update by querying metadata
             if let Ok(updated_metadata) = client.get_token_metadata(addresses.token_mint).await {
-                println!("📊 Updated metadata retrieved: {}", updated_metadata.symbol);
+                println!("Updated metadata retrieved: {}", updated_metadata.symbol);
             }
         }
         Err(e) => {
             println!(
-                "⚠️  Metadata update failed (expected in test environment): {}",
+                "Metadata update failed (expected in test environment): {}",
                 e
             );
         }
@@ -549,11 +534,11 @@ async fn test_token_operation_error_conditions() -> Result<(), Box<dyn Error>> {
     let addresses = test_utils::TestAddresses::new();
 
     if client.get_chain_id().await.is_err() {
-        println!("⏭️  Skipping error condition tests - no test server available");
+        println!("Skipping error condition tests - no test server available");
         return Ok(());
     }
 
-    println!("🚨 Testing error conditions for token operations...");
+    println!("Testing error conditions for token operations...");
 
     // Test with invalid private key
     let (epoch, checkpoint, chain_id) = test_utils::create_base_payload(&client, 11).await?;
@@ -573,9 +558,9 @@ async fn test_token_operation_error_conditions() -> Result<(), Box<dyn Error>> {
         .mint_token(invalid_mint_payload.clone(), "invalid_private_key")
         .await
     {
-        Ok(_) => println!("⚠️  Unexpected success with invalid private key"),
+        Ok(_) => println!("Unexpected success with invalid private key"),
         Err(e) => {
-            println!("✅ Correctly rejected invalid private key: {}", e);
+            println!("Correctly rejected invalid private key: {}", e);
             assert!(e.to_string().contains("Invalid") || e.to_string().contains("decode"));
         }
     }
@@ -591,13 +576,10 @@ async fn test_token_operation_error_conditions() -> Result<(), Box<dyn Error>> {
         .await
     {
         Ok(hash) => {
-            println!(
-                "✅ Zero value mint succeeded (may be allowed): {}",
-                hash.hash
-            );
+            println!("Zero value mint succeeded (may be allowed): {}", hash.hash);
         }
         Err(e) => {
-            println!("✅ Zero value mint rejected (expected): {}", e);
+            println!("Zero value mint rejected (expected): {}", e);
         }
     }
 
@@ -612,9 +594,9 @@ async fn test_token_operation_error_conditions() -> Result<(), Box<dyn Error>> {
         .mint_token(invalid_token_payload, test_utils::test_private_key())
         .await
     {
-        Ok(_) => println!("⚠️  Zero address mint unexpectedly succeeded"),
+        Ok(_) => println!("Zero address mint unexpectedly succeeded"),
         Err(e) => {
-            println!("✅ Zero address mint rejected: {}", e);
+            println!("Zero address mint rejected: {}", e);
         }
     }
 
@@ -628,11 +610,11 @@ async fn test_hash_format_validation() -> Result<(), Box<dyn Error>> {
     let addresses = test_utils::TestAddresses::new();
 
     if client.get_chain_id().await.is_err() {
-        println!("⏭️  Skipping hash format validation - no test server available");
+        println!("Skipping hash format validation - no test server available");
         return Ok(());
     }
 
-    println!("🔍 Testing hash format validation across all operations...");
+    println!("Testing hash format validation across all operations...");
 
     let (epoch, checkpoint, chain_id) = test_utils::create_base_payload(&client, 13).await?;
 
@@ -641,13 +623,13 @@ async fn test_hash_format_validation() -> Result<(), Box<dyn Error>> {
 
     // Test each operation and collect hashes
     let operations = vec![
-        ("mint", "🪙"),
-        ("burn", "🔥"),
-        ("grant_authority", "🔑"),
-        ("pause", "⏸️"),
-        ("manage_blacklist", "🚫"),
-        ("manage_whitelist", "✅"),
-        ("update_metadata", "📝"),
+        ("mint", ""),
+        ("burn", ""),
+        ("grant_authority", ""),
+        ("pause", ""),
+        ("manage_blacklist", ""),
+        ("manage_whitelist", ""),
+        ("update_metadata", ""),
     ];
 
     for (operation, emoji) in operations {
@@ -685,7 +667,7 @@ async fn test_hash_format_validation() -> Result<(), Box<dyn Error>> {
     }
 
     println!(
-        "✅ All hash formats validated successfully ({} operations)",
+        "All hash formats validated successfully ({} operations)",
         successful_hashes.len()
     );
     Ok(())
@@ -698,11 +680,11 @@ async fn test_concurrent_token_operations() -> Result<(), Box<dyn Error>> {
     let addresses = test_utils::TestAddresses::new();
 
     if client.get_chain_id().await.is_err() {
-        println!("⏭️  Skipping concurrent operations test - no test server available");
+        println!("Skipping concurrent operations test - no test server available");
         return Ok(());
     }
 
-    println!("🔄 Testing concurrent token operations...");
+    println!("Testing concurrent token operations...");
 
     let (epoch, checkpoint, chain_id) = test_utils::create_base_payload(&client, 14).await?;
 
@@ -724,15 +706,11 @@ async fn test_concurrent_token_operations() -> Result<(), Box<dyn Error>> {
                 token: addresses_clone.token_mint,
             };
 
-            println!("🚀 Starting concurrent operation {}", i);
+            println!("Starting concurrent operation {}", i);
             let result = client_clone
                 .mint_token(mint_payload, test_utils::test_private_key())
                 .await;
-            println!(
-                "🏁 Completed concurrent operation {}: {:?}",
-                i,
-                result.is_ok()
-            );
+            println!("Completed concurrent operation {}: {:?}", i, result.is_ok());
             result
         });
 
@@ -751,19 +729,19 @@ async fn test_concurrent_token_operations() -> Result<(), Box<dyn Error>> {
             Ok(Ok(hash)) => {
                 test_utils::validate_hash_response(&hash)?;
                 successful_operations += 1;
-                println!("✅ Concurrent operation {} succeeded", i);
+                println!("Concurrent operation {} succeeded", i);
             }
             Ok(Err(e)) => {
-                println!("⚠️  Concurrent operation {} failed: {}", i, e);
+                println!("Concurrent operation {} failed: {}", i, e);
             }
             Err(e) => {
-                println!("💥 Concurrent operation {} panicked: {}", i, e);
+                println!("Concurrent operation {} panicked: {}", i, e);
             }
         }
     }
 
     println!(
-        "🎯 Concurrent operations completed: {}/3 successful",
+        "Concurrent operations completed: {}/3 successful",
         successful_operations
     );
     Ok(())

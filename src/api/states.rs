@@ -50,8 +50,9 @@ mod tests {
             checkpoint: 456,
         };
 
-        let json = serde_json::to_string(&state).unwrap();
-        let deserialized: LatestStateResponse = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&state).expect("Test data should be valid");
+        let deserialized: LatestStateResponse =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(state.epoch, deserialized.epoch);
         assert_eq!(state.checkpoint, deserialized.checkpoint);

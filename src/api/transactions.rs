@@ -189,9 +189,11 @@ mod tests {
             recent_checkpoint: 456,
             chain_id: 1212101,
             nonce: 0,
-            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .expect("Test data should be valid"),
             value: U256::from(1000000000000000000u64),
-            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                .expect("Test data should be valid"),
         };
 
         let encoded = rlp_encode(&payload);
@@ -206,7 +208,7 @@ mod tests {
             token: None,
         };
 
-        let json = serde_json::to_string(&request).unwrap();
+        let json = serde_json::to_string(&request).expect("Test data should be valid");
         assert!(json.contains("742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0"));
     }
 }

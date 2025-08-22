@@ -120,8 +120,9 @@ mod tests {
             size: Some(1024),
         };
 
-        let json = serde_json::to_string(&checkpoint).unwrap();
-        let deserialized: Checkpoint = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&checkpoint).expect("Test data should be valid");
+        let deserialized: Checkpoint =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(checkpoint.number, deserialized.number);
         assert_eq!(checkpoint.hash, deserialized.hash);
@@ -133,8 +134,9 @@ mod tests {
     fn test_checkpoint_number() {
         let checkpoint_number = CheckpointNumber { number: 50 };
 
-        let json = serde_json::to_string(&checkpoint_number).unwrap();
-        let deserialized: CheckpointNumber = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&checkpoint_number).expect("Test data should be valid");
+        let deserialized: CheckpointNumber =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(checkpoint_number.number, deserialized.number);
     }

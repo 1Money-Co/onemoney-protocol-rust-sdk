@@ -125,8 +125,10 @@ fn test_fee_estimate_path_construction_without_token() {
 
 #[test]
 fn test_payment_payload_comprehensive() {
-    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     let payload = PaymentPayload {
         recent_epoch: 123,
@@ -148,8 +150,9 @@ fn test_payment_payload_comprehensive() {
     assert_eq!(payload.token, token);
 
     // Test serialization/deserialization
-    let json = serde_json::to_string(&payload).unwrap();
-    let deserialized: PaymentPayload = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&payload).expect("Test data should be valid");
+    let deserialized: PaymentPayload =
+        serde_json::from_str(&json).expect("Test data should be valid");
     assert_eq!(payload.recent_epoch, deserialized.recent_epoch);
     assert_eq!(payload.recent_checkpoint, deserialized.recent_checkpoint);
     assert_eq!(payload.chain_id, deserialized.chain_id);
@@ -180,8 +183,10 @@ fn test_payment_payload_comprehensive() {
 
 #[test]
 fn test_payment_payload_different_values() {
-    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     // Test with different values to ensure hash changes
     let payload1 = PaymentPayload {
@@ -261,8 +266,10 @@ fn test_payment_payload_different_values() {
 
 #[test]
 fn test_payment_request_structure() {
-    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     let payload = PaymentPayload {
         recent_epoch: 100,
@@ -283,7 +290,7 @@ fn test_payment_request_structure() {
     let request = PaymentRequest { payload, signature };
 
     // Test serialization (PaymentRequest only derives Serialize, not Deserialize)
-    let json = serde_json::to_string(&request).unwrap();
+    let json = serde_json::to_string(&request).expect("Test data should be valid");
     assert!(json.contains("recent_epoch"));
     assert!(json.contains("100"));
     assert!(json.contains("signature"));
@@ -305,7 +312,7 @@ fn test_fee_estimate_request_comprehensive() {
     };
 
     // Test serialization (FeeEstimateRequest only derives Serialize, not Deserialize)
-    let json = serde_json::to_string(&request_with_token).unwrap();
+    let json = serde_json::to_string(&request_with_token).expect("Test data should be valid");
     assert!(json.contains("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0"));
     assert!(json.contains("1000000000000000000"));
     assert!(json.contains("0x1234567890abcdef1234567890abcdef12345678"));
@@ -320,7 +327,7 @@ fn test_fee_estimate_request_comprehensive() {
         token: None,
     };
 
-    let json2 = serde_json::to_string(&request_without_token).unwrap();
+    let json2 = serde_json::to_string(&request_without_token).expect("Test data should be valid");
     assert!(json2.contains("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0"));
     assert!(json2.contains("500000000000000000"));
     assert!(!json2.contains("0x1234567890abcdef1234567890abcdef12345678"));
@@ -351,7 +358,7 @@ fn test_fee_estimate_request_comprehensive() {
     ];
 
     for request in edge_cases {
-        let json = serde_json::to_string(&request).unwrap();
+        let json = serde_json::to_string(&request).expect("Test data should be valid");
         assert!(json.contains(&request.from));
         assert!(json.contains(&request.value));
         if let Some(token) = &request.token {
@@ -362,8 +369,10 @@ fn test_fee_estimate_request_comprehensive() {
 
 #[test]
 fn test_payment_payload_edge_cases() {
-    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     // Test with zero values
     let zero_payload = PaymentPayload {
@@ -395,8 +404,8 @@ fn test_payment_payload_edge_cases() {
     assert_ne!(hash_zero, hash_max);
 
     // Test serialization of edge cases
-    let json_zero = serde_json::to_string(&zero_payload).unwrap();
-    let json_max = serde_json::to_string(&max_payload).unwrap();
+    let json_zero = serde_json::to_string(&zero_payload).expect("Test data should be valid");
+    let json_max = serde_json::to_string(&max_payload).expect("Test data should be valid");
 
     assert!(json_zero.contains("\"0\""));
     assert!(json_max.contains(&u64::MAX.to_string()));
@@ -421,9 +430,9 @@ fn test_signature_structure_comprehensive() {
         },
         Signature {
             r: U256::from_str("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")
-                .unwrap(),
+                .expect("Test data should be valid"),
             s: U256::from_str("0xfedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321")
-                .unwrap(),
+                .expect("Test data should be valid"),
             v: 28,
         },
         Signature {
@@ -436,8 +445,9 @@ fn test_signature_structure_comprehensive() {
 
     for signature in signatures {
         // Test serialization/deserialization
-        let json = serde_json::to_string(&signature).unwrap();
-        let deserialized: Signature = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&signature).expect("Test data should be valid");
+        let deserialized: Signature =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(signature.r, deserialized.r);
         assert_eq!(signature.s, deserialized.s);
@@ -543,8 +553,10 @@ fn test_hash_string_formats() {
 
 #[test]
 fn test_rlp_encoding_comprehensive() {
-    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     let payload = PaymentPayload {
         recent_epoch: 123,

@@ -45,10 +45,13 @@ impl EvmWallet {
     /// ```rust
     /// use onemoney_protocol::utils::EvmWallet;
     ///
-    /// let wallet = EvmWallet::generate_random().unwrap();
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let wallet = EvmWallet::generate_random()?;
     /// println!("Generated wallet: {}", wallet);
     /// println!("Address: {}", wallet.address);
     /// println!("Private key: {}", wallet.private_key);
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn generate_random() -> Result<Self> {
         // Generate a random private key
@@ -81,7 +84,7 @@ mod tests {
 
     #[test]
     fn test_generate_random_wallet() {
-        let wallet = EvmWallet::generate_random().unwrap();
+        let wallet = EvmWallet::generate_random().expect("Failed to generate random wallet");
 
         // Check that all fields are populated
         assert!(!wallet.private_key.is_empty());

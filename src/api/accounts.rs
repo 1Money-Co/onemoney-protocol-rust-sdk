@@ -92,7 +92,8 @@ mod tests {
 
     #[test]
     fn test_nonce_api_path_construction() {
-        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
         let expected_path = api_path(&format!("{NONCE}?address={address}"));
 
         assert!(expected_path.contains("/accounts/nonce"));
@@ -101,8 +102,10 @@ mod tests {
 
     #[test]
     fn test_token_account_api_path_construction() {
-        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
         let expected_path = api_path(&format!("{TOKEN_ACCOUNT}?address={address}&token={token}"));
 
         assert!(expected_path.contains("/accounts/token_account"));
@@ -119,7 +122,8 @@ mod tests {
 
     #[test]
     fn test_associated_token_account_display() {
-        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
         let account = AssociatedTokenAccount {
             token_account_address: address,
             balance: "1000000000000000000".to_string(),
@@ -135,8 +139,10 @@ mod tests {
 
     #[test]
     fn test_associated_token_account_equality() {
-        let address1 = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-        let address2 = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let address1 = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let address2 = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
 
         let account1 = AssociatedTokenAccount {
             token_account_address: address1,
@@ -155,7 +161,8 @@ mod tests {
 
     #[test]
     fn test_associated_token_account_clone() {
-        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
         let account = AssociatedTokenAccount {
             token_account_address: address,
             balance: "1000000000000000000".to_string(),

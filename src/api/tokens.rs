@@ -222,31 +222,33 @@ mod tests {
     #[test]
     fn test_authority_values() {
         assert_eq!(
-            serde_json::to_string(&Authority::MasterMintBurn).unwrap(),
+            serde_json::to_string(&Authority::MasterMintBurn).expect("Test data should be valid"),
             "\"MasterMintBurn\""
         );
         assert_eq!(
-            serde_json::to_string(&Authority::MintBurnTokens).unwrap(),
+            serde_json::to_string(&Authority::MintBurnTokens).expect("Test data should be valid"),
             "\"MintBurnTokens\""
         );
         assert_eq!(
-            serde_json::to_string(&Authority::Pause).unwrap(),
+            serde_json::to_string(&Authority::Pause).expect("Test data should be valid"),
             "\"Pause\""
         );
         assert_eq!(
-            serde_json::to_string(&Authority::ManageList).unwrap(),
+            serde_json::to_string(&Authority::ManageList).expect("Test data should be valid"),
             "\"ManageList\""
         );
         assert_eq!(
-            serde_json::to_string(&Authority::UpdateMetadata).unwrap(),
+            serde_json::to_string(&Authority::UpdateMetadata).expect("Test data should be valid"),
             "\"UpdateMetadata\""
         );
     }
 
     #[test]
     fn test_token_mint_payload_structure() {
-        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
 
         let payload = TokenMintPayload {
             recent_epoch: 100,
@@ -269,8 +271,10 @@ mod tests {
 
     #[test]
     fn test_token_burn_payload_structure() {
-        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
 
         let payload = TokenBurnPayload {
             recent_epoch: 100,
@@ -290,11 +294,11 @@ mod tests {
     #[test]
     fn test_authority_action_serialization() {
         assert_eq!(
-            serde_json::to_string(&AuthorityAction::Grant).unwrap(),
+            serde_json::to_string(&AuthorityAction::Grant).expect("Test data should be valid"),
             "\"Grant\""
         );
         assert_eq!(
-            serde_json::to_string(&AuthorityAction::Revoke).unwrap(),
+            serde_json::to_string(&AuthorityAction::Revoke).expect("Test data should be valid"),
             "\"Revoke\""
         );
     }
@@ -302,11 +306,11 @@ mod tests {
     #[test]
     fn test_pause_action_serialization() {
         assert_eq!(
-            serde_json::to_string(&PauseAction::Pause).unwrap(),
+            serde_json::to_string(&PauseAction::Pause).expect("Test data should be valid"),
             "\"Pause\""
         );
         assert_eq!(
-            serde_json::to_string(&PauseAction::Unpause).unwrap(),
+            serde_json::to_string(&PauseAction::Unpause).expect("Test data should be valid"),
             "\"Unpause\""
         );
     }
@@ -314,11 +318,11 @@ mod tests {
     #[test]
     fn test_blacklist_action_serialization() {
         assert_eq!(
-            serde_json::to_string(&BlacklistAction::Add).unwrap(),
+            serde_json::to_string(&BlacklistAction::Add).expect("Test data should be valid"),
             "\"Add\""
         );
         assert_eq!(
-            serde_json::to_string(&BlacklistAction::Remove).unwrap(),
+            serde_json::to_string(&BlacklistAction::Remove).expect("Test data should be valid"),
             "\"Remove\""
         );
     }
@@ -326,20 +330,21 @@ mod tests {
     #[test]
     fn test_whitelist_action_serialization() {
         assert_eq!(
-            serde_json::to_string(&WhitelistAction::Add).unwrap(),
+            serde_json::to_string(&WhitelistAction::Add).expect("Test data should be valid"),
             "\"Add\""
         );
         assert_eq!(
-            serde_json::to_string(&WhitelistAction::Remove).unwrap(),
+            serde_json::to_string(&WhitelistAction::Remove).expect("Test data should be valid"),
             "\"Remove\""
         );
     }
 
     #[test]
     fn test_token_authority_payload_structure() {
-        let authority_address =
-            Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+        let authority_address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
 
         let payload = TokenAuthorityPayload {
             recent_epoch: 100,
@@ -360,7 +365,8 @@ mod tests {
 
     #[test]
     fn test_token_pause_payload_structure() {
-        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
 
         let payload = TokenPausePayload {
             recent_epoch: 100,
@@ -377,8 +383,10 @@ mod tests {
 
     #[test]
     fn test_token_blacklist_payload_structure() {
-        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
 
         let payload = TokenBlacklistPayload {
             recent_epoch: 100,
@@ -397,8 +405,10 @@ mod tests {
 
     #[test]
     fn test_token_whitelist_payload_structure() {
-        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
 
         let payload = TokenWhitelistPayload {
             recent_epoch: 100,

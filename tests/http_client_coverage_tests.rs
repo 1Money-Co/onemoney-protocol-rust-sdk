@@ -60,12 +60,13 @@ fn test_error_response_serialization() {
     };
 
     // Test serialization
-    let json = serde_json::to_string(&error_response).unwrap();
+    let json = serde_json::to_string(&error_response).expect("Test data should be valid");
     assert!(json.contains("test_error"));
     assert!(json.contains("Test error message"));
 
     // Test deserialization
-    let deserialized: ErrorResponse = serde_json::from_str(&json).unwrap();
+    let deserialized: ErrorResponse =
+        serde_json::from_str(&json).expect("Test data should be valid");
     assert_eq!(error_response.error_code, deserialized.error_code);
     assert_eq!(error_response.message, deserialized.message);
 
@@ -117,11 +118,12 @@ fn test_error_response_various_codes() {
             message: message.to_string(),
         };
 
-        let json = serde_json::to_string(&error_response).unwrap();
+        let json = serde_json::to_string(&error_response).expect("Test data should be valid");
         assert!(json.contains(error_code));
         assert!(json.contains(message));
 
-        let deserialized: ErrorResponse = serde_json::from_str(&json).unwrap();
+        let deserialized: ErrorResponse =
+            serde_json::from_str(&json).expect("Test data should be valid");
         assert_eq!(error_response.error_code, deserialized.error_code);
         assert_eq!(error_response.message, deserialized.message);
     }
@@ -156,8 +158,9 @@ fn test_error_response_edge_cases() {
         message: String::new(),
     };
 
-    let json = serde_json::to_string(&empty_error).unwrap();
-    let deserialized: ErrorResponse = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&empty_error).expect("Test data should be valid");
+    let deserialized: ErrorResponse =
+        serde_json::from_str(&json).expect("Test data should be valid");
     assert_eq!(empty_error.error_code, deserialized.error_code);
     assert_eq!(empty_error.message, deserialized.message);
 
@@ -167,19 +170,21 @@ fn test_error_response_edge_cases() {
         message: "b".repeat(2000),
     };
 
-    let json2 = serde_json::to_string(&long_error).unwrap();
-    let deserialized2: ErrorResponse = serde_json::from_str(&json2).unwrap();
+    let json2 = serde_json::to_string(&long_error).expect("Test data should be valid");
+    let deserialized2: ErrorResponse =
+        serde_json::from_str(&json2).expect("Test data should be valid");
     assert_eq!(long_error.error_code, deserialized2.error_code);
     assert_eq!(long_error.message, deserialized2.message);
 
     // Test with special characters
     let special_error = ErrorResponse {
         error_code: "error_with_ñúmbers_123".to_string(),
-        message: "Message with 🚀 emojis and \"quotes\"".to_string(),
+        message: "Message with special characters and \"quotes\"".to_string(),
     };
 
-    let json3 = serde_json::to_string(&special_error).unwrap();
-    let deserialized3: ErrorResponse = serde_json::from_str(&json3).unwrap();
+    let json3 = serde_json::to_string(&special_error).expect("Test data should be valid");
+    let deserialized3: ErrorResponse =
+        serde_json::from_str(&json3).expect("Test data should be valid");
     assert_eq!(special_error.error_code, deserialized3.error_code);
     assert_eq!(special_error.message, deserialized3.message);
 }
@@ -205,7 +210,7 @@ fn test_network_enum_coverage() {
         let result = ClientBuilder::new().network(network).build();
         assert!(result.is_ok());
 
-        let client = result.unwrap();
+        let client = result.expect("Test data should be valid");
         let debug_str = format!("{:?}", client);
         assert!(debug_str.contains("Client"));
     }
@@ -219,10 +224,10 @@ fn test_error_response_json_structure() {
         message: "test message".to_string(),
     };
 
-    let json = serde_json::to_string(&error_response).unwrap();
+    let json = serde_json::to_string(&error_response).expect("Test data should be valid");
 
     // Parse as generic JSON to verify structure
-    let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
+    let parsed: serde_json::Value = serde_json::from_str(&json).expect("Test data should be valid");
 
     assert!(parsed.is_object());
     assert!(parsed.get("error_code").is_some());

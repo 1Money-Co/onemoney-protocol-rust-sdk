@@ -269,5 +269,5 @@ fn test_error_send_sync() {
         println!("Error in thread: {}", error_msg);
     })
     .join()
-    .unwrap();
+    .expect("Test data should be valid");
 }

@@ -81,7 +81,7 @@ mod mock_utils {
         let zero_hash = "0x0000000000000000000000000000000000000000000000000000000000000000";
         assert_ne!(hash_str, zero_hash, "Hash should not be all zeros");
 
-        println!("✅ Mock hash format validated: {}", hash_str);
+        println!("Mock hash format validated: {}", hash_str);
         Ok(())
     }
 }
@@ -89,7 +89,7 @@ mod mock_utils {
 /// Test hash response structure and format validation
 #[tokio::test]
 async fn test_hash_response_structure() -> Result<(), Box<dyn Error>> {
-    println!("🔍 Testing Hash response structure...");
+    println!("Testing Hash response structure...");
 
     let mock_hash = mock_utils::create_mock_hash();
     mock_utils::validate_mock_hash(&mock_hash)?;
@@ -106,14 +106,14 @@ async fn test_hash_response_structure() -> Result<(), Box<dyn Error>> {
     assert!(display_str.contains("Transaction Hash"));
     assert!(display_str.contains("0x1234567890abcdef"));
 
-    println!("✅ Hash structure validation completed");
+    println!("Hash structure validation completed");
     Ok(())
 }
 
 /// Test token payload serialization and signature generation
 #[tokio::test]
 async fn test_token_payload_serialization() -> Result<(), Box<dyn Error>> {
-    println!("📦 Testing token payload serialization...");
+    println!("Testing token payload serialization...");
 
     let addresses = mock_utils::MockAddresses::new();
 
@@ -142,14 +142,14 @@ async fn test_token_payload_serialization() -> Result<(), Box<dyn Error>> {
     let hash2 = mint_payload.signature_hash();
     assert_eq!(hash, hash2);
 
-    println!("✅ Payload serialization validated");
+    println!("Payload serialization validated");
     Ok(())
 }
 
 /// Test error handling for invalid payloads
 #[tokio::test]
 async fn test_invalid_payload_handling() -> Result<(), Box<dyn Error>> {
-    println!("🚨 Testing invalid payload handling...");
+    println!("Testing invalid payload handling...");
 
     let client = mock_utils::create_mock_client()?;
     let addresses = mock_utils::MockAddresses::new();
@@ -171,7 +171,7 @@ async fn test_invalid_payload_handling() -> Result<(), Box<dyn Error>> {
             panic!("Should have failed with invalid private key");
         }
         Err(e) => {
-            println!("✅ Correctly rejected invalid private key: {}", e);
+            println!("Correctly rejected invalid private key: {}", e);
             assert!(e.to_string().contains("Invalid") || e.to_string().contains("decode"));
         }
     }
@@ -182,7 +182,7 @@ async fn test_invalid_payload_handling() -> Result<(), Box<dyn Error>> {
 /// Test all token operation method signatures
 #[tokio::test]
 async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
-    println!("📝 Testing token method signatures...");
+    println!("Testing token method signatures...");
 
     let client = mock_utils::create_mock_client()?;
     let addresses = mock_utils::MockAddresses::new();
@@ -307,14 +307,14 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
         .update_token_metadata(metadata_payload, private_key)
         .await;
 
-    println!("✅ All method signatures validated with Hash return type");
+    println!("All method signatures validated with Hash return type");
     Ok(())
 }
 
 /// Test payload validation and edge cases
 #[tokio::test]
 async fn test_payload_edge_cases() -> Result<(), Box<dyn Error>> {
-    println!("🎯 Testing payload edge cases...");
+    println!("Testing payload edge cases...");
 
     let addresses = mock_utils::MockAddresses::new();
 
@@ -355,14 +355,14 @@ async fn test_payload_edge_cases() -> Result<(), Box<dyn Error>> {
     assert_ne!(hash_zero, alloy_primitives::B256::default());
     assert_ne!(hash_zero, hash); // Different payloads should have different hashes
 
-    println!("✅ Edge case validation completed");
+    println!("Edge case validation completed");
     Ok(())
 }
 
 /// Test concurrent payload creation and hashing
 #[tokio::test]
 async fn test_concurrent_payload_operations() -> Result<(), Box<dyn Error>> {
-    println!("🔄 Testing concurrent payload operations...");
+    println!("Testing concurrent payload operations...");
 
     let addresses = mock_utils::MockAddresses::new();
 
@@ -418,14 +418,14 @@ async fn test_concurrent_payload_operations() -> Result<(), Box<dyn Error>> {
         assert!(json.contains("recent_epoch"));
     }
 
-    println!("✅ Concurrent operations completed successfully");
+    println!("Concurrent operations completed successfully");
     Ok(())
 }
 
 /// Test request structure creation and serialization
 #[tokio::test]
 async fn test_request_structure_creation() -> Result<(), Box<dyn Error>> {
-    println!("🏗️  Testing request structure creation...");
+    println!("Testing request structure creation...");
 
     let addresses = mock_utils::MockAddresses::new();
     let private_key = mock_utils::test_private_key();
@@ -457,7 +457,7 @@ async fn test_request_structure_creation() -> Result<(), Box<dyn Error>> {
     assert_eq!(signature.s, signature2.s);
     assert_eq!(signature.v, signature2.v);
 
-    println!("✅ Request structure creation validated");
+    println!("Request structure creation validated");
     Ok(())
 }
 

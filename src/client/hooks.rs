@@ -154,7 +154,10 @@ mod tests {
         }
 
         fn get_messages(&self) -> Vec<(LogLevel, String)> {
-            self.messages.lock().unwrap().clone()
+            self.messages
+                .lock()
+                .expect("Failed to lock messages mutex")
+                .clone()
         }
     }
 
@@ -162,7 +165,7 @@ mod tests {
         fn log(&self, level: LogLevel, message: &str) {
             self.messages
                 .lock()
-                .unwrap()
+                .expect("Failed to lock messages mutex")
                 .push((level, message.to_string()));
         }
     }

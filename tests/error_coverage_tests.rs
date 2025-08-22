@@ -213,8 +213,9 @@ fn test_error_response_serialization() {
         message: "The provided input is invalid".to_string(),
     };
 
-    let json = serde_json::to_string(&error_response).unwrap();
-    let deserialized: ErrorResponse = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&error_response).expect("Test data should be valid");
+    let deserialized: ErrorResponse =
+        serde_json::from_str(&json).expect("Test data should be valid");
 
     assert_eq!(error_response.error_code, deserialized.error_code);
     assert_eq!(error_response.message, deserialized.message);

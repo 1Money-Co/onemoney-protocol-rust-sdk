@@ -50,8 +50,9 @@ fn test_checkpoint_number_various_values() {
         let checkpoint_number = CheckpointNumber { number };
 
         // Test serialization
-        let json = serde_json::to_string(&checkpoint_number).unwrap();
-        let deserialized: CheckpointNumber = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&checkpoint_number).expect("Test data should be valid");
+        let deserialized: CheckpointNumber =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(checkpoint_number.number, deserialized.number);
 
@@ -90,13 +91,17 @@ fn test_checkpoint_with_various_sizes() {
     };
 
     // Test serialization with size
-    let json_with_size = serde_json::to_string(&checkpoint_with_size).unwrap();
-    let deserialized_with_size: Checkpoint = serde_json::from_str(&json_with_size).unwrap();
+    let json_with_size =
+        serde_json::to_string(&checkpoint_with_size).expect("Test data should be valid");
+    let deserialized_with_size: Checkpoint =
+        serde_json::from_str(&json_with_size).expect("Test data should be valid");
     assert_eq!(checkpoint_with_size.size, deserialized_with_size.size);
 
     // Test serialization without size
-    let json_without_size = serde_json::to_string(&checkpoint_without_size).unwrap();
-    let deserialized_without_size: Checkpoint = serde_json::from_str(&json_without_size).unwrap();
+    let json_without_size =
+        serde_json::to_string(&checkpoint_without_size).expect("Test data should be valid");
+    let deserialized_without_size: Checkpoint =
+        serde_json::from_str(&json_without_size).expect("Test data should be valid");
     assert_eq!(checkpoint_without_size.size, deserialized_without_size.size);
     assert!(deserialized_without_size.size.is_none());
 }
@@ -162,8 +167,8 @@ fn test_checkpoint_all_fields_serialization() {
     };
 
     // Test that all fields serialize and deserialize correctly
-    let json = serde_json::to_string(&checkpoint).unwrap();
-    let deserialized: Checkpoint = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&checkpoint).expect("Test data should be valid");
+    let deserialized: Checkpoint = serde_json::from_str(&json).expect("Test data should be valid");
 
     assert_eq!(checkpoint.hash, deserialized.hash);
     assert_eq!(checkpoint.parent_hash, deserialized.parent_hash);
@@ -208,8 +213,8 @@ fn test_checkpoint_edge_case_values() {
     };
 
     // Should still serialize and deserialize correctly
-    let json = serde_json::to_string(&checkpoint).unwrap();
-    let deserialized: Checkpoint = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&checkpoint).expect("Test data should be valid");
+    let deserialized: Checkpoint = serde_json::from_str(&json).expect("Test data should be valid");
 
     assert_eq!(checkpoint.hash, deserialized.hash);
     assert_eq!(checkpoint.number, deserialized.number);

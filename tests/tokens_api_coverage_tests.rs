@@ -47,7 +47,8 @@ fn test_token_api_path_construction() {
 
 #[test]
 fn test_token_metadata_path_construction() {
-    let token_address = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let token_address = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
     let path = api_path(&format!("{}?token={}", TOKEN_METADATA, token_address));
 
     assert!(path.contains("/v1/tokens/token_metadata"));
@@ -57,8 +58,10 @@ fn test_token_metadata_path_construction() {
 
 #[test]
 fn test_token_mint_payload_comprehensive() {
-    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     let payload = TokenMintPayload {
         recent_epoch: 100,
@@ -80,8 +83,9 @@ fn test_token_mint_payload_comprehensive() {
     assert_eq!(payload.token, token);
 
     // Test serialization
-    let json = serde_json::to_string(&payload).unwrap();
-    let deserialized: TokenMintPayload = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&payload).expect("Test data should be valid");
+    let deserialized: TokenMintPayload =
+        serde_json::from_str(&json).expect("Test data should be valid");
     assert_eq!(payload.recent_epoch, deserialized.recent_epoch);
     assert_eq!(payload.recipient, deserialized.recipient);
     assert_eq!(payload.token, deserialized.token);
@@ -97,8 +101,10 @@ fn test_token_mint_payload_comprehensive() {
 
 #[test]
 fn test_token_burn_payload_comprehensive() {
-    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     let payload = TokenBurnPayload {
         recent_epoch: 150,
@@ -111,8 +117,9 @@ fn test_token_burn_payload_comprehensive() {
     };
 
     // Test serialization/deserialization
-    let json = serde_json::to_string(&payload).unwrap();
-    let deserialized: TokenBurnPayload = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&payload).expect("Test data should be valid");
+    let deserialized: TokenBurnPayload =
+        serde_json::from_str(&json).expect("Test data should be valid");
     assert_eq!(payload.recent_epoch, deserialized.recent_epoch);
     assert_eq!(payload.recent_checkpoint, deserialized.recent_checkpoint);
     assert_eq!(payload.chain_id, deserialized.chain_id);
@@ -128,9 +135,10 @@ fn test_token_burn_payload_comprehensive() {
 
 #[test]
 fn test_token_authority_payload_comprehensive() {
-    let authority_address =
-        Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let authority_address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     // Test Grant action
     let grant_payload = TokenAuthorityPayload {
@@ -180,7 +188,7 @@ fn test_token_authority_payload_comprehensive() {
             value: U256::from(1000000000000000000u64),
         };
 
-        let json = serde_json::to_string(&payload).unwrap();
+        let json = serde_json::to_string(&payload).expect("Test data should be valid");
         assert!(json.contains("Grant"));
 
         let hash = payload.signature_hash();
@@ -188,8 +196,9 @@ fn test_token_authority_payload_comprehensive() {
     }
 
     // Test serialization
-    let json = serde_json::to_string(&grant_payload).unwrap();
-    let deserialized: TokenAuthorityPayload = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&grant_payload).expect("Test data should be valid");
+    let deserialized: TokenAuthorityPayload =
+        serde_json::from_str(&json).expect("Test data should be valid");
     assert_eq!(grant_payload.action, deserialized.action);
     assert_eq!(grant_payload.authority_type, deserialized.authority_type);
     assert_eq!(
@@ -205,7 +214,8 @@ fn test_token_authority_payload_comprehensive() {
 
 #[test]
 fn test_token_pause_payload_comprehensive() {
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     // Test Pause action
     let pause_payload = TokenPausePayload {
@@ -229,8 +239,9 @@ fn test_token_pause_payload_comprehensive() {
 
     // Test serialization for both actions
     for payload in [&pause_payload, &unpause_payload] {
-        let json = serde_json::to_string(payload).unwrap();
-        let deserialized: TokenPausePayload = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(payload).expect("Test data should be valid");
+        let deserialized: TokenPausePayload =
+            serde_json::from_str(&json).expect("Test data should be valid");
         assert_eq!(payload.action, deserialized.action);
         assert_eq!(payload.token, deserialized.token);
         assert_eq!(payload.recent_epoch, deserialized.recent_epoch);
@@ -251,8 +262,10 @@ fn test_token_pause_payload_comprehensive() {
 
 #[test]
 fn test_token_blacklist_payload_comprehensive() {
-    let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     // Test Add action
     let add_payload = TokenBlacklistPayload {
@@ -278,8 +291,9 @@ fn test_token_blacklist_payload_comprehensive() {
 
     // Test serialization for both actions
     for payload in [&add_payload, &remove_payload] {
-        let json = serde_json::to_string(payload).unwrap();
-        let deserialized: TokenBlacklistPayload = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(payload).expect("Test data should be valid");
+        let deserialized: TokenBlacklistPayload =
+            serde_json::from_str(&json).expect("Test data should be valid");
         assert_eq!(payload.action, deserialized.action);
         assert_eq!(payload.address, deserialized.address);
         assert_eq!(payload.token, deserialized.token);
@@ -301,8 +315,10 @@ fn test_token_blacklist_payload_comprehensive() {
 
 #[test]
 fn test_token_whitelist_payload_comprehensive() {
-    let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     // Test Add action
     let add_payload = TokenWhitelistPayload {
@@ -328,8 +344,9 @@ fn test_token_whitelist_payload_comprehensive() {
 
     // Test serialization for both actions
     for payload in [&add_payload, &remove_payload] {
-        let json = serde_json::to_string(payload).unwrap();
-        let deserialized: TokenWhitelistPayload = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(payload).expect("Test data should be valid");
+        let deserialized: TokenWhitelistPayload =
+            serde_json::from_str(&json).expect("Test data should be valid");
         assert_eq!(payload.action, deserialized.action);
         assert_eq!(payload.address, deserialized.address);
         assert_eq!(payload.token, deserialized.token);
@@ -351,7 +368,8 @@ fn test_token_whitelist_payload_comprehensive() {
 
 #[test]
 fn test_token_metadata_update_payload_comprehensive() {
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     let payload = TokenMetadataUpdatePayload {
         recent_epoch: 100,
@@ -374,8 +392,9 @@ fn test_token_metadata_update_payload_comprehensive() {
     };
 
     // Test serialization/deserialization
-    let json = serde_json::to_string(&payload).unwrap();
-    let deserialized: TokenMetadataUpdatePayload = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&payload).expect("Test data should be valid");
+    let deserialized: TokenMetadataUpdatePayload =
+        serde_json::from_str(&json).expect("Test data should be valid");
     assert_eq!(payload.token, deserialized.token);
     assert_eq!(payload.name, deserialized.name);
     assert_eq!(payload.uri, deserialized.uri);
@@ -400,8 +419,9 @@ fn test_token_metadata_update_payload_comprehensive() {
         additional_metadata: vec![],
     };
 
-    let json2 = serde_json::to_string(&minimal_payload).unwrap();
-    let deserialized2: TokenMetadataUpdatePayload = serde_json::from_str(&json2).unwrap();
+    let json2 = serde_json::to_string(&minimal_payload).expect("Test data should be valid");
+    let deserialized2: TokenMetadataUpdatePayload =
+        serde_json::from_str(&json2).expect("Test data should be valid");
     assert_eq!(minimal_payload.additional_metadata.len(), 0);
     assert_eq!(deserialized2.additional_metadata.len(), 0);
 
@@ -413,15 +433,18 @@ fn test_token_metadata_update_payload_comprehensive() {
 
 #[test]
 fn test_mint_info_response_structure() {
-    let master_authority = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
-    let master_mint_burn = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+    let master_authority = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
+    let master_mint_burn = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
 
     let mint_info = MintInfo {
         symbol: "TEST".to_string(),
         master_authority,
         master_mint_burn_authority: master_mint_burn,
         mint_burn_authorities: vec![MinterAllowance {
-            minter: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12").unwrap(),
+            minter: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")
+                .expect("Test data should be valid"),
             allowance: "1000000000000000000000".to_string(),
         }],
         pause_authorities: vec![master_authority],
@@ -444,8 +467,8 @@ fn test_mint_info_response_structure() {
     };
 
     // Test serialization/deserialization
-    let json = serde_json::to_string(&mint_info).unwrap();
-    let deserialized: MintInfo = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&mint_info).expect("Test data should be valid");
+    let deserialized: MintInfo = serde_json::from_str(&json).expect("Test data should be valid");
     assert_eq!(mint_info.symbol, deserialized.symbol);
     assert_eq!(mint_info.master_authority, deserialized.master_authority);
     assert_eq!(mint_info.decimals, deserialized.decimals);
@@ -462,8 +485,10 @@ fn test_mint_info_response_structure() {
 
 #[test]
 fn test_token_requests_serialization() {
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
-    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
+    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
     let signature = Signature {
         r: U256::from(12345u64),
         s: U256::from(67890u64),
@@ -484,7 +509,7 @@ fn test_token_requests_serialization() {
         signature: signature.clone(),
     };
 
-    let json = serde_json::to_string(&mint_request).unwrap();
+    let json = serde_json::to_string(&mint_request).expect("Test data should be valid");
     assert!(json.contains("recent_epoch"));
     assert!(json.contains("100"));
     assert!(json.contains("signature"));
@@ -503,7 +528,7 @@ fn test_token_requests_serialization() {
         signature: signature.clone(),
     };
 
-    let json2 = serde_json::to_string(&burn_request).unwrap();
+    let json2 = serde_json::to_string(&burn_request).expect("Test data should be valid");
     assert!(json2.contains("recent_epoch"));
     assert!(json2.contains("signature"));
 }
@@ -527,8 +552,10 @@ fn test_client_creation_for_token_operations() {
 
 #[test]
 fn test_payload_edge_cases() {
-    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
-    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+    let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+        .expect("Test data should be valid");
+    let recipient = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+        .expect("Test data should be valid");
 
     // Test with zero values
     let zero_payload = TokenMintPayload {

@@ -172,7 +172,7 @@ jobs:
             fi
 
             if [ $attempt -eq $MAX_ATTEMPTS ]; then
-              echo "💥 Failed to verify crate availability after $MAX_ATTEMPTS attempts over ~$((MAX_ATTEMPTS * BASE_DELAY / 60)) minutes"
+              echo "Failed to verify crate availability after $MAX_ATTEMPTS attempts over ~$((MAX_ATTEMPTS * BASE_DELAY / 60)) minutes"
               echo "This might indicate:"
               echo "  - Slow crates.io indexing (normal during high traffic)"
               echo "  - Publishing failure"

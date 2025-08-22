@@ -11,21 +11,23 @@ fn test_checkpoint_transactions_full() {
     // Create a transaction for testing
     let transaction = Transaction {
         hash: B256::from_str("0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777")
-            .unwrap(),
+            .expect("Test data should be valid"),
         checkpoint_hash: Some(
             B256::from_str("0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f")
-                .unwrap(),
+                .expect("Test data should be valid"),
         ),
         checkpoint_number: Some(1500),
         transaction_index: Some(0),
         epoch: 100,
         checkpoint: 200,
         chain_id: 1212101,
-        from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+        from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid"),
         nonce: 5,
         data: TxPayload::TokenTransfer {
             value: "1000000000000000000".to_string(),
-            to: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+            to: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                .expect("Test data should be valid"),
             token: None,
         },
         signature: Signature {
@@ -38,8 +40,9 @@ fn test_checkpoint_transactions_full() {
     let checkpoint_transactions = CheckpointTransactions::Full(vec![transaction.clone()]);
 
     // Test serialization
-    let json = serde_json::to_string(&checkpoint_transactions).unwrap();
-    let deserialized: CheckpointTransactions = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&checkpoint_transactions).expect("Test data should be valid");
+    let deserialized: CheckpointTransactions =
+        serde_json::from_str(&json).expect("Test data should be valid");
 
     match deserialized {
         CheckpointTransactions::Full(transactions) => {
@@ -66,8 +69,9 @@ fn test_checkpoint_transactions_hashes() {
     let checkpoint_transactions = CheckpointTransactions::Hashes(hashes.clone());
 
     // Test serialization
-    let json = serde_json::to_string(&checkpoint_transactions).unwrap();
-    let deserialized: CheckpointTransactions = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&checkpoint_transactions).expect("Test data should be valid");
+    let deserialized: CheckpointTransactions =
+        serde_json::from_str(&json).expect("Test data should be valid");
 
     match deserialized {
         CheckpointTransactions::Hashes(deserialized_hashes) => {
@@ -86,22 +90,25 @@ fn test_checkpoint_transactions_hashes() {
 fn test_checkpoint_full_structure() {
     let transaction = Transaction {
         hash: B256::from_str("0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777")
-            .unwrap(),
+            .expect("Test data should be valid"),
         checkpoint_hash: Some(
             B256::from_str("0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f")
-                .unwrap(),
+                .expect("Test data should be valid"),
         ),
         checkpoint_number: Some(1500),
         transaction_index: Some(0),
         epoch: 100,
         checkpoint: 200,
         chain_id: 1212101,
-        from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+        from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid"),
         nonce: 5,
         data: TxPayload::TokenMint {
             value: "1000000000000000000".to_string(),
-            address: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
-            token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12").unwrap(),
+            address: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                .expect("Test data should be valid"),
+            token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")
+                .expect("Test data should be valid"),
         },
         signature: Signature {
             r: U256::from(12345u64),
@@ -128,8 +135,8 @@ fn test_checkpoint_full_structure() {
     };
 
     // Test serialization
-    let json = serde_json::to_string(&checkpoint).unwrap();
-    let deserialized: Checkpoint = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&checkpoint).expect("Test data should be valid");
+    let deserialized: Checkpoint = serde_json::from_str(&json).expect("Test data should be valid");
 
     assert_eq!(checkpoint.hash, deserialized.hash);
     assert_eq!(checkpoint.parent_hash, deserialized.parent_hash);
@@ -209,8 +216,9 @@ fn test_checkpoint_header_structure() {
     };
 
     // Test serialization
-    let json = serde_json::to_string(&header).unwrap();
-    let deserialized: CheckpointHeader = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&header).expect("Test data should be valid");
+    let deserialized: CheckpointHeader =
+        serde_json::from_str(&json).expect("Test data should be valid");
 
     assert_eq!(header.hash, deserialized.hash);
     assert_eq!(header.parent_hash, deserialized.parent_hash);
@@ -234,8 +242,9 @@ fn test_checkpoint_number_structure() {
     let checkpoint_num = CheckpointNumber { number: 12345 };
 
     // Test serialization
-    let json = serde_json::to_string(&checkpoint_num).unwrap();
-    let deserialized: CheckpointNumber = serde_json::from_str(&json).unwrap();
+    let json = serde_json::to_string(&checkpoint_num).expect("Test data should be valid");
+    let deserialized: CheckpointNumber =
+        serde_json::from_str(&json).expect("Test data should be valid");
 
     assert_eq!(checkpoint_num.number, deserialized.number);
 
@@ -260,18 +269,20 @@ fn test_checkpoint_transactions_empty() {
 fn test_checkpoint_multiple_transactions() {
     let tx1 = Transaction {
         hash: B256::from_str("0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777")
-            .unwrap(),
+            .expect("Test data should be valid"),
         checkpoint_hash: None,   // Test without checkpoint hash
         checkpoint_number: None, // Test without checkpoint number
         transaction_index: None, // Test without transaction index
         epoch: 100,
         checkpoint: 200,
         chain_id: 1212101,
-        from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+        from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid"),
         nonce: 5,
         data: TxPayload::TokenTransfer {
             value: "1000000000000000000".to_string(),
-            to: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+            to: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                .expect("Test data should be valid"),
             token: None,
         },
         signature: Signature::default(),
@@ -279,22 +290,25 @@ fn test_checkpoint_multiple_transactions() {
 
     let tx2 = Transaction {
         hash: B256::from_str("0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f")
-            .unwrap(),
+            .expect("Test data should be valid"),
         checkpoint_hash: Some(
             B256::from_str("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")
-                .unwrap(),
+                .expect("Test data should be valid"),
         ),
         checkpoint_number: Some(1500),
         transaction_index: Some(1),
         epoch: 101,
         checkpoint: 201,
         chain_id: 1212101,
-        from: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        from: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid"),
         nonce: 10,
         data: TxPayload::TokenBurn {
             value: "500000000000000000".to_string(),
-            address: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
-            token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12").unwrap(),
+            address: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .expect("Test data should be valid"),
+            token: Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")
+                .expect("Test data should be valid"),
         },
         signature: Signature {
             r: U256::from(54321u64),
@@ -335,7 +349,10 @@ fn test_checkpoint_multiple_transactions() {
     assert!(checkpoint_display_str.contains(&format!("{}", tx2.hash)));
 
     // Test that optional fields are handled correctly
-    assert!(checkpoint_display_str.contains(&format!("{}", tx2.checkpoint_hash.unwrap())));
+    assert!(checkpoint_display_str.contains(&format!(
+        "{}",
+        tx2.checkpoint_hash.expect("Test data should be valid")
+    )));
 }
 
 #[test]
@@ -344,7 +361,8 @@ fn test_serde_untagged_enum() {
 
     // JSON with array of hashes (should deserialize as Hashes)
     let hashes_json = r#"["0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777", "0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f"]"#;
-    let parsed: CheckpointTransactions = serde_json::from_str(hashes_json).unwrap();
+    let parsed: CheckpointTransactions =
+        serde_json::from_str(hashes_json).expect("Test data should be valid");
 
     match parsed {
         CheckpointTransactions::Hashes(hashes) => {

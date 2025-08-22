@@ -43,8 +43,9 @@ mod tests {
         // Test that ChainIdResponse can be serialized/deserialized
         let chain_id_response = ChainIdResponse { chain_id: 1212101 };
 
-        let json = serde_json::to_string(&chain_id_response).unwrap();
-        let deserialized: ChainIdResponse = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&chain_id_response).expect("Test data should be valid");
+        let deserialized: ChainIdResponse =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(chain_id_response.chain_id, deserialized.chain_id);
     }

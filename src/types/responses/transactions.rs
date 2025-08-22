@@ -363,8 +363,9 @@ mod tests {
             fee: "1000000000000000000".to_string(),
         };
 
-        let json = serde_json::to_string(&fee_estimate).unwrap();
-        let deserialized: FeeEstimate = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&fee_estimate).expect("Test data should be valid");
+        let deserialized: FeeEstimate =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(fee_estimate.fee, deserialized.fee);
     }
@@ -385,11 +386,11 @@ mod tests {
             hash: B256::from_str(
                 "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
             )
-            .unwrap(),
+            .expect("Test data should be valid"),
         };
 
-        let json = serde_json::to_string(&hash).unwrap();
-        let deserialized: Hash = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&hash).expect("Test data should be valid");
+        let deserialized: Hash = serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(hash.hash, deserialized.hash);
     }
@@ -400,7 +401,7 @@ mod tests {
             hash: B256::from_str(
                 "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
             )
-            .unwrap(),
+            .expect("Test data should be valid"),
         };
 
         let display_str = format!("{}", hash);
@@ -417,12 +418,14 @@ mod tests {
             hash: B256::from_str(
                 "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
             )
-            .unwrap(),
-            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+            .expect("Test data should be valid"),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                .expect("Test data should be valid"),
         };
 
-        let json = serde_json::to_string(&hash_with_token).unwrap();
-        let deserialized: HashWithToken = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&hash_with_token).expect("Test data should be valid");
+        let deserialized: HashWithToken =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(hash_with_token.hash, deserialized.hash);
         assert_eq!(hash_with_token.token, deserialized.token);
@@ -434,26 +437,28 @@ mod tests {
             hash: B256::from_str(
                 "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
             )
-            .unwrap(),
+            .expect("Test data should be valid"),
             checkpoint_hash: Some(
                 B256::from_str(
                     "0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f",
                 )
-                .unwrap(),
+                .expect("Test data should be valid"),
             ),
             checkpoint_number: Some(1500),
             transaction_index: Some(0),
             epoch: 100,
             checkpoint: 200,
             chain_id: 1212101,
-            from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .expect("Test data should be valid"),
             nonce: 5,
             data: TxPayload::default(),
             signature: crate::Signature::default(),
         };
 
-        let json = serde_json::to_string(&transaction).unwrap();
-        let deserialized: Transaction = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&transaction).expect("Test data should be valid");
+        let deserialized: Transaction =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(transaction.hash, deserialized.hash);
         assert_eq!(transaction.epoch, deserialized.epoch);
@@ -467,23 +472,28 @@ mod tests {
             transaction_hash: B256::from_str(
                 "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
             )
-            .unwrap(),
+            .expect("Test data should be valid"),
             transaction_index: Some(0),
             checkpoint_hash: Some(
                 B256::from_str(
                     "0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f",
                 )
-                .unwrap(),
+                .expect("Test data should be valid"),
             ),
             checkpoint_number: Some(1500),
             fee_used: 1000000,
-            from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
-            to: Some(Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap()),
+            from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .expect("Test data should be valid"),
+            to: Some(
+                Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                    .expect("Test data should be valid"),
+            ),
             token_address: None,
         };
 
-        let json = serde_json::to_string(&receipt).unwrap();
-        let deserialized: TransactionReceipt = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&receipt).expect("Test data should be valid");
+        let deserialized: TransactionReceipt =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(receipt.success, deserialized.success);
         assert_eq!(receipt.transaction_hash, deserialized.transaction_hash);
@@ -496,13 +506,14 @@ mod tests {
             symbol: "TEST".to_string(),
             decimals: 18,
             master_authority: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
-                .unwrap(),
+                .expect("Test data should be valid"),
             is_private: false,
             name: "Test Token".to_string(),
         };
 
-        let json = serde_json::to_string(&payload).unwrap();
-        let deserialized: TxPayload = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&payload).expect("Test data should be valid");
+        let deserialized: TxPayload =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         match deserialized {
             TxPayload::TokenCreate {
@@ -516,7 +527,8 @@ mod tests {
                 assert_eq!(decimals, 18);
                 assert_eq!(
                     master_authority,
-                    Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap()
+                    Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                        .expect("Test data should be valid")
                 );
                 assert!(!is_private);
                 assert_eq!(name, "Test Token");
@@ -529,23 +541,32 @@ mod tests {
     fn test_tx_payload_token_transfer_serialization() {
         let payload = TxPayload::TokenTransfer {
             value: "1000000000000000000".to_string(),
-            to: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
-            token: Some(Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap()),
+            to: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .expect("Test data should be valid"),
+            token: Some(
+                Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                    .expect("Test data should be valid"),
+            ),
         };
 
-        let json = serde_json::to_string(&payload).unwrap();
-        let deserialized: TxPayload = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&payload).expect("Test data should be valid");
+        let deserialized: TxPayload =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         match deserialized {
             TxPayload::TokenTransfer { value, to, token } => {
                 assert_eq!(value, "1000000000000000000");
                 assert_eq!(
                     to,
-                    Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap()
+                    Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                        .expect("Test data should be valid")
                 );
                 assert_eq!(
                     token,
-                    Some(Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap())
+                    Some(
+                        Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                            .expect("Test data should be valid")
+                    )
                 );
             }
             _ => panic!("Wrong payload type"),
@@ -556,12 +577,14 @@ mod tests {
     fn test_tx_payload_is_raw() {
         let raw_payload = TxPayload::Raw {
             input: Bytes::from(vec![1, 2, 3, 4]),
-            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                .expect("Test data should be valid"),
         };
 
         let transfer_payload = TxPayload::TokenTransfer {
             value: "1000000000000000000".to_string(),
-            to: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            to: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .expect("Test data should be valid"),
             token: None,
         };
 
