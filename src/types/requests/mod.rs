@@ -1,5 +1,6 @@
 //! API request type definitions.
 
+pub mod authorities;
 pub mod tokens;
 pub mod transactions;
 

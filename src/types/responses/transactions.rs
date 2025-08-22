@@ -1,33 +1,25 @@
 //! Transaction-related API response types.
 
-use alloy_primitives::{Address, B256, Bytes, U256};
+use alloy_primitives::{Address, B256, Bytes};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 use super::{accounts::Nonce, tokens::TokenMetadata};
-use crate::api_signature::RestSignature;
 
 /// Chain ID type from L1 primitives
 pub type ChainId = u64;
 
 /// Fee estimation result.
-#[derive(Debug, Clone)]
+/// Matches L1 server's EstimateFee structure: { "fee": String }
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FeeEstimate {
-    /// Estimated gas limit.
-    pub gas_limit: u64,
-    /// Estimated gas price.
-    pub gas_price: U256,
-    /// Total estimated fee.
-    pub total_fee: U256,
+    /// Estimated fee amount as string.
+    pub fee: String,
 }
 
 impl Display for FeeEstimate {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        write!(
-            f,
-            "Fee Estimate: {} gas @ {} per unit = {} total",
-            self.gas_limit, self.gas_price, self.total_fee
-        )
+        write!(f, "Fee Estimate: {}", self.fee)
     }
 }
 
@@ -92,7 +84,7 @@ pub struct Transaction {
 
     /// All _flattened_ fields of the transaction signature.
     /// Note: this is an option so special transaction types without a signature (e.g. <https://github.com/ethereum-optimism/optimism/blob/0bf643c4147b43cd6f25a759d331ef3a2a61a2a3/specs/deposits.md#the-deposited-transaction-type>) can be supported.
-    pub signature: RestSignature,
+    pub signature: crate::Signature,
 }
 
 impl Display for Transaction {
@@ -110,26 +102,27 @@ impl Display for Transaction {
 }
 
 /// Transaction receipt response.
+/// Matches L1 server's TransactionReceipt structure with proper types.
 #[derive(Debug, Clone, Deserialize)]
 pub struct TransactionReceipt {
     /// If transaction is executed successfully.
     pub success: bool,
     /// Transaction Hash.
-    pub transaction_hash: String,
+    pub transaction_hash: B256,
     /// Index within the block.
     pub transaction_index: Option<u64>,
     /// Hash of the checkpoint this transaction was included within.
-    pub checkpoint_hash: Option<String>,
+    pub checkpoint_hash: Option<B256>,
     /// Number of the checkpoint this transaction was included within.
     pub checkpoint_number: Option<u64>,
     /// Fee used.
     pub fee_used: u128,
     /// Address of the sender.
-    pub from: String,
+    pub from: Address,
     /// Address of the receiver. None when its a contract creation transaction.
-    pub to: Option<String>,
+    pub to: Option<Address>,
     /// Token address created, or None if not a deployment.
-    pub token_address: Option<String>,
+    pub token_address: Option<Address>,
 }
 
 impl Display for TransactionReceipt {

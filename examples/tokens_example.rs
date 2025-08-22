@@ -399,7 +399,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             print_detailed_error("Could not update token metadata", &e);
         }
     }
-    sleep(Duration::from_secs(1)).await;
+    sleep(Duration::from_secs(2)).await;
 
     println!("\nToken Operations Example Completed!");
     println!("===================================");
@@ -423,10 +423,154 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("   - POST /v1/tokens/manage_whitelist - Manage token whitelist");
     println!("   - POST /v1/tokens/update_metadata - Update token metadata");
 
+    // 11. Query Latest Checkpoint with Full Transaction Details
+    println!("\n11. Query Latest Checkpoint with Full Transaction Details");
+    println!("========================================================");
+
+    // Get the latest checkpoint number
+    let latest_checkpoint_number = match client.get_checkpoint_number().await {
+        Ok(checkpoint_number) => {
+            println!("Latest {}", checkpoint_number);
+            checkpoint_number.number
+        }
+        Err(e) => {
+            print_detailed_error("Could not get latest checkpoint number", &e);
+            return Ok(());
+        }
+    };
+
+    // Get the checkpoint with full transaction details
+    match client
+        .get_checkpoint_by_number(latest_checkpoint_number, true)
+        .await
+    {
+        Ok(checkpoint) => {
+            println!("\nLatest Checkpoint with Full Transaction Details:");
+            println!("===============================================");
+            println!("{}", checkpoint);
+
+            // Analyze token operations in this checkpoint
+            match &checkpoint.transactions {
+                onemoney_protocol::CheckpointTransactions::Full(transactions) => {
+                    let mut token_operations = 0;
+                    let mut mint_operations = 0;
+                    let mut burn_operations = 0;
+                    let mut transfer_operations = 0;
+                    let mut authority_operations = 0;
+                    let mut pause_operations = 0;
+                    let mut blacklist_operations = 0;
+                    let mut whitelist_operations = 0;
+                    let mut metadata_operations = 0;
+                    let mut create_operations = 0;
+
+                    for tx in transactions {
+                        match &tx.data {
+                            onemoney_protocol::TxPayload::TokenCreate { .. } => {
+                                token_operations += 1;
+                                create_operations += 1;
+                            }
+                            onemoney_protocol::TxPayload::TokenTransfer { .. } => {
+                                token_operations += 1;
+                                transfer_operations += 1;
+                            }
+                            onemoney_protocol::TxPayload::TokenMint { .. } => {
+                                token_operations += 1;
+                                mint_operations += 1;
+                            }
+                            onemoney_protocol::TxPayload::TokenBurn { .. } => {
+                                token_operations += 1;
+                                burn_operations += 1;
+                            }
+                            onemoney_protocol::TxPayload::TokenGrantAuthority { .. } => {
+                                token_operations += 1;
+                                authority_operations += 1;
+                            }
+                            onemoney_protocol::TxPayload::TokenRevokeAuthority { .. } => {
+                                token_operations += 1;
+                                authority_operations += 1;
+                            }
+                            onemoney_protocol::TxPayload::TokenPause { .. } => {
+                                token_operations += 1;
+                                pause_operations += 1;
+                            }
+                            onemoney_protocol::TxPayload::TokenUnpause { .. } => {
+                                token_operations += 1;
+                                pause_operations += 1;
+                            }
+                            onemoney_protocol::TxPayload::TokenBlacklistAccount { .. } => {
+                                token_operations += 1;
+                                blacklist_operations += 1;
+                            }
+                            onemoney_protocol::TxPayload::TokenWhitelistAccount { .. } => {
+                                token_operations += 1;
+                                whitelist_operations += 1;
+                            }
+                            onemoney_protocol::TxPayload::TokenUpdateMetadata { .. } => {
+                                token_operations += 1;
+                                metadata_operations += 1;
+                            }
+                            _ => {
+                                // Other transaction types (governance, raw, etc.)
+                            }
+                        }
+                    }
+
+                    println!("\nToken Operations Analysis:");
+                    println!("=========================");
+                    println!("Total transactions in checkpoint: {}", transactions.len());
+                    println!("Total token operations: {}", token_operations);
+                    if create_operations > 0 {
+                        println!("  - Token creation operations: {}", create_operations);
+                    }
+                    if transfer_operations > 0 {
+                        println!("  - Token transfer operations: {}", transfer_operations);
+                    }
+                    if mint_operations > 0 {
+                        println!("  - Token mint operations: {}", mint_operations);
+                    }
+                    if burn_operations > 0 {
+                        println!("  - Token burn operations: {}", burn_operations);
+                    }
+                    if authority_operations > 0 {
+                        println!("  - Token authority operations: {}", authority_operations);
+                    }
+                    if pause_operations > 0 {
+                        println!("  - Token pause/unpause operations: {}", pause_operations);
+                    }
+                    if blacklist_operations > 0 {
+                        println!("  - Token blacklist operations: {}", blacklist_operations);
+                    }
+                    if whitelist_operations > 0 {
+                        println!("  - Token whitelist operations: {}", whitelist_operations);
+                    }
+                    if metadata_operations > 0 {
+                        println!("  - Token metadata operations: {}", metadata_operations);
+                    }
+
+                    if token_operations == 0 {
+                        println!("  No token operations found in this checkpoint.");
+                        println!(
+                            "  This is normal - checkpoints may contain other transaction types."
+                        );
+                    }
+                }
+                onemoney_protocol::CheckpointTransactions::Hashes(_) => {
+                    println!(
+                        "  Checkpoint contains only transaction hashes (should not happen with full=true)"
+                    );
+                }
+            }
+        }
+        Err(e) => {
+            print_detailed_error("Could not get checkpoint with full details", &e);
+        }
+    }
+
     println!("\nNext steps:");
     println!("   - Review transactions_example.rs for payment operations");
     println!("   - Check accounts_example.rs for account balance queries");
     println!("   - See checkpoints_example.rs for blockchain state info");
+    println!("   - Examine the checkpoint data structure above to verify token operation display");
 
     Ok(())
 }

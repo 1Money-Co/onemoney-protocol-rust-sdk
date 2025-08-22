@@ -59,14 +59,66 @@ pub struct Checkpoint {
 
 impl Display for Checkpoint {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        write!(
-            f,
-            "Checkpoint #{}: {} (parent: {}, timestamp: {})",
-            self.number, self.hash, self.parent_hash, self.timestamp
-        )?;
+        writeln!(f, "Checkpoint #{}:", self.number)?;
+        writeln!(f, "  Hash: {}", self.hash)?;
+        writeln!(f, "  Parent Hash: {}", self.parent_hash)?;
+        writeln!(f, "  State Root: {}", self.state_root)?;
+        writeln!(f, "  Transactions Root: {}", self.transactions_root)?;
+        writeln!(f, "  Receipts Root: {}", self.receipts_root)?;
+        writeln!(f, "  Timestamp: {}", self.timestamp)?;
+        writeln!(f, "  Extra Data: {}", self.extra_data)?;
+
         if let Some(size) = self.size {
-            write!(f, " size: {} bytes", size)?;
+            writeln!(f, "  Size: {} bytes", size)?;
         }
+
+        writeln!(f, "  Transactions:")?;
+        match &self.transactions {
+            CheckpointTransactions::Full(transactions) => {
+                writeln!(
+                    f,
+                    "    Count: {} (full transaction details)",
+                    transactions.len()
+                )?;
+                for (i, tx) in transactions.iter().enumerate() {
+                    writeln!(f, "    Transaction {}:", i + 1)?;
+                    writeln!(f, "      Hash: {}", tx.hash)?;
+                    writeln!(f, "      From: {}", tx.from)?;
+                    writeln!(f, "      Nonce: {}", tx.nonce)?;
+                    writeln!(f, "      Epoch: {}", tx.epoch)?;
+                    writeln!(f, "      Checkpoint: {}", tx.checkpoint)?;
+                    writeln!(f, "      Chain ID: {}", tx.chain_id)?;
+
+                    if let Some(checkpoint_hash) = &tx.checkpoint_hash {
+                        writeln!(f, "      Checkpoint Hash: {}", checkpoint_hash)?;
+                    }
+                    if let Some(checkpoint_number) = tx.checkpoint_number {
+                        writeln!(f, "      Checkpoint Number: {}", checkpoint_number)?;
+                    }
+                    if let Some(transaction_index) = tx.transaction_index {
+                        writeln!(f, "      Transaction Index: {}", transaction_index)?;
+                    }
+
+                    writeln!(f, "      Signature:")?;
+                    writeln!(f, "        R: {}", tx.signature.r)?;
+                    writeln!(f, "        S: {}", tx.signature.s)?;
+                    writeln!(f, "        V: {}", tx.signature.v)?;
+
+                    writeln!(f, "      Payload: {:?}", tx.data)?;
+
+                    if i < transactions.len() - 1 {
+                        writeln!(f)?;
+                    }
+                }
+            }
+            CheckpointTransactions::Hashes(hashes) => {
+                writeln!(f, "    Count: {} (hashes only)", hashes.len())?;
+                for (i, hash) in hashes.iter().enumerate() {
+                    writeln!(f, "    {}: {}", i + 1, hash)?;
+                }
+            }
+        }
+
         Ok(())
     }
 }

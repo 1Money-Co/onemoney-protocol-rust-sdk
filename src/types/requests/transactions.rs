@@ -100,12 +100,13 @@ pub struct PaymentRequest {
 }
 
 /// Fee estimation request.
+/// Matches L1 server's EstimateFeeRequest structure with string query parameters.
 #[derive(Debug, Clone, Serialize)]
 pub struct FeeEstimateRequest {
-    /// From address.
-    pub from: Address,
-    /// Value to transfer.
-    pub value: Option<U256>,
-    /// Token address (optional).
-    pub token: Option<Address>,
+    /// From address (as string for query parameter).
+    pub from: String,
+    /// Value to transfer (as string for query parameter).
+    pub value: String,
+    /// Token address (optional, as string for query parameter).
+    pub token: Option<String>,
 }

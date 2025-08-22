@@ -5,13 +5,18 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 /// ECDSA signature components.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+///
+/// Compatible with REST API and L1 implementation signature format.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Signature {
-    /// R component of the signature.
+    /// The R field of the signature; the point on the curve.
     pub r: U256,
-    /// S component of the signature.
+    /// The S field of the signature; the point on the curve.
     pub s: U256,
-    /// V component of the signature (recovery ID).
+    /// For EIP-155, EIP-2930 and Blob transactions this is set to the parity (0
+    /// for even, 1 for odd) of the y-value of the secp256k1 signature.
+    ///
+    /// For legacy transactions, this is the recovery id.
     pub v: u64,
 }
 

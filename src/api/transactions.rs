@@ -10,10 +10,8 @@ use crate::requests::{FeeEstimateRequest, PaymentPayload, PaymentRequest};
 use crate::responses::FeeEstimate;
 use crate::responses::TransactionReceipt;
 use crate::{Hash, Result, Transaction};
-use alloy_primitives::U256;
 #[cfg(test)]
 use rlp::encode as rlp_encode;
-use serde::Deserialize;
 
 impl Client {
     /// Send a payment transaction.
@@ -109,21 +107,19 @@ impl Client {
     ///
     /// ```rust,no_run
     /// use onemoney_protocol::{Client, FeeEstimateRequest};
-    /// use alloy_primitives::{Address, U256};
-    /// use std::str::FromStr;
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///     let client = Client::mainnet();
     ///
     ///     let request = FeeEstimateRequest {
-    ///         from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?,
-    ///         value: Some(U256::from(1000000000000000000u64)),
+    ///         from: "0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0".to_string(),
+    ///         value: "1000000000000000000".to_string(),
     ///         token: None,
     ///     };
     ///
     ///     let estimate = client.estimate_fee(request).await?;
-    ///     println!("Estimated fee: {}", estimate.total_fee);
+    ///     println!("Estimated fee: {}", estimate.fee);
     ///
     ///     Ok(())
     /// }
@@ -133,9 +129,7 @@ impl Client {
         let mut query_params = Vec::new();
 
         query_params.push(format!("from={}", request.from));
-        if let Some(value) = request.value {
-            query_params.push(format!("value={}", value));
-        }
+        query_params.push(format!("value={}", request.value));
         if let Some(token) = request.token {
             query_params.push(format!("token={}", token));
         }
@@ -145,23 +139,7 @@ impl Client {
             path.push_str(&query_params.join("&"));
         }
 
-        #[derive(Deserialize)]
-        struct EstimateFeeResponse {
-            fee: String,
-        }
-
-        let response: EstimateFeeResponse = self.get(&api_path(&path)).await?;
-        // Parse the fee string as U256
-        let fee_amount = response
-            .fee
-            .parse::<u128>()
-            .map_err(|_| crate::Error::custom("Invalid fee format from API".to_string()))?;
-
-        Ok(FeeEstimate {
-            gas_limit: 21000, // Default gas limit for simple transactions
-            gas_price: U256::from(fee_amount / 21000), // Calculated gas price
-            total_fee: U256::from(fee_amount),
-        })
+        self.get(&api_path(&path)).await
     }
 
     /// Get transaction receipt by hash.
@@ -201,7 +179,7 @@ impl Client {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloy_primitives::Address;
+    use alloy_primitives::{Address, U256};
     use std::str::FromStr;
 
     #[test]
@@ -223,12 +201,12 @@ mod tests {
     #[test]
     fn test_fee_estimate_request() {
         let request = FeeEstimateRequest {
-            from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
-            value: Some(U256::from(1000000000000000000u64)),
+            from: "0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0".to_string(),
+            value: "1000000000000000000".to_string(),
             token: None,
         };
 
         let json = serde_json::to_string(&request).unwrap();
-        assert!(json.contains("742d35cc6634c0532925a3b8d91d6f4a81b8cbc0"));
+        assert!(json.contains("742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0"));
     }
 }

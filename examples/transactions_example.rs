@@ -61,20 +61,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let amount = U256::from(10000u64); // 1 token
 
     let fee_request = FeeEstimateRequest {
-        from: sender_address,
-        value: Some(amount),
-        token: Some(token_address),
+        from: sender_address.to_string(),
+        value: amount.to_string(),
+        token: Some(token_address.to_string()),
     };
 
-    let estimated_fee = match client.estimate_fee(fee_request).await {
+    let estimated_fee_str = match client.estimate_fee(fee_request).await {
         Ok(fee_estimate) => {
             println!("{}", fee_estimate);
-            fee_estimate.total_fee
+            fee_estimate.fee.clone()
         }
         Err(e) => {
             print_detailed_error("Could not estimate fee", &e);
             println!("   Proceeding without fee check...");
-            U256::from(0u64) // Fallback
+            "0".to_string() // Fallback
         }
     };
 
@@ -87,6 +87,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Ok(token_account) => {
             println!("{}", token_account);
 
+            let estimated_fee = U256::from_str(&estimated_fee_str).unwrap_or(U256::from(0u64));
             let total_required = amount + estimated_fee;
             let available_balance =
                 U256::from_str(&token_account.balance).unwrap_or(U256::from(0u64));
