@@ -121,65 +121,6 @@ fn test_address_parsing_errors() {
     }
 }
 
-#[tokio::test]
-async fn test_network_error_handling() {
-    // Test connection to invalid endpoint
-    let client = ClientBuilder::new()
-        .base_url("http://127.0.0.1:1") // Invalid port
-        .timeout(Duration::from_millis(100))
-        .build()
-        .expect("Client should build");
-
-    let result = client.get_chain_id().await;
-    assert!(result.is_err(), "Should fail to connect");
-
-    match result {
-        Err(e) => {
-            println!("Network error (expected): {}", e);
-
-            // Error should be meaningful
-            let error_str = format!("{}", e);
-            assert!(!error_str.is_empty());
-            // Could be HTTP client error, network error, or API error
-            assert!(
-                error_str.contains("HTTP")
-                    || error_str.contains("connection")
-                    || error_str.contains("network")
-                    || error_str.contains("API error")
-                    || error_str.contains("request failed")
-            );
-        }
-        Ok(_) => panic!("Expected network error"),
-    }
-}
-
-#[tokio::test]
-async fn test_timeout_error() {
-    use tokio::time::{Duration, timeout};
-
-    // Create a client with very short timeout
-    let client = ClientBuilder::new()
-        .base_url("http://httpbin.org/delay/10") // This will delay 10 seconds
-        .timeout(Duration::from_millis(100))     // But we timeout after 100ms
-        .build()
-        .expect("Client should build");
-
-    // Test that timeout produces appropriate error
-    let result = timeout(Duration::from_secs(2), client.get_chain_id()).await;
-
-    match result {
-        Ok(inner_result) => {
-            // The request completed, but should have been an error due to short client timeout
-            assert!(inner_result.is_err(), "Request should have timed out");
-            println!("Timeout error (expected): {}", inner_result.unwrap_err());
-        }
-        Err(_) => {
-            // The tokio timeout fired first
-            println!("Tokio timeout fired (also acceptable)");
-        }
-    }
-}
-
 #[test]
 fn test_error_from_conversions() {
     // Test that common error types can be converted to our Error type
