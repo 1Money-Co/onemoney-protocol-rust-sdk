@@ -6,7 +6,7 @@ Official Rust SDK for the OneMoney L1 blockchain REST API.
 [![Documentation](https://docs.rs/onemoney-protocol/badge.svg)](https://docs.rs/onemoney-protocol)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![CI](https://github.com/1Money-Co/onemoney-rust-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/1Money-Co/onemoney-rust-sdk/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/1Money-Co/onemoney-rust-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/1Money-Co/onemoney-rust-sdk)
+[![codecov](https://codecov.io/gh/1Money-Co/onemoney-protocol-rust-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/1Money-Co/onemoney-protocol-rust-sdk)
 [![Security Audit](https://github.com/1Money-Co/onemoney-rust-sdk/actions/workflows/security.yml/badge.svg)](https://github.com/1Money-Co/onemoney-rust-sdk/actions/workflows/security.yml)
 
 ## Features
