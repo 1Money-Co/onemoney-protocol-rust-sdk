@@ -24,14 +24,41 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Generate changelog
-        uses: orhun/git-cliff-action@v2
-        id: git-cliff
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          config: cliff.toml
-          args: -vv --latest --strip header
-        env:
-          OUTPUT: CHANGES.md
+          toolchain: "1.87.0"
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install git-cliff
+        run: |
+          if ! command -v git-cliff &> /dev/null; then
+            cargo install git-cliff
+          else
+            echo "git-cliff already installed"
+          fi
+
+      - name: Generate changelog
+        id: git-cliff
+        run: |
+          # Generate changelog using git-cliff
+          if [ -f "cliff.toml" ]; then
+            CHANGELOG=$(git-cliff --config cliff.toml --latest --strip header 2>/dev/null || echo "## Changes\n\nSee commit history for details.")
+          else
+            CHANGELOG="## Changes\n\nSee commit history for details."
+          fi
+
+          echo "Generated changelog:"
+          echo "$CHANGELOG"
+
+          # Set output for next step using the new GitHub Actions syntax
+          {
+            echo 'content<<EOF'
+            echo "$CHANGELOG"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
 
       - name: Create Release
         id: create-release
