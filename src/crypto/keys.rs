@@ -87,10 +87,33 @@ mod tests {
             "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
         let result2 = private_key_to_address(private_key_no_prefix);
         assert!(result2.is_ok());
-        assert_eq!(
-            result.expect("Valid address conversion"),
-            result2.expect("Valid address conversion")
-        );
+
+        let address1 = result.expect("Valid address conversion");
+        let address2 = result2.expect("Valid address conversion");
+        assert_eq!(address1, address2);
+
+        // Test address format validation using the first address
+        assert_ne!(address1, String::default());
+        assert!(address1.starts_with("0x"));
+        assert_eq!(address1.len(), 42); // 0x + 40 hex chars
+    }
+
+    #[test]
+    fn test_private_key_to_address_error_cases() {
+        // Test invalid hex
+        let invalid_hex = "0xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
+        let result = private_key_to_address(invalid_hex);
+        assert!(result.is_err());
+
+        // Test wrong length
+        let too_short = "0x1234";
+        let result = private_key_to_address(too_short);
+        assert!(result.is_err());
+
+        // Test empty string
+        let empty = "";
+        let result = private_key_to_address(empty);
+        assert!(result.is_err());
     }
 
     #[test]
@@ -102,5 +125,39 @@ mod tests {
 
         let token_account = derive_token_account_address(wallet, mint);
         assert_ne!(token_account, Address::ZERO);
+    }
+
+    #[test]
+    fn test_derive_token_account_deterministic() {
+        // Test with the same addresses from coverage_tests.rs
+        let owner = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Valid owner address");
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Valid token address");
+
+        let token_account = derive_token_account_address(owner, token);
+        assert_ne!(token_account, Address::ZERO);
+        assert_ne!(token_account, owner);
+        assert_ne!(token_account, token);
+
+        // Test deterministic behavior - should always return the same result
+        let token_account2 = derive_token_account_address(owner, token);
+        assert_eq!(token_account, token_account2);
+    }
+
+    #[test]
+    fn test_derive_token_account_different_inputs() {
+        let wallet1 = Address::from_str("0x1111111111111111111111111111111111111111")
+            .expect("Valid wallet address");
+        let wallet2 = Address::from_str("0x2222222222222222222222222222222222222222")
+            .expect("Valid wallet address");
+        let mint = Address::from_str("0x3333333333333333333333333333333333333333")
+            .expect("Valid mint address");
+
+        let account1 = derive_token_account_address(wallet1, mint);
+        let account2 = derive_token_account_address(wallet2, mint);
+
+        // Different wallets should produce different token accounts
+        assert_ne!(account1, account2);
     }
 }

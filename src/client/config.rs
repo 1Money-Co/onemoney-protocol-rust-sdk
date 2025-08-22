@@ -100,3 +100,117 @@ pub mod endpoints {
         pub const LATEST_EPOCH_CHECKPOINT: &str = "/states/latest_epoch_checkpoint";
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_network_urls() {
+        assert_eq!(Network::Mainnet.url(), "https://api.mainnet.1money.network");
+        assert_eq!(Network::Testnet.url(), "https://api.testnet.1money.network");
+        assert_eq!(Network::Local.url(), "http://127.0.0.1:18555");
+    }
+
+    #[test]
+    fn test_network_properties() {
+        assert!(Network::Mainnet.is_production());
+        assert!(!Network::Testnet.is_production());
+        assert!(!Network::Local.is_production());
+
+        assert!(!Network::Mainnet.is_test());
+        assert!(Network::Testnet.is_test());
+        assert!(Network::Local.is_test());
+    }
+
+    #[test]
+    fn test_api_path_construction() {
+        // Test basic API path construction
+        let path = api_path("/test");
+        assert_eq!(path, "/v1/test");
+        assert!(path.contains("/v1/test"));
+
+        // Test with leading slash
+        let path_with_slash = api_path("/accounts/nonce");
+        assert_eq!(path_with_slash, "/v1/accounts/nonce");
+
+        // Test without leading slash
+        let path_without_slash = api_path("chains/chain_id");
+        assert_eq!(path_without_slash, "/v1chains/chain_id");
+    }
+
+    #[test]
+    fn test_endpoint_constants() {
+        // Test account endpoints
+        assert_eq!(endpoints::accounts::NONCE, "/accounts/nonce");
+        assert_eq!(
+            endpoints::accounts::TOKEN_ACCOUNT,
+            "/accounts/token_account"
+        );
+
+        // Test chain endpoints
+        assert_eq!(endpoints::chains::CHAIN_ID, "/chains/chain_id");
+
+        // Test state endpoints
+        assert_eq!(
+            endpoints::states::LATEST_EPOCH_CHECKPOINT,
+            "/states/latest_epoch_checkpoint"
+        );
+
+        // Test checkpoint endpoints
+        assert_eq!(endpoints::checkpoints::NUMBER, "/checkpoints/number");
+        assert_eq!(endpoints::checkpoints::BY_NUMBER, "/checkpoints/by_number");
+        assert_eq!(endpoints::checkpoints::BY_HASH, "/checkpoints/by_hash");
+
+        // Test transaction endpoints
+        assert_eq!(endpoints::transactions::PAYMENT, "/transactions/payment");
+        assert_eq!(endpoints::transactions::BY_HASH, "/transactions/by_hash");
+        assert_eq!(
+            endpoints::transactions::RECEIPT_BY_HASH,
+            "/transactions/receipt/by_hash"
+        );
+        assert_eq!(
+            endpoints::transactions::ESTIMATE_FEE,
+            "/transactions/estimate_fee"
+        );
+
+        // Test token endpoints
+        assert_eq!(endpoints::tokens::MINT, "/tokens/mint");
+        assert_eq!(endpoints::tokens::BURN, "/tokens/burn");
+        assert_eq!(
+            endpoints::tokens::GRANT_AUTHORITY,
+            "/tokens/grant_authority"
+        );
+        assert_eq!(
+            endpoints::tokens::UPDATE_METADATA,
+            "/tokens/update_metadata"
+        );
+        assert_eq!(
+            endpoints::tokens::MANAGE_BLACKLIST,
+            "/tokens/manage_blacklist"
+        );
+        assert_eq!(
+            endpoints::tokens::MANAGE_WHITELIST,
+            "/tokens/manage_whitelist"
+        );
+        assert_eq!(endpoints::tokens::PAUSE, "/tokens/pause");
+        assert_eq!(endpoints::tokens::TOKEN_METADATA, "/tokens/token_metadata");
+    }
+
+    #[test]
+    fn test_network_default() {
+        let default_network = Network::default();
+        assert_eq!(default_network, Network::Mainnet);
+    }
+
+    #[test]
+    fn test_constants() {
+        assert_eq!(API_VERSION, "/v1");
+        assert_eq!(DEFAULT_TIMEOUT, Duration::from_secs(30));
+
+        // Verify URL constants
+        assert!(MAINNET_URL.starts_with("https://"));
+        assert!(TESTNET_URL.starts_with("https://"));
+        assert!(LOCAL_URL.starts_with("http://"));
+    }
+}

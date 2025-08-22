@@ -99,4 +99,63 @@ mod tests {
 
         println!("Generated wallet: {}", wallet);
     }
+
+    #[test]
+    fn test_wallet_generation_uniqueness() {
+        // Test from coverage_tests.rs - ensure each generation creates unique wallets
+        let wallet1 = EvmWallet::generate_random().expect("Failed to generate first wallet");
+        let wallet2 = EvmWallet::generate_random().expect("Failed to generate second wallet");
+
+        // Ensure different wallets are generated
+        assert_ne!(wallet1.private_key, wallet2.private_key);
+        assert_ne!(wallet1.public_key, wallet2.public_key);
+        assert_ne!(wallet1.address, wallet2.address);
+    }
+
+    #[test]
+    fn test_wallet_format_validation() {
+        let wallet = EvmWallet::generate_random().expect("Failed to generate wallet");
+
+        // Validate private key format
+        assert!(wallet.private_key.starts_with("0x"));
+        let private_key_hex = &wallet.private_key[2..];
+        assert_eq!(private_key_hex.len(), 64);
+        assert!(private_key_hex.chars().all(|c| c.is_ascii_hexdigit()));
+
+        // Validate public key format
+        assert!(wallet.public_key.starts_with("0x04")); // Uncompressed format
+        let public_key_hex = &wallet.public_key[2..];
+        assert_eq!(public_key_hex.len(), 130);
+        assert!(public_key_hex.chars().all(|c| c.is_ascii_hexdigit()));
+
+        // Validate address format using our utility function
+        let address_str = wallet.address.to_string();
+        assert!(crate::utils::address::is_valid_address_format(&address_str));
+    }
+
+    #[test]
+    fn test_wallet_display() {
+        let wallet = EvmWallet::generate_random().expect("Failed to generate wallet");
+        let display_str = format!("{}", wallet);
+
+        assert!(display_str.contains("EVM Wallet:"));
+        assert!(display_str.contains("address:"));
+        assert!(display_str.contains("private_key:"));
+        assert!(display_str.contains("public_key:"));
+        assert!(display_str.contains(&wallet.address.to_string()));
+    }
+
+    #[test]
+    fn test_wallet_serialization() {
+        let wallet = EvmWallet::generate_random().expect("Failed to generate wallet");
+
+        // Test JSON serialization/deserialization
+        let json = serde_json::to_string(&wallet).expect("Failed to serialize wallet");
+        let deserialized: EvmWallet =
+            serde_json::from_str(&json).expect("Failed to deserialize wallet");
+
+        assert_eq!(wallet.private_key, deserialized.private_key);
+        assert_eq!(wallet.public_key, deserialized.public_key);
+        assert_eq!(wallet.address, deserialized.address);
+    }
 }
