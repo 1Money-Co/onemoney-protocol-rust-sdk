@@ -82,3 +82,95 @@ impl Client {
         self.get(&path).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::client::config::api_path;
+    use alloy_primitives::Address;
+    use std::str::FromStr;
+
+    #[test]
+    fn test_nonce_api_path_construction() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let expected_path = api_path(&format!("{NONCE}?address={address}"));
+
+        assert!(expected_path.contains("/accounts/nonce"));
+        assert!(expected_path.contains("address=0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0"));
+    }
+
+    #[test]
+    fn test_token_account_api_path_construction() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+        let expected_path = api_path(&format!("{TOKEN_ACCOUNT}?address={address}&token={token}"));
+
+        assert!(expected_path.contains("/accounts/token_account"));
+        assert!(expected_path.contains("address=0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0"));
+        assert!(expected_path.contains("token=0x1234567890AbcdEF1234567890aBcdef12345678"));
+    }
+
+    #[test]
+    fn test_account_nonce_display() {
+        let nonce = AccountNonce { nonce: 42 };
+        let display_str = format!("{}", nonce);
+        assert_eq!(display_str, "Account Nonce: 42");
+    }
+
+    #[test]
+    fn test_associated_token_account_display() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let account = AssociatedTokenAccount {
+            token_account_address: address,
+            balance: "1000000000000000000".to_string(),
+            nonce: 5,
+        };
+
+        let display_str = format!("{}", account);
+        assert!(display_str.contains("Associated Token Account"));
+        assert!(display_str.contains("Address: 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0"));
+        assert!(display_str.contains("Balance: 1000000000000000000"));
+        assert!(display_str.contains("Nonce: 5"));
+    }
+
+    #[test]
+    fn test_associated_token_account_equality() {
+        let address1 = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let address2 = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+
+        let account1 = AssociatedTokenAccount {
+            token_account_address: address1,
+            balance: "1000000000000000000".to_string(),
+            nonce: 5,
+        };
+
+        let account2 = AssociatedTokenAccount {
+            token_account_address: address2,
+            balance: "1000000000000000000".to_string(),
+            nonce: 5,
+        };
+
+        assert_eq!(account1, account2);
+    }
+
+    #[test]
+    fn test_associated_token_account_clone() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let account = AssociatedTokenAccount {
+            token_account_address: address,
+            balance: "1000000000000000000".to_string(),
+            nonce: 5,
+        };
+
+        let cloned = account.clone();
+        assert_eq!(account, cloned);
+    }
+
+    #[test]
+    fn test_associated_token_account_default() {
+        let account = AssociatedTokenAccount::default();
+        assert_eq!(account.token_account_address, Address::default());
+        assert_eq!(account.balance, String::default());
+        assert_eq!(account.nonce, 0);
+    }
+}

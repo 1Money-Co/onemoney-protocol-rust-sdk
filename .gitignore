@@ -31,3 +31,4 @@ Thumbs.db
 *.temp
 go-sdk-ref
 l1client-ref
+lcov.info

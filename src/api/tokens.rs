@@ -214,7 +214,10 @@ impl Client {
 
 #[cfg(test)]
 mod tests {
-    use crate::Authority;
+    use super::*;
+    use crate::{Authority, AuthorityAction, BlacklistAction, PauseAction, WhitelistAction};
+    use alloy_primitives::{Address, U256};
+    use std::str::FromStr;
 
     #[test]
     fn test_authority_values() {
@@ -238,5 +241,177 @@ mod tests {
             serde_json::to_string(&Authority::UpdateMetadata).unwrap(),
             "\"UpdateMetadata\""
         );
+    }
+
+    #[test]
+    fn test_token_mint_payload_structure() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+
+        let payload = TokenMintPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: address,
+            value: U256::from(1000000000000000000u64),
+            token,
+        };
+
+        assert_eq!(payload.recent_epoch, 100);
+        assert_eq!(payload.recent_checkpoint, 200);
+        assert_eq!(payload.chain_id, 1212101);
+        assert_eq!(payload.nonce, 5);
+        assert_eq!(payload.recipient, address);
+        assert_eq!(payload.value, U256::from(1000000000000000000u64));
+        assert_eq!(payload.token, token);
+    }
+
+    #[test]
+    fn test_token_burn_payload_structure() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+
+        let payload = TokenBurnPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: address,
+            value: U256::from(500000000000000000u64),
+            token,
+        };
+
+        assert_eq!(payload.recent_epoch, 100);
+        assert_eq!(payload.recipient, address);
+        assert_eq!(payload.value, U256::from(500000000000000000u64));
+    }
+
+    #[test]
+    fn test_authority_action_serialization() {
+        assert_eq!(
+            serde_json::to_string(&AuthorityAction::Grant).unwrap(),
+            "\"Grant\""
+        );
+        assert_eq!(
+            serde_json::to_string(&AuthorityAction::Revoke).unwrap(),
+            "\"Revoke\""
+        );
+    }
+
+    #[test]
+    fn test_pause_action_serialization() {
+        assert_eq!(
+            serde_json::to_string(&PauseAction::Pause).unwrap(),
+            "\"Pause\""
+        );
+        assert_eq!(
+            serde_json::to_string(&PauseAction::Unpause).unwrap(),
+            "\"Unpause\""
+        );
+    }
+
+    #[test]
+    fn test_blacklist_action_serialization() {
+        assert_eq!(
+            serde_json::to_string(&BlacklistAction::Add).unwrap(),
+            "\"Add\""
+        );
+        assert_eq!(
+            serde_json::to_string(&BlacklistAction::Remove).unwrap(),
+            "\"Remove\""
+        );
+    }
+
+    #[test]
+    fn test_whitelist_action_serialization() {
+        assert_eq!(
+            serde_json::to_string(&WhitelistAction::Add).unwrap(),
+            "\"Add\""
+        );
+        assert_eq!(
+            serde_json::to_string(&WhitelistAction::Remove).unwrap(),
+            "\"Remove\""
+        );
+    }
+
+    #[test]
+    fn test_token_authority_payload_structure() {
+        let authority_address =
+            Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+
+        let payload = TokenAuthorityPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            action: AuthorityAction::Grant,
+            authority_type: Authority::MintBurnTokens,
+            authority_address,
+            token,
+            value: U256::from(1000000000000000000u64),
+        };
+
+        assert_eq!(payload.action, AuthorityAction::Grant);
+        assert_eq!(payload.authority_type, Authority::MintBurnTokens);
+        assert_eq!(payload.authority_address, authority_address);
+    }
+
+    #[test]
+    fn test_token_pause_payload_structure() {
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+
+        let payload = TokenPausePayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            action: PauseAction::Pause,
+            token,
+        };
+
+        assert_eq!(payload.action, PauseAction::Pause);
+        assert_eq!(payload.token, token);
+    }
+
+    #[test]
+    fn test_token_blacklist_payload_structure() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+
+        let payload = TokenBlacklistPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            action: BlacklistAction::Add,
+            address,
+            token,
+        };
+
+        assert_eq!(payload.action, BlacklistAction::Add);
+        assert_eq!(payload.address, address);
+        assert_eq!(payload.token, token);
+    }
+
+    #[test]
+    fn test_token_whitelist_payload_structure() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap();
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap();
+
+        let payload = TokenWhitelistPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            action: WhitelistAction::Add,
+            address,
+            token,
+        };
+
+        assert_eq!(payload.action, WhitelistAction::Add);
+        assert_eq!(payload.address, address);
+        assert_eq!(payload.token, token);
     }
 }
