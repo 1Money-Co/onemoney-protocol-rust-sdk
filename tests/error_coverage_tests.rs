@@ -257,6 +257,47 @@ fn test_error_type_checks() {
     assert!(!config_error.is_crypto_error());
 }
 
+#[test]
+fn test_error_constructors_heterogeneous_types() {
+    // Test response_deserialization with mixed &str and String types
+    let format_str = "JSON";
+    let error_string = String::from("Parse error occurred");
+    let response_data = "{\"invalid\": syntax}";
+
+    let error = Error::response_deserialization(format_str, error_string, response_data);
+    let error_display = format!("{}", error);
+    assert!(error_display.contains("JSON"));
+    assert!(error_display.contains("Parse error occurred"));
+    assert!(error_display.contains("{\"invalid\": syntax}"));
+
+    // Test invalid_parameter with mixed types
+    let param_name = "timeout";
+    let message = format!("Value must be between {} and {}", 1, 3600);
+
+    let error = Error::invalid_parameter(param_name, message);
+    let error_display = format!("{}", error);
+    assert!(error_display.contains("timeout"));
+    assert!(error_display.contains("Value must be between 1 and 3600"));
+
+    // Test resource_not_found with mixed types
+    let resource_type = String::from("Transaction");
+    let identifier = "0x1234abcd";
+
+    let error = Error::resource_not_found(resource_type, identifier);
+    let error_display = format!("{}", error);
+    assert!(error_display.contains("Transaction"));
+    assert!(error_display.contains("0x1234abcd"));
+
+    // Test business_logic with mixed types
+    let operation = "token_transfer";
+    let reason = format!("Insufficient balance: {} < {}", 100, 500);
+
+    let error = Error::business_logic(operation, reason);
+    let error_display = format!("{}", error);
+    assert!(error_display.contains("token_transfer"));
+    assert!(error_display.contains("Insufficient balance: 100 < 500"));
+}
+
 #[cfg(test)]
 mod reqwest_error_tests {
     use super::*;

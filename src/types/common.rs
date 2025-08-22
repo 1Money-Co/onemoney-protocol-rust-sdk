@@ -9,9 +9,9 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 /// Compatible with REST API and L1 implementation signature format.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Signature {
-    /// The R field of the signature; the point on the curve.
+    /// The R field of the signature; a scalar (U256) representing the x-coordinate-derived component of the signature.
     pub r: U256,
-    /// The S field of the signature; the point on the curve.
+    /// The S field of the signature; a scalar (U256) representing the multiplicative component of the signature.
     pub s: U256,
     /// For EIP-155, EIP-2930 and Blob transactions this is set to the parity (0
     /// for even, 1 for odd) of the y-value of the secp256k1 signature.

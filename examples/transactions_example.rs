@@ -196,10 +196,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     for attempt in 1..=5 {
         println!("   Attempt {}/5: Checking transaction status...", attempt);
 
-        match client
-            .get_transaction_by_hash(&format!("{:?}", tx_hash))
-            .await
-        {
+        match client.get_transaction_by_hash(&tx_hash.to_string()).await {
             Ok(tx) => {
                 println!("Transaction confirmed on chain:");
                 println!("{:?}", tx);
@@ -225,7 +222,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Try to get transaction receipt for additional details
     println!("\nFetching transaction receipt...");
     match client
-        .get_transaction_receipt_by_hash(&format!("{:?}", tx_hash))
+        .get_transaction_receipt_by_hash(&tx_hash.to_string())
         .await
     {
         Ok(receipt) => {

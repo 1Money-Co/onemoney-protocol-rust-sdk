@@ -256,7 +256,11 @@ impl Error {
     }
 
     /// Create a response deserialization error.
-    pub fn response_deserialization<T: Into<String>>(format: T, error: T, response: T) -> Self {
+    pub fn response_deserialization<A: Into<String>, B: Into<String>, C: Into<String>>(
+        format: A,
+        error: B,
+        response: C,
+    ) -> Self {
         Self::ResponseDeserialization {
             format: format.into(),
             error: error.into(),
@@ -282,7 +286,7 @@ impl Error {
     }
 
     /// Create an invalid parameter error.
-    pub fn invalid_parameter<T: Into<String>>(parameter: T, message: T) -> Self {
+    pub fn invalid_parameter<A: Into<String>, B: Into<String>>(parameter: A, message: B) -> Self {
         Self::InvalidParameter {
             parameter: parameter.into(),
             message: message.into(),
@@ -290,7 +294,10 @@ impl Error {
     }
 
     /// Create a resource not found error.
-    pub fn resource_not_found<T: Into<String>>(resource_type: T, identifier: T) -> Self {
+    pub fn resource_not_found<A: Into<String>, B: Into<String>>(
+        resource_type: A,
+        identifier: B,
+    ) -> Self {
         Self::ResourceNotFound {
             resource_type: resource_type.into(),
             identifier: identifier.into(),
@@ -298,7 +305,7 @@ impl Error {
     }
 
     /// Create a business logic error.
-    pub fn business_logic<T: Into<String>>(operation: T, reason: T) -> Self {
+    pub fn business_logic<A: Into<String>, B: Into<String>>(operation: A, reason: B) -> Self {
         Self::BusinessLogic {
             operation: operation.into(),
             reason: reason.into(),
@@ -328,11 +335,11 @@ impl From<reqwest::Error> for Error {
         } else if err.is_connect() {
             Error::connection(format!("Connection failed: {}", err))
         } else if err.is_request() {
-            Error::invalid_parameter("request", &format!("Request error: {}", err))
+            Error::invalid_parameter("request", format!("Request error: {}", err))
         } else if err.is_decode() {
             Error::response_deserialization(
                 "JSON",
-                &err.to_string(),
+                err.to_string(),
                 "Failed to decode response body",
             )
         } else {
