@@ -5,6 +5,9 @@ Official Rust SDK for the OneMoney L1 blockchain REST API.
 [![Crates.io](https://img.shields.io/crates/v/onemoney-protocol.svg)](https://crates.io/crates/onemoney-protocol)
 [![Documentation](https://docs.rs/onemoney-protocol/badge.svg)](https://docs.rs/onemoney-protocol)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![CI](https://github.com/1Money-Co/onemoney-rust-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/1Money-Co/onemoney-rust-sdk/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/1Money-Co/onemoney-rust-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/1Money-Co/onemoney-rust-sdk)
+[![Security Audit](https://github.com/1Money-Co/onemoney-rust-sdk/actions/workflows/security.yml/badge.svg)](https://github.com/1Money-Co/onemoney-rust-sdk/actions/workflows/security.yml)
 
 ## Features
 
@@ -15,6 +18,8 @@ Official Rust SDK for the OneMoney L1 blockchain REST API.
 - **Network support** - Mainnet and testnet configurations
 - **Extensible** - Hook system for middleware and custom logging
 - **Well documented** - Comprehensive API documentation and examples
+- **Thoroughly tested** - 398+ tests with 80%+ code coverage and continuous integration
+- **Production ready** - Comprehensive error handling, retry logic, and security audits
 
 ## Installation
 
@@ -261,6 +266,16 @@ cargo test -- --nocapture
 
 # Run specific test module
 cargo test accounts::tests
+
+# Run tests with coverage (requires cargo-llvm-cov)
+cargo install cargo-llvm-cov
+cargo llvm-cov --all-features --workspace --html
+
+# Run integration tests
+cargo test --test '*'
+
+# Run unit tests only
+cargo test --lib
 ```
 
 ## License
