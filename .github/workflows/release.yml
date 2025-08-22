@@ -24,20 +24,57 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Generate changelog
-        uses: orhun/git-cliff-action@v2
-        id: git-cliff
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          config: cliff.toml
-          args: -vv --latest --strip header
-        env:
-          OUTPUT: CHANGES.md
+          toolchain: "1.87.0"
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install git-cliff
+        run: |
+          if ! command -v git-cliff &> /dev/null; then
+            cargo install git-cliff
+          else
+            echo "git-cliff already installed"
+          fi
+
+      - name: Generate changelog
+        id: git-cliff
+        run: |
+          set -euo pipefail
+
+          # Generate changelog using git-cliff
+          if [ -f "cliff.toml" ]; then
+            echo "Found cliff.toml, generating changelog with git-cliff..."
+            git-cliff --config cliff.toml --latest --strip header > .changelog.txt || {
+              echo "git-cliff failed, using fallback changelog"
+              echo "## Changes\n\nSee commit history for details." > .changelog.txt
+            }
+          else
+            echo "No cliff.toml found, using fallback changelog"
+            echo "## Changes\n\nSee commit history for details." > .changelog.txt
+          fi
+
+          echo "Generated changelog:"
+          cat .changelog.txt
+
+          # Set output for next step using the new GitHub Actions syntax
+          {
+            echo 'content<<CHANGELOG_EOF'
+            cat .changelog.txt
+            echo 'CHANGELOG_EOF'
+            echo "body_path=.changelog.txt"
+          } >> $GITHUB_OUTPUT
 
       - name: Create Release
         id: create-release
         uses: softprops/action-gh-release@v2
         with:
-          body: ${{ steps.git-cliff.outputs.content }}
+          # Prefer file-based body to avoid 1MB output limits and encoding pitfalls
+          body_path: ${{ steps.git-cliff.outputs.body_path }}
+          # body: ${{ steps.git-cliff.outputs.content }} # keep as fallback if needed
           draft: false
           prerelease: false
 
@@ -135,7 +172,7 @@ jobs:
             fi
 
             if [ $attempt -eq $MAX_ATTEMPTS ]; then
-              echo "💥 Failed to verify crate availability after $MAX_ATTEMPTS attempts over ~$((MAX_ATTEMPTS * BASE_DELAY / 60)) minutes"
+              echo "Failed to verify crate availability after $MAX_ATTEMPTS attempts over ~$((MAX_ATTEMPTS * BASE_DELAY / 60)) minutes"
               echo "This might indicate:"
               echo "  - Slow crates.io indexing (normal during high traffic)"
               echo "  - Publishing failure"

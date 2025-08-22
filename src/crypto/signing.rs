@@ -1,7 +1,8 @@
 //! Digital signature operations.
 
 use super::hashing::Signable;
-use crate::{CryptoError, OneMoneyAddress, Result, Signature};
+use crate::{CryptoError, Result, Signature};
+use alloy_primitives::Address;
 use alloy_primitives::{B256, U256, keccak256};
 use hex::decode as hex_decode;
 use k256::ecdsa::SigningKey;
@@ -128,7 +129,7 @@ where
 pub fn verify_signature<T>(
     message: &T,
     signature: &Signature,
-    _expected_signer: OneMoneyAddress,
+    _expected_signer: Address,
 ) -> Result<bool>
 where
     T: Serialize + Encodable,
@@ -194,14 +195,18 @@ mod tests {
             text: "test message".to_string(),
         };
 
-        let signature = sign_message(&message, private_key).unwrap();
+        let signature = sign_message(&message, private_key).expect("Failed to sign message");
         assert_ne!(signature.r, U256::ZERO);
         assert_ne!(signature.s, U256::ZERO);
 
-        let signer_address_str = private_key_to_address(private_key).unwrap();
-        let signer_address = signer_address_str.parse::<Address>().unwrap();
+        let signer_address_str =
+            private_key_to_address(private_key).expect("Failed to derive address from private key");
+        let signer_address = signer_address_str
+            .parse::<Address>()
+            .expect("Failed to parse address");
 
-        let is_valid = verify_signature(&message, &signature, signer_address).unwrap();
+        let is_valid = verify_signature(&message, &signature, signer_address)
+            .expect("Failed to verify signature");
         assert!(is_valid);
     }
 }

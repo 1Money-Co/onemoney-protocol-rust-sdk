@@ -1,430 +1,22 @@
 //! Token-related API operations.
 
+use crate::Result;
 use crate::client::Client;
 use crate::client::config::api_path;
 use crate::client::config::endpoints::tokens::{
-    BURN, GRANT_AUTHORITY, MANAGE_BLACKLIST, MANAGE_WHITELIST, MINT, PAUSE, REVOKE_AUTHORITY,
-    TOKEN_METADATA, UPDATE_METADATA,
+    BURN, GRANT_AUTHORITY, MANAGE_BLACKLIST, MANAGE_WHITELIST, MINT, PAUSE, TOKEN_METADATA,
+    UPDATE_METADATA,
 };
-use crate::crypto::{Signable, sign_transaction_payload};
-use crate::{
-    Authority, AuthorityAction, MetadataKVPair, MintInfo, OneMoneyAddress, Result, Signature,
-    TokenAmount,
+use crate::crypto::sign_transaction_payload;
+use crate::requests::{
+    BlacklistTokenRequest, BurnTokenRequest, MintTokenRequest, PauseTokenRequest,
+    TokenAuthorityPayload, TokenAuthorityRequest, TokenBlacklistPayload, TokenBurnPayload,
+    TokenMetadataUpdatePayload, TokenMintPayload, TokenPausePayload, TokenWhitelistPayload,
+    UpdateMetadataRequest, WhitelistTokenRequest,
 };
-use alloy_primitives::{B256, keccak256};
-use rlp::{Encodable, RlpStream};
-use serde::{Deserialize, Serialize};
-
-/// Token mint payload.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TokenMintPayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
-    /// Recent checkpoint number.
-    pub recent_checkpoint: u64,
-    /// Chain ID.
-    pub chain_id: u64,
-    /// Account nonce.
-    pub nonce: u64,
-    /// Recipient address.
-    pub recipient: OneMoneyAddress,
-    /// Amount to mint.
-    pub value: TokenAmount,
-    /// Token address.
-    pub token: OneMoneyAddress,
-}
-
-impl Encodable for TokenMintPayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(7);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&self.recipient.as_slice());
-        // Encode U256 as compact bytes (no leading zeros) to match L1
-        let value_bytes = self.value.to_be_bytes_vec();
-        let mut compact_bytes = value_bytes;
-        while !compact_bytes.is_empty() && compact_bytes[0] == 0 {
-            compact_bytes.remove(0);
-        }
-        if compact_bytes.is_empty() {
-            compact_bytes = vec![0];
-        }
-        s.append(&compact_bytes);
-        s.append(&self.token.as_slice());
-    }
-}
-
-impl Signable for TokenMintPayload {
-    fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
-        keccak256(&encoded)
-    }
-}
-
-/// Token mint request.
-#[derive(Debug, Clone, Serialize)]
-pub struct MintTokenRequest {
-    #[serde(flatten)]
-    pub payload: TokenMintPayload,
-    /// Signature for the payload.
-    pub signature: Signature,
-}
-
-/// Token burn payload.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TokenBurnPayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
-    /// Recent checkpoint number.
-    pub recent_checkpoint: u64,
-    /// Chain ID.
-    pub chain_id: u64,
-    /// Account nonce.
-    pub nonce: u64,
-    /// Token account to burn from.
-    pub recipient: OneMoneyAddress,
-    /// Amount to burn.
-    pub value: TokenAmount,
-    /// Token address.
-    pub token: OneMoneyAddress,
-}
-
-impl Encodable for TokenBurnPayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(7);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&self.recipient.as_slice());
-        // Encode U256 as compact bytes (no leading zeros) to match L1
-        let value_bytes = self.value.to_be_bytes_vec();
-        let mut compact_bytes = value_bytes;
-        while !compact_bytes.is_empty() && compact_bytes[0] == 0 {
-            compact_bytes.remove(0);
-        }
-        if compact_bytes.is_empty() {
-            compact_bytes = vec![0];
-        }
-        s.append(&compact_bytes);
-        s.append(&self.token.as_slice());
-    }
-}
-
-impl Signable for TokenBurnPayload {
-    fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
-        keccak256(&encoded)
-    }
-}
-
-/// Token burn request.
-#[derive(Debug, Clone, Serialize)]
-pub struct BurnTokenRequest {
-    #[serde(flatten)]
-    pub payload: TokenBurnPayload,
-    /// Signature for the payload.
-    pub signature: Signature,
-}
-
-/// Token authority payload (unified for grant/revoke operations).
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TokenAuthorityPayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
-    /// Recent checkpoint number.
-    pub recent_checkpoint: u64,
-    /// Chain ID.
-    pub chain_id: u64,
-    /// Account nonce.
-    pub nonce: u64,
-    /// Authority action (Grant or Revoke).
-    pub action: AuthorityAction,
-    /// Authority type.
-    pub authority_type: Authority,
-    /// Address to grant/revoke authority to/from.
-    pub authority_address: OneMoneyAddress,
-    /// Token address.
-    pub token: OneMoneyAddress,
-    /// Allowance value (for MintBurnTokens authority type).
-    pub value: TokenAmount,
-}
-
-impl Encodable for TokenAuthorityPayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(9);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&format!("{:?}", self.action));
-        s.append(&format!("{:?}", self.authority_type));
-        s.append(&self.authority_address.as_slice());
-        s.append(&self.token.as_slice());
-        // Encode U256 as compact bytes (no leading zeros) to match L1
-        let value_bytes = self.value.to_be_bytes_vec();
-        let mut compact_bytes = value_bytes;
-        while !compact_bytes.is_empty() && compact_bytes[0] == 0 {
-            compact_bytes.remove(0);
-        }
-        if compact_bytes.is_empty() {
-            compact_bytes = vec![0];
-        }
-        s.append(&compact_bytes);
-    }
-}
-
-impl Signable for TokenAuthorityPayload {
-    fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
-        keccak256(&encoded)
-    }
-}
-
-/// Token authority request.
-#[derive(Debug, Clone, Serialize)]
-pub struct TokenAuthorityRequest {
-    #[serde(flatten)]
-    pub payload: TokenAuthorityPayload,
-    /// Signature for the payload.
-    pub signature: Signature,
-}
-
-/// Token operation response.
-#[derive(Debug, Clone, Deserialize)]
-pub struct TokenOperationResponse {
-    /// Transaction hash.
-    pub hash: String,
-}
-
-/// Pause action types matching L1 server implementation.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "PascalCase")]
-pub enum PauseAction {
-    /// Pause token operations.
-    Pause,
-    /// Unpause token operations.
-    Unpause,
-}
-
-/// Token pause payload.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TokenPausePayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
-    /// Recent checkpoint number.
-    pub recent_checkpoint: u64,
-    /// Chain ID.
-    pub chain_id: u64,
-    /// Account nonce.
-    pub nonce: u64,
-    /// Pause action.
-    pub action: PauseAction,
-    /// Token address.
-    pub token: OneMoneyAddress,
-}
-
-impl Encodable for TokenPausePayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(6);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&format!("{:?}", self.action));
-        s.append(&self.token.as_slice());
-    }
-}
-
-impl Signable for TokenPausePayload {
-    fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
-        keccak256(&encoded)
-    }
-}
-
-/// Token pause request.
-#[derive(Debug, Clone, Serialize)]
-pub struct PauseTokenRequest {
-    #[serde(flatten)]
-    pub payload: TokenPausePayload,
-    /// Signature for the payload.
-    pub signature: Signature,
-}
-
-/// Blacklist action types matching L1 server implementation.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "PascalCase")]
-pub enum BlacklistAction {
-    /// Add address to blacklist.
-    Add,
-    /// Remove address from blacklist.
-    Remove,
-}
-
-/// Token blacklist management payload.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TokenBlacklistPayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
-    /// Recent checkpoint number.
-    pub recent_checkpoint: u64,
-    /// Chain ID.
-    pub chain_id: u64,
-    /// Account nonce.
-    pub nonce: u64,
-    /// Blacklist action.
-    pub action: BlacklistAction,
-    /// Address to blacklist/unblacklist.
-    pub address: OneMoneyAddress,
-    /// Token address.
-    pub token: OneMoneyAddress,
-}
-
-impl Encodable for TokenBlacklistPayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(7);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&format!("{:?}", self.action));
-        s.append(&self.address.as_slice());
-        s.append(&self.token.as_slice());
-    }
-}
-
-impl Signable for TokenBlacklistPayload {
-    fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
-        keccak256(&encoded)
-    }
-}
-
-/// Token blacklist request.
-#[derive(Debug, Clone, Serialize)]
-pub struct BlacklistTokenRequest {
-    #[serde(flatten)]
-    pub payload: TokenBlacklistPayload,
-    /// Signature for the payload.
-    pub signature: Signature,
-}
-
-/// Whitelist action types matching L1 server implementation.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "PascalCase")]
-pub enum WhitelistAction {
-    /// Add address to whitelist.
-    Add,
-    /// Remove address from whitelist.
-    Remove,
-}
-
-/// Token whitelist management payload.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TokenWhitelistPayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
-    /// Recent checkpoint number.
-    pub recent_checkpoint: u64,
-    /// Chain ID.
-    pub chain_id: u64,
-    /// Account nonce.
-    pub nonce: u64,
-    /// Whitelist action.
-    pub action: WhitelistAction,
-    /// Address to whitelist/unwhitelist.
-    pub address: OneMoneyAddress,
-    /// Token address.
-    pub token: OneMoneyAddress,
-}
-
-impl Encodable for TokenWhitelistPayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(7);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&format!("{:?}", self.action));
-        s.append(&self.address.as_slice());
-        s.append(&self.token.as_slice());
-    }
-}
-
-impl Signable for TokenWhitelistPayload {
-    fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
-        keccak256(&encoded)
-    }
-}
-
-/// Token whitelist request.
-#[derive(Debug, Clone, Serialize)]
-pub struct WhitelistTokenRequest {
-    #[serde(flatten)]
-    pub payload: TokenWhitelistPayload,
-    /// Signature for the payload.
-    pub signature: Signature,
-}
-
-/// Token metadata update payload.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TokenMetadataUpdatePayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
-    /// Recent checkpoint number.
-    pub recent_checkpoint: u64,
-    /// Chain ID.
-    pub chain_id: u64,
-    /// Account nonce.
-    pub nonce: u64,
-    /// Token name.
-    pub name: String,
-    /// Metadata URI.
-    pub uri: String,
-    /// Token address.
-    pub token: OneMoneyAddress,
-    /// Additional metadata as key-value pairs.
-    pub additional_metadata: Vec<MetadataKVPair>,
-}
-
-impl Encodable for TokenMetadataUpdatePayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(8);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&self.name);
-        s.append(&self.uri);
-        s.append(&self.token.as_slice()); // token at position 7
-        // Manually encode Vec<MetadataKVPair> as nested RLP list
-        let mut metadata_stream = rlp::RlpStream::new_list(self.additional_metadata.len());
-        for metadata_item in &self.additional_metadata {
-            metadata_stream.append(metadata_item);
-        }
-        s.append_raw(&metadata_stream.out(), 1);
-    }
-}
-
-impl Signable for TokenMetadataUpdatePayload {
-    fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
-        keccak256(&encoded)
-    }
-}
-
-/// Token metadata update request.
-#[derive(Debug, Clone, Serialize)]
-pub struct UpdateMetadataRequest {
-    #[serde(flatten)]
-    pub payload: TokenMetadataUpdatePayload,
-    /// Signature for the payload.
-    pub signature: Signature,
-}
+use crate::responses::MintInfo;
+use crate::responses::TransactionResponse;
+use alloy_primitives::Address;
 
 impl Client {
     /// Mint tokens to an account.
@@ -441,7 +33,7 @@ impl Client {
         &self,
         payload: TokenMintPayload,
         private_key: &str,
-    ) -> Result<TokenOperationResponse> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = MintTokenRequest { payload, signature };
 
@@ -462,7 +54,7 @@ impl Client {
         &self,
         payload: TokenBurnPayload,
         private_key: &str,
-    ) -> Result<TokenOperationResponse> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = BurnTokenRequest { payload, signature };
 
@@ -483,7 +75,7 @@ impl Client {
         &self,
         payload: TokenAuthorityPayload,
         private_key: &str,
-    ) -> Result<TokenOperationResponse> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = TokenAuthorityRequest { payload, signature };
 
@@ -492,9 +84,12 @@ impl Client {
 
     /// Revoke authority for a token from an address.
     ///
+    /// Note: This method uses the same `/v1/tokens/grant_authority` endpoint as grant_authority(),
+    /// but with `AuthorityAction::Revoke` in the payload to indicate a revoke operation.
+    ///
     /// # Arguments
     ///
-    /// * `payload` - Authority revoke parameters
+    /// * `payload` - Authority revoke parameters (with action set to AuthorityAction::Revoke)
     /// * `private_key` - Private key for signing the transaction (must have master authority)
     ///
     /// # Returns
@@ -504,11 +99,11 @@ impl Client {
         &self,
         payload: TokenAuthorityPayload,
         private_key: &str,
-    ) -> Result<TokenOperationResponse> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = TokenAuthorityRequest { payload, signature };
 
-        self.post(&api_path(REVOKE_AUTHORITY), &request).await
+        self.post(&api_path(GRANT_AUTHORITY), &request).await
     }
 
     /// Get token metadata by mint address.
@@ -524,13 +119,14 @@ impl Client {
     /// # Example
     ///
     /// ```rust,no_run
-    /// use onemoney_protocol::{Client, OneMoneyAddress};
+    /// use onemoney_protocol::Client;
+    /// use alloy_primitives::Address;
     /// use std::str::FromStr;
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
-    ///     let mint = OneMoneyAddress::from_str("0x1234567890abcdef1234567890abcdef12345678")?;
+    ///     let client = Client::mainnet()?;
+    ///     let mint = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")?;
     ///
     ///     let mint_info = client.get_token_metadata(mint).await?;
     ///     println!("Token: {}", mint_info.symbol);
@@ -538,7 +134,7 @@ impl Client {
     ///     Ok(())
     /// }
     /// ```
-    pub async fn get_token_metadata(&self, mint_address: OneMoneyAddress) -> Result<MintInfo> {
+    pub async fn get_token_metadata(&self, mint_address: Address) -> Result<MintInfo> {
         let path = api_path(&format!("{}?token={}", TOKEN_METADATA, mint_address));
         let response: MintInfo = self.get(&path).await?;
         Ok(response)
@@ -558,7 +154,7 @@ impl Client {
         &self,
         payload: TokenPausePayload,
         private_key: &str,
-    ) -> Result<TokenOperationResponse> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = PauseTokenRequest { payload, signature };
 
@@ -579,7 +175,7 @@ impl Client {
         &self,
         payload: TokenBlacklistPayload,
         private_key: &str,
-    ) -> Result<TokenOperationResponse> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = BlacklistTokenRequest { payload, signature };
 
@@ -600,7 +196,7 @@ impl Client {
         &self,
         payload: TokenWhitelistPayload,
         private_key: &str,
-    ) -> Result<TokenOperationResponse> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = WhitelistTokenRequest { payload, signature };
 
@@ -621,7 +217,7 @@ impl Client {
         &self,
         payload: TokenMetadataUpdatePayload,
         private_key: &str,
-    ) -> Result<TokenOperationResponse> {
+    ) -> Result<TransactionResponse> {
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = UpdateMetadataRequest { payload, signature };
 
@@ -632,28 +228,213 @@ impl Client {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{Authority, AuthorityAction, BlacklistAction, PauseAction, WhitelistAction};
+    use alloy_primitives::{Address, U256};
+    use std::str::FromStr;
 
     #[test]
     fn test_authority_values() {
         assert_eq!(
-            serde_json::to_string(&Authority::MasterMintBurn).unwrap(),
+            serde_json::to_string(&Authority::MasterMintBurn).expect("Test data should be valid"),
             "\"MasterMintBurn\""
         );
         assert_eq!(
-            serde_json::to_string(&Authority::MintBurnTokens).unwrap(),
+            serde_json::to_string(&Authority::MintBurnTokens).expect("Test data should be valid"),
             "\"MintBurnTokens\""
         );
         assert_eq!(
-            serde_json::to_string(&Authority::Pause).unwrap(),
+            serde_json::to_string(&Authority::Pause).expect("Test data should be valid"),
             "\"Pause\""
         );
         assert_eq!(
-            serde_json::to_string(&Authority::ManageList).unwrap(),
+            serde_json::to_string(&Authority::ManageList).expect("Test data should be valid"),
             "\"ManageList\""
         );
         assert_eq!(
-            serde_json::to_string(&Authority::UpdateMetadata).unwrap(),
+            serde_json::to_string(&Authority::UpdateMetadata).expect("Test data should be valid"),
             "\"UpdateMetadata\""
         );
+    }
+
+    #[test]
+    fn test_token_mint_payload_structure() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
+
+        let payload = TokenMintPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: address,
+            value: U256::from(1000000000000000000u64),
+            token,
+        };
+
+        assert_eq!(payload.recent_epoch, 100);
+        assert_eq!(payload.recent_checkpoint, 200);
+        assert_eq!(payload.chain_id, 1212101);
+        assert_eq!(payload.nonce, 5);
+        assert_eq!(payload.recipient, address);
+        assert_eq!(payload.value, U256::from(1000000000000000000u64));
+        assert_eq!(payload.token, token);
+    }
+
+    #[test]
+    fn test_token_burn_payload_structure() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
+
+        let payload = TokenBurnPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: address,
+            value: U256::from(500000000000000000u64),
+            token,
+        };
+
+        assert_eq!(payload.recent_epoch, 100);
+        assert_eq!(payload.recipient, address);
+        assert_eq!(payload.value, U256::from(500000000000000000u64));
+    }
+
+    #[test]
+    fn test_authority_action_serialization() {
+        assert_eq!(
+            serde_json::to_string(&AuthorityAction::Grant).expect("Test data should be valid"),
+            "\"Grant\""
+        );
+        assert_eq!(
+            serde_json::to_string(&AuthorityAction::Revoke).expect("Test data should be valid"),
+            "\"Revoke\""
+        );
+    }
+
+    #[test]
+    fn test_pause_action_serialization() {
+        assert_eq!(
+            serde_json::to_string(&PauseAction::Pause).expect("Test data should be valid"),
+            "\"Pause\""
+        );
+        assert_eq!(
+            serde_json::to_string(&PauseAction::Unpause).expect("Test data should be valid"),
+            "\"Unpause\""
+        );
+    }
+
+    #[test]
+    fn test_blacklist_action_serialization() {
+        assert_eq!(
+            serde_json::to_string(&BlacklistAction::Add).expect("Test data should be valid"),
+            "\"Add\""
+        );
+        assert_eq!(
+            serde_json::to_string(&BlacklistAction::Remove).expect("Test data should be valid"),
+            "\"Remove\""
+        );
+    }
+
+    #[test]
+    fn test_whitelist_action_serialization() {
+        assert_eq!(
+            serde_json::to_string(&WhitelistAction::Add).expect("Test data should be valid"),
+            "\"Add\""
+        );
+        assert_eq!(
+            serde_json::to_string(&WhitelistAction::Remove).expect("Test data should be valid"),
+            "\"Remove\""
+        );
+    }
+
+    #[test]
+    fn test_token_authority_payload_structure() {
+        let authority_address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
+
+        let payload = TokenAuthorityPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            action: AuthorityAction::Grant,
+            authority_type: Authority::MintBurnTokens,
+            authority_address,
+            token,
+            value: U256::from(1000000000000000000u64),
+        };
+
+        assert_eq!(payload.action, AuthorityAction::Grant);
+        assert_eq!(payload.authority_type, Authority::MintBurnTokens);
+        assert_eq!(payload.authority_address, authority_address);
+    }
+
+    #[test]
+    fn test_token_pause_payload_structure() {
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
+
+        let payload = TokenPausePayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            action: PauseAction::Pause,
+            token,
+        };
+
+        assert_eq!(payload.action, PauseAction::Pause);
+        assert_eq!(payload.token, token);
+    }
+
+    #[test]
+    fn test_token_blacklist_payload_structure() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
+
+        let payload = TokenBlacklistPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            action: BlacklistAction::Add,
+            address,
+            token,
+        };
+
+        assert_eq!(payload.action, BlacklistAction::Add);
+        assert_eq!(payload.address, address);
+        assert_eq!(payload.token, token);
+    }
+
+    #[test]
+    fn test_token_whitelist_payload_structure() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let token = Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            .expect("Test data should be valid");
+
+        let payload = TokenWhitelistPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            action: WhitelistAction::Add,
+            address,
+            token,
+        };
+
+        assert_eq!(payload.action, WhitelistAction::Add);
+        assert_eq!(payload.address, address);
+        assert_eq!(payload.token, token);
     }
 }

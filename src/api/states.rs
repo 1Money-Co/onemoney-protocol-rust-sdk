@@ -3,7 +3,7 @@
 use crate::client::Client;
 use crate::client::config::api_path;
 use crate::client::config::endpoints::states::LATEST_EPOCH_CHECKPOINT;
-use crate::{LatestStateResponse, Result};
+use crate::{Result, responses::LatestStateResponse};
 
 impl Client {
     /// Get the latest epoch and checkpoint information.
@@ -22,7 +22,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///
     ///     let state = client.get_latest_epoch_checkpoint().await?;
     ///     println!("Latest state: epoch {} checkpoint {}", state.epoch, state.checkpoint);
@@ -48,19 +48,13 @@ mod tests {
         let state = LatestStateResponse {
             epoch: 123,
             checkpoint: 456,
-            checkpoint_hash: "0xabcdef1234567890".to_string(),
-            checkpoint_parent_hash: "0x1234567890abcdef".to_string(),
         };
 
-        let json = serde_json::to_string(&state).unwrap();
-        let deserialized: LatestStateResponse = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&state).expect("Test data should be valid");
+        let deserialized: LatestStateResponse =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(state.epoch, deserialized.epoch);
         assert_eq!(state.checkpoint, deserialized.checkpoint);
-        assert_eq!(state.checkpoint_hash, deserialized.checkpoint_hash);
-        assert_eq!(
-            state.checkpoint_parent_hash,
-            deserialized.checkpoint_parent_hash
-        );
     }
 }

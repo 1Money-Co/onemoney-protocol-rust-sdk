@@ -10,10 +10,11 @@
 mod common;
 use common as environment;
 
+use alloy_primitives::{Address, U256};
 use environment::{
     ExampleConfig, create_example_client, print_detailed_error, print_environment_banner,
 };
-use onemoney_protocol::{FeeEstimateRequest, OneMoneyAddress, PaymentPayload, TokenAmount};
+use onemoney_protocol::{FeeEstimateRequest, PaymentPayload};
 use std::error::Error;
 use std::str::FromStr;
 
@@ -27,10 +28,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let config = ExampleConfig::get();
     config.print_config_warning();
 
-    let sender_address = OneMoneyAddress::from_str(config.wallet_address)?;
-    let recipient_address = OneMoneyAddress::from_str(config.recipient_address)?;
+    let sender_address = Address::from_str(config.wallet_address)?;
+    let recipient_address = Address::from_str(config.recipient_address)?;
     let private_key = config.private_key;
-    let token_address = OneMoneyAddress::from_str(config.token_mint_address)?;
+    let token_address = Address::from_str(config.token_mint_address)?;
 
     println!("\nDemo Configuration:");
     println!("   Sender: {}", sender_address);
@@ -57,38 +58,39 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("\n2. Estimate Transaction Fees and Check Balance");
     println!("=============================================");
 
-    let amount = TokenAmount::from(10000u64); // 1 token
+    let amount = U256::from(10000u64); // 1 token
 
     let fee_request = FeeEstimateRequest {
-        from: sender_address,
-        value: Some(amount),
-        token: Some(token_address),
+        from: sender_address.to_string(),
+        value: amount.to_string(),
+        token: Some(token_address.to_string()),
     };
 
-    let estimated_fee = match client.estimate_fee(fee_request).await {
+    let estimated_fee_str = match client.estimate_fee(fee_request).await {
         Ok(fee_estimate) => {
             println!("{}", fee_estimate);
-            fee_estimate.total_fee
+            fee_estimate.fee.clone()
         }
         Err(e) => {
             print_detailed_error("Could not estimate fee", &e);
             println!("   Proceeding without fee check...");
-            TokenAmount::from(0u64) // Fallback
+            "0".to_string() // Fallback
         }
     };
 
     // Check token account balance
     println!("\nChecking sender's token balance...");
     match client
-        .get_token_account(sender_address, token_address)
+        .get_associated_token_account(sender_address, token_address)
         .await
     {
         Ok(token_account) => {
             println!("{}", token_account);
 
+            let estimated_fee = U256::from_str(&estimated_fee_str).unwrap_or(U256::from(0u64));
             let total_required = amount + estimated_fee;
             let available_balance =
-                TokenAmount::from_str(&token_account.balance).unwrap_or(TokenAmount::from(0u64));
+                U256::from_str(&token_account.balance).unwrap_or(U256::from(0u64));
 
             if available_balance < total_required {
                 println!("  Status: WARNING - Insufficient balance");
@@ -194,10 +196,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     for attempt in 1..=5 {
         println!("   Attempt {}/5: Checking transaction status...", attempt);
 
-        match client.get_transaction_by_hash(tx_hash).await {
+        match client.get_transaction_by_hash(&tx_hash.to_string()).await {
             Ok(tx) => {
                 println!("Transaction confirmed on chain:");
-                println!("{}", tx);
+                println!("{:?}", tx);
                 confirmed = true;
                 break;
             }
@@ -219,7 +221,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Try to get transaction receipt for additional details
     println!("\nFetching transaction receipt...");
-    match client.get_transaction_receipt_by_hash(tx_hash).await {
+    match client
+        .get_transaction_receipt_by_hash(&tx_hash.to_string())
+        .await
+    {
         Ok(receipt) => {
             println!("Transaction receipt:");
             println!("{}", receipt);

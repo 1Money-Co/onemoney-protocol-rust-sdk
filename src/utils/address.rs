@@ -1,6 +1,7 @@
 //! Address utilities and validation functions.
 
-use crate::{CryptoError, OneMoneyAddress, Result};
+use crate::{CryptoError, Result};
+use alloy_primitives::Address;
 use alloy_primitives::keccak256;
 
 /// Convert a public key to an Ethereum address.
@@ -12,7 +13,7 @@ use alloy_primitives::keccak256;
 /// # Returns
 ///
 /// The corresponding Ethereum address.
-pub fn public_key_to_address(public_key_hex: &str) -> Result<OneMoneyAddress> {
+pub fn public_key_to_address(public_key_hex: &str) -> Result<Address> {
     let public_key_hex = public_key_hex.strip_prefix("0x").unwrap_or(public_key_hex);
 
     let public_key_bytes = hex::decode(public_key_hex)
@@ -37,7 +38,7 @@ pub fn public_key_to_address(public_key_hex: &str) -> Result<OneMoneyAddress> {
 
     // Take the last 20 bytes as the address
     let address_bytes = &hash[12..];
-    let address = alloy_primitives::Address::from_slice(address_bytes);
+    let address = Address::from_slice(address_bytes);
 
     Ok(address)
 }
@@ -64,10 +65,19 @@ mod tests {
 
     #[test]
     fn test_is_valid_address_format() {
-        // Valid addresses
+        // Valid addresses from coverage_tests.rs
+        assert!(is_valid_address_format(
+            "0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0"
+        ));
         assert!(is_valid_address_format(
             "0x1234567890abcdef1234567890abcdef12345678"
         ));
+
+        // Test that addresses without 0x prefix are also valid
+        // (the function strips 0x and validates hex)
+        assert!(is_valid_address_format(
+            "742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0"
+        )); // Valid without 0x
         assert!(is_valid_address_format(
             "1234567890abcdef1234567890abcdef12345678"
         ));
@@ -76,6 +86,7 @@ mod tests {
         ));
 
         // Invalid addresses
+        assert!(!is_valid_address_format("invalid")); // Not hex
         assert!(!is_valid_address_format("0x123")); // Too short
         assert!(!is_valid_address_format(
             "0x1234567890abcdef1234567890abcdef123456789"
@@ -84,5 +95,33 @@ mod tests {
             "0x1234567890abcdef1234567890abcdef1234567g"
         )); // Invalid char
         assert!(!is_valid_address_format("")); // Empty
+    }
+
+    #[test]
+    fn test_public_key_to_address() {
+        // Test valid public key (uncompressed format)
+        let valid_public_key = format!("04{}", "1".repeat(128)); // 0x04 + 64 bytes of coordinates
+        let result = public_key_to_address(&format!("0x{}", valid_public_key));
+        assert!(result.is_ok());
+        let address = result.unwrap();
+        assert_ne!(address, Address::ZERO);
+    }
+
+    #[test]
+    fn test_public_key_to_address_error_cases() {
+        // Test invalid format (compressed)
+        let compressed_key = format!("02{}", "1".repeat(64));
+        let result = public_key_to_address(&compressed_key);
+        assert!(result.is_err());
+
+        // Test wrong length
+        let short_key = "041234";
+        let result = public_key_to_address(short_key);
+        assert!(result.is_err());
+
+        // Test invalid hex
+        let invalid_hex = format!("04{}", "z".repeat(128));
+        let result = public_key_to_address(&invalid_hex);
+        assert!(result.is_err());
     }
 }

@@ -4,13 +4,7 @@ use crate::Result;
 use crate::client::Client;
 use crate::client::config::api_path;
 use crate::client::config::endpoints::chains::CHAIN_ID;
-use serde::{Deserialize, Serialize};
-
-/// Chain ID response from the API.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ChainIdResponse {
-    pub chain_id: u64,
-}
+use crate::responses::ChainIdResponse;
 
 impl Client {
     /// Get the current chain ID.
@@ -26,7 +20,7 @@ impl Client {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet();
+    ///     let client = Client::mainnet()?;
     ///
     ///     let chain_id = client.get_chain_id().await?;
     ///     println!("Current chain ID: {}", chain_id);
@@ -49,8 +43,9 @@ mod tests {
         // Test that ChainIdResponse can be serialized/deserialized
         let chain_id_response = ChainIdResponse { chain_id: 1212101 };
 
-        let json = serde_json::to_string(&chain_id_response).unwrap();
-        let deserialized: ChainIdResponse = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&chain_id_response).expect("Test data should be valid");
+        let deserialized: ChainIdResponse =
+            serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(chain_id_response.chain_id, deserialized.chain_id);
     }

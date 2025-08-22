@@ -1,5 +1,7 @@
 //! Hook and logging system for request/response middleware.
 
+use std::str;
+
 /// Type alias for redaction callback function.
 /// Takes the original body and returns a redacted version.
 pub type RedactionCallback = Box<dyn Fn(&str) -> String + Send + Sync>;
@@ -140,21 +142,25 @@ impl Hook for LoggingHook {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::{Arc, Mutex};
 
     #[derive(Clone)]
     struct TestLogger {
-        messages: std::sync::Arc<std::sync::Mutex<Vec<(LogLevel, String)>>>,
+        messages: Arc<Mutex<Vec<(LogLevel, String)>>>,
     }
 
     impl TestLogger {
         fn new() -> Self {
             Self {
-                messages: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
+                messages: Arc::new(Mutex::new(Vec::new())),
             }
         }
 
         fn get_messages(&self) -> Vec<(LogLevel, String)> {
-            self.messages.lock().unwrap().clone()
+            self.messages
+                .lock()
+                .expect("Failed to lock messages mutex")
+                .clone()
         }
     }
 
@@ -162,12 +168,12 @@ mod tests {
         fn log(&self, level: LogLevel, message: &str) {
             self.messages
                 .lock()
-                .unwrap()
+                .expect("Failed to lock messages mutex")
                 .push((level, message.to_string()));
         }
     }
 
-    impl Logger for std::sync::Arc<TestLogger> {
+    impl Logger for Arc<TestLogger> {
         fn log(&self, level: LogLevel, message: &str) {
             self.as_ref().log(level, message);
         }
@@ -226,8 +232,6 @@ mod tests {
 
     #[test]
     fn test_before_request_with_empty_body() {
-        use std::sync::Arc;
-
         let logger = Arc::new(TestLogger::new());
         let hook = LoggingHook::new(Box::new(logger.clone()));
 
@@ -240,8 +244,6 @@ mod tests {
 
     #[test]
     fn test_before_request_with_long_body() {
-        use std::sync::Arc;
-
         let logger = Arc::new(TestLogger::new());
         let hook = LoggingHook::new(Box::new(logger.clone()));
 
@@ -256,8 +258,6 @@ mod tests {
 
     #[test]
     fn test_after_response_with_redaction() {
-        use std::sync::Arc;
-
         let logger = Arc::new(TestLogger::new());
         let redactor = Box::new(|body: &str| {
             body.replace("0x123456789abcdef", "***REDACTED***")
@@ -288,7 +288,7 @@ mod tests {
         assert!(preview.chars().count() <= 103); // 100 chars + "..."
 
         // Verify the preview contains valid UTF-8 and doesn't cut multi-byte chars
-        assert!(preview.is_ascii() || std::str::from_utf8(preview.as_bytes()).is_ok());
+        assert!(preview.is_ascii() || str::from_utf8(preview.as_bytes()).is_ok());
 
         // Test exactly 100 characters (no truncation needed)
         let exactly_100_chars = "a".repeat(97) + "xyz"; // 97 + 3 = 100 chars exactly

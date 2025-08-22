@@ -120,9 +120,9 @@ When implementing the Rust SDK:
    **Good Example - Function Signatures:**
    ```rust
    use std::error::Error;
-   use crate::{OneMoneyAddress, TokenAmount, Result};
+   use crate::{Address, U256, Result};
 
-   async fn create_payment(address: OneMoneyAddress, amount: TokenAmount) -> Result<(), Box<dyn Error>> {
+   async fn create_payment(address: Address, amount: U256) -> Result<()> {
        // implementation
    }
    ```
@@ -130,8 +130,8 @@ When implementing the Rust SDK:
    **Bad Example - Inline Path Function Signatures:**
    ```rust
    async fn create_payment(
-       address: crate::OneMoneyAddress,
-       amount: crate::TokenAmount
+       address: crate::Address,
+       amount: crate::U256
    ) -> Result<(), Box<dyn std::error::Error>> {
        // implementation
    }
