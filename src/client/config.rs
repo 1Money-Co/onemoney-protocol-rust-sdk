@@ -11,6 +11,15 @@ pub const TESTNET_URL: &str = "https://api.testnet.1money.network";
 /// Default local API URL.
 pub const LOCAL_URL: &str = "http://127.0.0.1:18555";
 
+/// Mainnet chain ID.
+pub const MAINNET_CHAIN_ID: u64 = 21210;
+
+/// Testnet chain ID.
+pub const TESTNET_CHAIN_ID: u64 = 1_212_101;
+
+/// Local chain ID (same as testnet).
+pub const LOCAL_CHAIN_ID: u64 = 1_212_101;
+
 /// Default request timeout.
 pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(30);
 
@@ -41,6 +50,15 @@ impl Network {
             Network::Mainnet => MAINNET_URL,
             Network::Testnet => TESTNET_URL,
             Network::Local => LOCAL_URL,
+        }
+    }
+
+    /// Get the chain ID for this network.
+    pub fn chain_id(&self) -> u64 {
+        match self {
+            Network::Mainnet => MAINNET_CHAIN_ID,
+            Network::Testnet => TESTNET_CHAIN_ID,
+            Network::Local => LOCAL_CHAIN_ID,
         }
     }
 
@@ -201,6 +219,20 @@ mod tests {
     fn test_network_default() {
         let default_network = Network::default();
         assert_eq!(default_network, Network::Mainnet);
+    }
+
+    #[test]
+    fn test_network_chain_ids() {
+        assert_eq!(Network::Mainnet.chain_id(), 21210);
+        assert_eq!(Network::Testnet.chain_id(), 1_212_101);
+        assert_eq!(Network::Local.chain_id(), 1_212_101);
+    }
+
+    #[test]
+    fn test_chain_id_constants() {
+        assert_eq!(MAINNET_CHAIN_ID, 21210);
+        assert_eq!(TESTNET_CHAIN_ID, 1_212_101);
+        assert_eq!(LOCAL_CHAIN_ID, 1_212_101);
     }
 
     #[test]

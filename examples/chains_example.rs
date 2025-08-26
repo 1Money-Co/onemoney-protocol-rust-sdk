@@ -1,7 +1,8 @@
 //! Chain information example for the OneMoney Rust SDK.
 //!
 //! This example demonstrates chain-related operations:
-//! - Getting chain ID from the API
+//! - Getting predefined chain ID (fast, no network request)
+//! - Fetching chain ID from the network API (with network verification)
 
 #[path = "common.rs"]
 mod common;
@@ -16,16 +17,31 @@ async fn main() -> Result<(), Box<dyn Error>> {
     print_environment_banner("Chain Information");
     let client = create_example_client();
 
-    // 1. Get Chain ID
-    println!("\n1. Get Chain ID");
-    println!("===============");
+    // 1. Get Predefined Chain ID (Fast)
+    println!("\n1. Get Predefined Chain ID");
+    println!("==========================");
+    let chain_id = client.get_chain_id();
+    println!("Expected chain ID: {}", chain_id);
 
-    match client.get_chain_id().await {
-        Ok(chain_id) => {
-            println!("Chain ID: {}", chain_id);
+    // 2. Fetch Chain ID from Network
+    println!("\n2. Fetch Chain ID from Network");
+    println!("==============================");
+
+    match client.fetch_chain_id_from_network().await {
+        Ok(api_chain_id) => {
+            println!("API chain ID: {}", api_chain_id);
+            if api_chain_id == chain_id {
+                println!("Chain ID matches expected value!");
+            } else {
+                println!(
+                    "WARNING: Chain ID mismatch! Expected {}, got {}",
+                    chain_id, api_chain_id
+                );
+            }
         }
         Err(e) => {
-            print_detailed_error("Could not get chain ID", &e);
+            print_detailed_error("Could not fetch chain ID from network", &e);
+            println!("Using expected chain ID: {}", chain_id);
         }
     }
 

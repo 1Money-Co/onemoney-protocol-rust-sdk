@@ -142,7 +142,7 @@ async fn test_chain_id_mock() -> Result<(), Box<dyn Error>> {
         .build()?;
 
     // Test the API call
-    let chain_id = client.get_chain_id().await?;
+    let chain_id = client.fetch_chain_id_from_network().await?;
     assert_eq!(chain_id, 12345);
 
     Ok(())
@@ -279,7 +279,7 @@ async fn test_http_error_responses() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(5))
         .build()?;
 
-    let result = client.get_chain_id().await;
+    let result = client.fetch_chain_id_from_network().await;
     assert!(result.is_err(), "Should fail with 500 error");
 
     println!("Expected error: {:?}", result.unwrap_err());
@@ -304,7 +304,7 @@ async fn test_api_rate_limiting_simulation() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(5))
         .build()?;
 
-    let result = client.get_chain_id().await;
+    let result = client.fetch_chain_id_from_network().await;
     assert!(result.is_err(), "Should fail with rate limit error");
 
     println!("Rate limit error (expected): {:?}", result.unwrap_err());
@@ -328,7 +328,7 @@ async fn test_invalid_json_response() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(5))
         .build()?;
 
-    let result = client.get_chain_id().await;
+    let result = client.fetch_chain_id_from_network().await;
     assert!(result.is_err(), "Should fail to parse invalid JSON");
 
     match result {
@@ -366,7 +366,7 @@ async fn test_missing_fields_in_response() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(5))
         .build()?;
 
-    let result = client.get_chain_id().await;
+    let result = client.fetch_chain_id_from_network().await;
     assert!(result.is_err(), "Should fail due to missing field");
 
     Ok(())
@@ -397,7 +397,7 @@ async fn test_network_timeout_mock() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_millis(100))
         .build()?;
 
-    let result = client.get_chain_id().await;
+    let result = client.fetch_chain_id_from_network().await;
     assert!(result.is_err(), "Should timeout");
 
     Ok(())
@@ -422,7 +422,7 @@ async fn test_content_type_validation() -> Result<(), Box<dyn Error>> {
 
     // This might succeed or fail depending on how strict our client is
     // about content types
-    let result = client.get_chain_id().await;
+    let result = client.fetch_chain_id_from_network().await;
     println!("Content-type test result: {:?}", result);
 
     Ok(())
@@ -450,7 +450,7 @@ async fn test_large_response_handling() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(10)) // Longer timeout for large response
         .build()?;
 
-    let result = client.get_chain_id().await;
+    let result = client.fetch_chain_id_from_network().await;
     // Should handle large responses gracefully
     match result {
         Ok(chain_id) => {
@@ -499,7 +499,7 @@ async fn test_multiple_concurrent_requests() -> Result<(), Box<dyn Error>> {
             .build()?;
         let handle = tokio::spawn(async move {
             println!("Starting request {}", i);
-            client_for_task.get_chain_id().await
+            client_for_task.fetch_chain_id_from_network().await
         });
         handles.push(handle);
     }
@@ -934,7 +934,7 @@ async fn test_mock_response_consistency() -> Result<(), Box<dyn Error>> {
 
     // Make multiple requests and verify consistent responses
     for i in 0..3 {
-        let chain_id = client.get_chain_id().await?;
+        let chain_id = client.fetch_chain_id_from_network().await?;
         assert_eq!(chain_id, 42, "Chain ID should be consistent on call {}", i);
         println!("Call {}: chain_id = {}", i, chain_id);
     }
@@ -973,7 +973,7 @@ async fn test_mock_error_response_formats() -> Result<(), Box<dyn Error>> {
             .timeout(Duration::from_secs(5))
             .build()?;
 
-        let result = client.get_chain_id().await;
+        let result = client.fetch_chain_id_from_network().await;
         assert!(result.is_err(), "Should fail with status {}", status_code);
 
         println!("Status {}: {:?}", status_code, result.unwrap_err());
@@ -999,7 +999,7 @@ async fn test_mock_server_edge_cases() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(5))
         .build()?;
 
-    let result = client.get_chain_id().await;
+    let result = client.fetch_chain_id_from_network().await;
     assert!(result.is_err(), "Should fail with empty response");
 
     println!("Empty response error (expected): {:?}", result.unwrap_err());

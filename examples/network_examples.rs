@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("\n2. Test Network Connectivity");
     println!("============================");
 
-    match client.get_chain_id().await {
+    match client.fetch_chain_id_from_network().await {
         Ok(chain_id) => {
             println!("Connected to {} network", current_env.name());
             println!("   Chain ID: {}", chain_id);
@@ -96,7 +96,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Ok(mainnet_client) => {
             println!("     Mainnet client created -> {}", Network::Mainnet.url());
             // Test connectivity (but don't fail if mainnet is unreachable)
-            match mainnet_client.get_chain_id().await {
+            match mainnet_client.fetch_chain_id_from_network().await {
                 Ok(chain_id) => println!("     Mainnet Chain ID: {}", chain_id),
                 Err(_) => println!("     Mainnet not reachable (this is normal in development)"),
             }
@@ -115,7 +115,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     {
         Ok(testnet_client) => {
             println!("     Testnet client created -> {}", Network::Testnet.url());
-            match testnet_client.get_chain_id().await {
+            match testnet_client.fetch_chain_id_from_network().await {
                 Ok(chain_id) => println!("     Testnet Chain ID: {}", chain_id),
                 Err(_) => println!("     Testnet not reachable"),
             }
@@ -154,7 +154,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(5))
         .build()
     {
-        Ok(invalid_client) => match invalid_client.get_chain_id().await {
+        Ok(invalid_client) => match invalid_client.fetch_chain_id_from_network().await {
             Ok(_) => println!("   Unexpected success with invalid URL"),
             Err(e) => {
                 print_detailed_error("Expected error with invalid URL", &e);

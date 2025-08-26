@@ -11,6 +11,7 @@ use url::Url;
 /// OneMoney API client.
 pub struct Client {
     pub(crate) base_url: Url,
+    pub(crate) network: Network,
     http_client: HttpClient,
     hooks: Vec<Box<dyn Hook>>,
 }
@@ -19,6 +20,7 @@ impl Debug for Client {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         f.debug_struct("Client")
             .field("base_url", &self.base_url)
+            .field("network", &self.network)
             .field("hooks_count", &self.hooks.len())
             .finish()
     }
@@ -41,9 +43,15 @@ impl Client {
     }
 
     /// Create a new client instance.
-    pub(crate) fn new(base_url: Url, http_client: HttpClient, hooks: Vec<Box<dyn Hook>>) -> Self {
+    pub(crate) fn new(
+        base_url: Url,
+        network: Network,
+        http_client: HttpClient,
+        hooks: Vec<Box<dyn Hook>>,
+    ) -> Self {
         Self {
             base_url,
+            network,
             http_client,
             hooks,
         }
@@ -453,7 +461,7 @@ mod tests {
         let http_client = HttpClient::new();
         let hooks: Vec<Box<dyn Hook>> = vec![];
 
-        let client = Client::new(base_url.clone(), http_client, hooks);
+        let client = Client::new(base_url.clone(), Network::Mainnet, http_client, hooks);
 
         assert_eq!(client.base_url, base_url);
         assert_eq!(client.hooks.len(), 0);

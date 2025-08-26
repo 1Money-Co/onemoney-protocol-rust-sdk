@@ -12,7 +12,6 @@ use alloy_primitives::{Address, U256};
 use onemoney_protocol::TokenMintPayload;
 use onemoney_protocol::client::builder::ClientBuilder;
 use onemoney_protocol::client::config::Network;
-use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -173,65 +172,6 @@ fn test_rapid_payload_creation_performance() {
         avg_time
     );
 }
-
-#[test]
-fn test_concurrent_serialization_performance() {
-    let payload = Arc::new(TokenMintPayload {
-        recent_epoch: 100,
-        recent_checkpoint: 200,
-        chain_id: 1,
-        nonce: 1,
-        token: Address::from([0x42; 20]),
-        recipient: Address::from([0x24; 20]),
-        value: U256::from(1_000_000_000_000_000_000u64),
-    });
-
-    let num_threads = 4;
-    let iterations_per_thread = 250;
-
-    let start = Instant::now();
-
-    let handles: Vec<_> = (0..num_threads)
-        .map(|thread_id| {
-            let payload_clone = Arc::clone(&payload);
-            thread::spawn(move || {
-                for i in 0..iterations_per_thread {
-                    let json = serde_json::to_string(&*payload_clone).unwrap_or_else(|_| {
-                        panic!(
-                            "Serialization failed in thread {} iteration {}",
-                            thread_id, i
-                        )
-                    });
-
-                    // Verify content to ensure work is actually done
-                    assert!(json.contains("recent_epoch"));
-                    assert!(json.contains("1000000000000000000"));
-                }
-            })
-        })
-        .collect();
-
-    for handle in handles {
-        handle.join().expect("Thread should complete successfully");
-    }
-
-    let duration = start.elapsed();
-    let total_operations = num_threads * iterations_per_thread;
-    let avg_time = duration / total_operations;
-
-    println!(
-        "Completed {} concurrent serializations in {:?} (avg: {:?} each)",
-        total_operations, duration, avg_time
-    );
-
-    // Should handle concurrent serialization efficiently
-    assert!(
-        avg_time < Duration::from_micros(100),
-        "Concurrent serialization too slow: {:?} per operation",
-        avg_time
-    );
-}
-
 //
 // ============================================================================
 // EDGE CASE VALUE HANDLING

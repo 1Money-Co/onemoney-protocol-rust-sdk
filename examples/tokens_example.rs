@@ -66,7 +66,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     };
     sleep(Duration::from_secs(1)).await;
 
-    let chain_id = match client.get_chain_id().await {
+    let chain_id = match client.fetch_chain_id_from_network().await {
         Ok(id) => {
             println!("Chain ID: {}", id);
             id
