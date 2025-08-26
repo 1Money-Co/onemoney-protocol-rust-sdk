@@ -75,13 +75,14 @@ impl ClientBuilder {
 
     /// Build the client.
     pub fn build(self) -> Result<Client> {
-        // Priority: base_url > network > default (mainnet)
+        // Determine the network - priority: network > default (mainnet)
+        let network = self.network.unwrap_or_default();
+
+        // Priority: base_url > network URL
         let base_url = if let Some(url) = self.base_url {
             url
-        } else if let Some(network) = self.network {
-            network.url().to_string()
         } else {
-            Network::default().url().to_string()
+            network.url().to_string()
         };
         let base_url = Url::parse(&base_url)?;
 
@@ -91,11 +92,11 @@ impl ClientBuilder {
             let timeout = self.timeout.unwrap_or(DEFAULT_TIMEOUT);
             reqwest::Client::builder()
                 .timeout(timeout)
-                .user_agent("onemoney-rust-sdk/0.1.0")
+                .user_agent("onemoney-rust-sdk/0.2.1")
                 .build()?
         };
 
-        Ok(Client::new(base_url, http_client, self.hooks))
+        Ok(Client::new(base_url, network, http_client, self.hooks))
     }
 }
 

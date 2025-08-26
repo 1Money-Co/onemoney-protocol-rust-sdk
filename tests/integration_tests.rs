@@ -61,7 +61,7 @@ async fn test_network_connectivity() -> Result<(), Box<dyn Error>> {
     // In a real testing environment, we would either:
     // 1. Use a mock server
     // 2. Skip this test if no test node is available
-    match client.get_chain_id().await {
+    match client.fetch_chain_id_from_network().await {
         Ok(chain_id) => {
             println!(
                 "Successfully connected to test node. Chain ID: {}",
@@ -119,7 +119,7 @@ async fn test_error_handling() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(1))
         .build()?;
 
-    let result = client.get_chain_id().await;
+    let result = client.fetch_chain_id_from_network().await;
     assert!(
         result.is_err(),
         "Should fail to connect to invalid endpoint"
@@ -147,7 +147,7 @@ async fn test_timeout_handling() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_millis(100))     // Very short timeout
         .build()?;
 
-    let result = client.get_chain_id().await;
+    let result = client.fetch_chain_id_from_network().await;
     assert!(
         result.is_err(),
         "Should timeout with short timeout duration"
@@ -182,7 +182,7 @@ mod integration_with_server {
         let client = test_utils::create_test_client()?;
 
         // Test chain ID retrieval
-        let chain_id = client.get_chain_id().await?;
+        let chain_id = client.fetch_chain_id_from_network().await?;
         assert!(chain_id > 0);
 
         Ok(())
@@ -247,7 +247,7 @@ async fn test_concurrent_requests() -> Result<(), Box<dyn Error>> {
         let handle = tokio::spawn(async move {
             println!("Starting request {}", i);
             let client = test_utils::create_test_client().expect("Should create client");
-            let result = client.get_chain_id().await;
+            let result = client.fetch_chain_id_from_network().await;
             println!("Completed request {}: {:?}", i, result.is_ok());
             result
         });
@@ -279,29 +279,12 @@ async fn test_multiple_client_instances() -> Result<(), Box<dyn Error>> {
     let client2 = test_utils::create_test_client()?;
 
     // Both clients should be usable and behave consistently
-    let future1 = client1.get_chain_id();
-    let future2 = client2.get_chain_id();
+    let result1 = client1.get_chain_id();
+    let result2 = client2.get_chain_id();
 
-    // Both should behave the same way (succeed or fail consistently)
-    let (result1, result2) = tokio::join!(future1, future2);
-
-    match (result1, result2) {
-        (Ok(id1), Ok(id2)) => {
-            assert_eq!(
-                id1, id2,
-                "Different client instances should return same chain ID"
-            );
-        }
-        (Err(_), Err(_)) => {
-            // Both failed, which is fine if no test server is running
-        }
-        _ => {
-            println!(
-                "Warning: Client instances had inconsistent behavior (one succeeded, one failed)"
-            );
-            // Don't fail the test - this could happen due to network timing
-        }
-    }
+    // Both clients should return the same chain ID
+    assert_eq!(result1, result2);
+    println!("Both clients returned chain ID: {}", result1);
 
     Ok(())
 }
@@ -315,7 +298,7 @@ async fn test_performance_characteristics() -> Result<(), Box<dyn Error>> {
 
     // Measure response time for a single request
     let start = Instant::now();
-    let _result = client.get_chain_id().await;
+    let _result = client.fetch_chain_id_from_network().await;
     let duration = start.elapsed();
 
     println!("Single request took: {:?}", duration);

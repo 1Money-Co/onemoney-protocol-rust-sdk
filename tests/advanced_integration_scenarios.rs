@@ -146,7 +146,8 @@ fn test_multi_client_coordination_pattern() -> Result<(), Box<dyn Error>> {
 async fn test_client_recovery_from_network_errors() {
     // Test client behavior when network operations fail
 
-    let client = create_test_client("recovery_test").expect("Client creation should succeed");
+    let client =
+        create_unreachable_test_client("recovery_test").expect("Client creation should succeed");
 
     // Test graceful handling of unreachable endpoints
     let test_operations = ["get_chain_id", "get_latest_epoch_checkpoint"];
@@ -154,13 +155,22 @@ async fn test_client_recovery_from_network_errors() {
     for operation in test_operations {
         match operation {
             "get_chain_id" => {
-                let result = client.get_chain_id().await;
-                assert!(result.is_err(), "Should fail gracefully for {}", operation);
-                println!(
-                    "Operation {} failed as expected: {:?}",
-                    operation,
-                    result.err()
-                );
+                let result = client.fetch_chain_id_from_network().await;
+                println!("fetch_chain_id_from_network result: {:?}", result);
+
+                // Check if we have an actual error or success
+                match result {
+                    Ok(chain_id) => {
+                        println!("Unexpected success: got chain ID {}", chain_id);
+                        panic!(
+                            "Expected network error but got successful response with chain ID: {}",
+                            chain_id
+                        );
+                    }
+                    Err(err) => {
+                        println!("Operation {} failed as expected: {:?}", operation, err);
+                    }
+                }
             }
             "get_latest_epoch_checkpoint" => {
                 let result = client.get_latest_epoch_checkpoint().await;
@@ -366,6 +376,20 @@ fn create_test_client(name: &str) -> Result<Client, Box<dyn Error>> {
 
     println!(
         "Created test client '{}': {:?}",
+        name,
+        format!("{:?}", client)
+    );
+    Ok(client)
+}
+
+fn create_unreachable_test_client(name: &str) -> Result<Client, Box<dyn Error>> {
+    // Use a port that's guaranteed to be unreachable
+    let client = ClientBuilder::new()
+        .base_url("http://127.0.0.1:19999")  // Different port that should be unreachable
+        .timeout(Duration::from_secs(2))     // Shorter timeout for faster test
+        .build()?;
+    println!(
+        "Created unreachable test client '{}': {:?}",
         name,
         format!("{:?}", client)
     );

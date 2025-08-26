@@ -610,7 +610,7 @@ async fn test_api_error_responses() {
         .build()
         .expect("Client should build");
 
-    let result = client.get_chain_id().await;
+    let result = client.fetch_chain_id_from_network().await;
     assert!(result.is_err(), "Should fail with 404");
 
     match result {

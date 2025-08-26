@@ -117,7 +117,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     };
 
-    let chain_id = match client.get_chain_id().await {
+    let chain_id = match client.fetch_chain_id_from_network().await {
         Ok(id) => id,
         Err(e) => {
             print_detailed_error("Could not get chain ID", &e);
