@@ -92,7 +92,7 @@ impl ClientBuilder {
             let timeout = self.timeout.unwrap_or(DEFAULT_TIMEOUT);
             reqwest::Client::builder()
                 .timeout(timeout)
-                .user_agent("onemoney-rust-sdk/0.2.1")
+                .user_agent("onemoney-rust-sdk/0.3.0")
                 .build()?
         };
 
