@@ -93,8 +93,12 @@ impl Display for Transaction {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         write!(
             f,
-            "Transaction {}: from {} at recent epoch {} recent checkpoint {} (nonce: {})",
-            self.hash, self.from, self.recent_epoch, self.recent_checkpoint, self.nonce
+            "Transaction {}: from {} at recent epoch {} checkpoint {} (nonce: {})",
+            self.hash,
+            self.from,
+            self.recent_epoch,
+            self.checkpoint_number.unwrap_or(self.recent_checkpoint),
+            self.nonce
         )?;
         if let Some(checkpoint_hash) = &self.checkpoint_hash {
             write!(f, " in checkpoint {}", checkpoint_hash)?;
@@ -665,7 +669,7 @@ mod tests {
         let display_str = format!("{}", transaction);
         assert_eq!(
             display_str,
-            "Transaction 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777: from 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0 at epoch 100 checkpoint 200 (nonce: 5) in checkpoint 0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f"
+            "Transaction 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777: from 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0 at recent epoch 100 checkpoint 200 (nonce: 5) in checkpoint 0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f"
         );
     }
 
@@ -692,7 +696,7 @@ mod tests {
         let display_str = format!("{}", transaction);
         assert_eq!(
             display_str,
-            "Transaction 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777: from 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0 at epoch 100 checkpoint 200 (nonce: 5)"
+            "Transaction 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777: from 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0 at recent epoch 100 checkpoint 200 (nonce: 5)"
         );
     }
 
