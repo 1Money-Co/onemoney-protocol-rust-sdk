@@ -69,10 +69,10 @@ pub struct Transaction {
     pub transaction_index: Option<u64>,
 
     /// Epoch
-    pub epoch: u64,
+    pub recent_epoch: u64,
 
     /// Checkpoint
-    pub checkpoint: u64,
+    pub recent_checkpoint: u64,
 
     /// The chain id of the transaction, if any.
     pub chain_id: ChainId,
@@ -94,7 +94,7 @@ impl Display for Transaction {
         write!(
             f,
             "Transaction {}: from {} at epoch {} checkpoint {} (nonce: {})",
-            self.hash, self.from, self.epoch, self.checkpoint, self.nonce
+            self.hash, self.from, self.recent_epoch, self.recent_checkpoint, self.nonce
         )?;
         if let Some(checkpoint_hash) = &self.checkpoint_hash {
             write!(f, " in checkpoint {}", checkpoint_hash)?;
@@ -189,7 +189,7 @@ pub enum TxPayload {
         value: String,
 
         /// The real recipient address.
-        to: Address,
+        recipient: Address,
 
         /// The token address, if it's native token, token address is `None`.
         token: Option<Address>,
@@ -203,9 +203,9 @@ pub enum TxPayload {
         /// The type of authority to update.
         authority_type: String,
         /// The new authority
-        new_authority: Address,
+        authority_address: Address,
         /// The amount of tokens to mint.
-        mint_tokens: Option<String>,
+        value: Option<String>,
 
         /// The token address
         token: Address,
@@ -219,9 +219,9 @@ pub enum TxPayload {
         /// The type of authority to update.
         authority_type: String,
         /// The new authority
-        new_authority: Address,
+        authority_address: Address,
         /// The amount of tokens to mint.
-        mint_tokens: Option<String>,
+        value: Option<String>,
 
         /// The token address
         token: Address,
@@ -260,7 +260,7 @@ pub enum TxPayload {
         /// The amount of new tokens to mint.
         value: String,
         /// The address to mint the tokens to.
-        address: Address,
+        recipient: Address,
 
         /// The token address
         token: Address,
@@ -275,7 +275,7 @@ pub enum TxPayload {
         /// The amount of tokens to burn.
         value: String,
         /// The address to burn the tokens from.
-        address: Address,
+        recipient: Address,
 
         /// The token address
         token: Address,
@@ -347,7 +347,7 @@ impl Default for TxPayload {
     fn default() -> Self {
         Self::TokenTransfer {
             value: String::default(),
-            to: Address::default(),
+            recipient: Address::default(),
             token: None,
         }
     }
@@ -448,8 +448,8 @@ mod tests {
             ),
             checkpoint_number: Some(1500),
             transaction_index: Some(0),
-            epoch: 100,
-            checkpoint: 200,
+            recent_epoch: 100,
+            recent_checkpoint: 200,
             chain_id: 1212101,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
@@ -463,8 +463,11 @@ mod tests {
             serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(transaction.hash, deserialized.hash);
-        assert_eq!(transaction.epoch, deserialized.epoch);
-        assert_eq!(transaction.checkpoint, deserialized.checkpoint);
+        assert_eq!(transaction.recent_epoch, deserialized.recent_epoch);
+        assert_eq!(
+            transaction.recent_checkpoint,
+            deserialized.recent_checkpoint
+        );
     }
 
     #[test]
@@ -543,7 +546,7 @@ mod tests {
     fn test_tx_payload_token_transfer_serialization() {
         let payload = TxPayload::TokenTransfer {
             value: "1000000000000000000".to_string(),
-            to: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
             token: Some(
                 Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
@@ -556,7 +559,11 @@ mod tests {
             serde_json::from_str(&json).expect("Test data should be valid");
 
         match deserialized {
-            TxPayload::TokenTransfer { value, to, token } => {
+            TxPayload::TokenTransfer {
+                value,
+                recipient: to,
+                token,
+            } => {
                 assert_eq!(value, "1000000000000000000");
                 assert_eq!(
                     to,
@@ -585,7 +592,7 @@ mod tests {
 
         let transfer_payload = TxPayload::TokenTransfer {
             value: "1000000000000000000".to_string(),
-            to: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
             token: None,
         };
@@ -599,7 +606,11 @@ mod tests {
         let default_payload = TxPayload::default();
 
         match default_payload {
-            TxPayload::TokenTransfer { value, to, token } => {
+            TxPayload::TokenTransfer {
+                value,
+                recipient: to,
+                token,
+            } => {
                 assert_eq!(value, String::default());
                 assert_eq!(to, Address::default());
                 assert_eq!(token, None);
@@ -641,8 +652,8 @@ mod tests {
             ),
             checkpoint_number: Some(200),
             transaction_index: Some(1),
-            epoch: 100,
-            checkpoint: 200,
+            recent_epoch: 100,
+            recent_checkpoint: 200,
             chain_id: 1212101,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
@@ -668,8 +679,8 @@ mod tests {
             checkpoint_hash: None, // This tests the None branch
             checkpoint_number: None,
             transaction_index: None,
-            epoch: 100,
-            checkpoint: 200,
+            recent_epoch: 100,
+            recent_checkpoint: 200,
             chain_id: 1212101,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
