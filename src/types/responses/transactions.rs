@@ -93,7 +93,7 @@ impl Display for Transaction {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         write!(
             f,
-            "Transaction {}: from {} at epoch {} checkpoint {} (nonce: {})",
+            "Transaction {}: from {} at recent epoch {} recent checkpoint {} (nonce: {})",
             self.hash, self.from, self.recent_epoch, self.recent_checkpoint, self.nonce
         )?;
         if let Some(checkpoint_hash) = &self.checkpoint_hash {
