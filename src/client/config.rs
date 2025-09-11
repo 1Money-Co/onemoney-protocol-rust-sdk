@@ -59,7 +59,7 @@ impl Network {
         }
     }
 
-    pub fn predefined_chain_id(&self) -> u64 {
+    pub const fn predefined_chain_id(&self) -> u64 {
         match self {
             Network::Mainnet => MAINNET_CHAIN_ID,
             Network::Testnet => TESTNET_CHAIN_ID,

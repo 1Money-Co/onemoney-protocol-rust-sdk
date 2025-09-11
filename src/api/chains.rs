@@ -25,7 +25,7 @@ impl Client {
     /// let chain_id = client.predefined_chain_id();
     /// assert_eq!(chain_id, 21210);
     /// ```
-    pub fn predefined_chain_id(&self) -> u64 {
+    pub const fn predefined_chain_id(&self) -> u64 {
         self.network.predefined_chain_id()
     }
 
