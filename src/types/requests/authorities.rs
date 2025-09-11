@@ -29,14 +29,7 @@ pub enum Authority {
 
 impl Display for Authority {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        let authority_name = match self {
-            Authority::MasterMintBurn => "Master Mint/Burn Authority",
-            Authority::MintBurnTokens => "Mint/Burn Tokens Authority",
-            Authority::Pause => "Pause Authority",
-            Authority::ManageList => "Manage List Authority",
-            Authority::UpdateMetadata => "Update Metadata Authority",
-        };
-        write!(f, "{}", authority_name)
+        write!(f, "{}", self.as_str())
     }
 }
 
