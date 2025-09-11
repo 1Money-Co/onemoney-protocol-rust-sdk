@@ -49,7 +49,7 @@ impl Client {
     ///     let client = Client::mainnet()?;
     ///
     ///     let api_chain_id = client.fetch_chain_id_from_network().await?;
-    ///     let expected_chain_id = client.get_chain_id();
+    ///     let expected_chain_id = client.predefined_chain_id();
     ///
     ///     assert_eq!(api_chain_id, expected_chain_id);
     ///     println!("Network chain ID matches expected: {}", api_chain_id);
