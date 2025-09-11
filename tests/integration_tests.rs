@@ -46,7 +46,7 @@ async fn test_client_creation() -> std::result::Result<(), Box<dyn Error>> {
 
     // Test custom URL
     let _custom_client = ClientBuilder::new()
-        .base_url("http://localhost:8080")
+        .network(Network::Custom("http://localhost:8080".to_string()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -115,7 +115,7 @@ async fn test_address_validation() -> Result<(), Box<dyn Error>> {
 async fn test_error_handling() -> Result<(), Box<dyn Error>> {
     // Test error handling with unreachable endpoint
     let client = ClientBuilder::new()
-        .base_url("http://127.0.0.1:1") // Invalid port
+        .network(Network::Custom("http://127.0.0.1:1".to_string())) // Invalid port
         .timeout(Duration::from_secs(1))
         .build()?;
 
@@ -143,7 +143,7 @@ async fn test_error_handling() -> Result<(), Box<dyn Error>> {
 async fn test_timeout_handling() -> Result<(), Box<dyn Error>> {
     // Test very short timeout
     let client = ClientBuilder::new()
-        .base_url("http://httpbin.org/delay/10") // Delayed response
+        .network(Network::Custom("http://httpbin.org/delay/10".to_string())) // Delayed response
         .timeout(Duration::from_millis(100))     // Very short timeout
         .build()?;
 
@@ -279,8 +279,8 @@ async fn test_multiple_client_instances() -> Result<(), Box<dyn Error>> {
     let client2 = test_utils::create_test_client()?;
 
     // Both clients should be usable and behave consistently
-    let result1 = client1.get_chain_id();
-    let result2 = client2.get_chain_id();
+    let result1 = client1.predefined_chain_id();
+    let result2 = client2.predefined_chain_id();
 
     // Both clients should return the same chain ID
     assert_eq!(result1, result2);

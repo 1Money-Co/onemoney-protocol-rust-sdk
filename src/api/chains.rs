@@ -7,14 +7,14 @@ use crate::client::config::endpoints::chains::CHAIN_ID;
 use crate::responses::ChainIdResponse;
 
 impl Client {
-    /// Get the chain ID for this network.
+    /// Get the predefined chain ID for this network.
     ///
     /// This method returns the predefined chain ID for the client's network configuration
     /// without making any network requests. This is fast and always available.
     ///
     /// # Returns
     ///
-    /// The chain ID for this network.
+    /// The predefined chain ID for this network.
     ///
     /// # Example
     ///
@@ -22,11 +22,11 @@ impl Client {
     /// use onemoney_protocol::Client;
     ///
     /// let client = Client::mainnet().unwrap();
-    /// let chain_id = client.get_chain_id();
+    /// let chain_id = client.predefined_chain_id();
     /// assert_eq!(chain_id, 21210);
     /// ```
-    pub fn get_chain_id(&self) -> u64 {
-        self.network.chain_id()
+    pub fn predefined_chain_id(&self) -> u64 {
+        self.network.predefined_chain_id()
     }
 
     /// Fetch the current chain ID from the network API.
@@ -87,8 +87,8 @@ mod tests {
         let testnet_client = Client::testnet().expect("Should create testnet client");
         let local_client = Client::local().expect("Should create local client");
 
-        assert_eq!(mainnet_client.get_chain_id(), 21210);
-        assert_eq!(testnet_client.get_chain_id(), 1_212_101);
-        assert_eq!(local_client.get_chain_id(), 1_212_101);
+        assert_eq!(mainnet_client.predefined_chain_id(), 21210);
+        assert_eq!(testnet_client.predefined_chain_id(), 1_212_101);
+        assert_eq!(local_client.predefined_chain_id(), 1_212_101);
     }
 }

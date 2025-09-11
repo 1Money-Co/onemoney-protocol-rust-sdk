@@ -150,7 +150,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("Testing with invalid URL:");
     match ClientBuilder::new()
-        .base_url("https://invalid-url-that-does-not-exist.example.com")
+        .network(Network::Custom(
+            "https://invalid-url-that-does-not-exist.example.com".to_string(),
+        ))
         .timeout(Duration::from_secs(5))
         .build()
     {

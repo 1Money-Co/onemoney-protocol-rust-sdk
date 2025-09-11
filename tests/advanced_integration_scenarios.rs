@@ -223,7 +223,7 @@ fn test_configuration_validation_patterns() -> Result<(), Box<dyn Error>> {
 
     for network in networks {
         let client = ClientBuilder::new()
-            .network(network)
+            .network(network.clone())
             .timeout(Duration::from_secs(10))
             .build()?;
 
@@ -385,7 +385,7 @@ fn create_test_client(name: &str) -> Result<Client, Box<dyn Error>> {
 fn create_unreachable_test_client(name: &str) -> Result<Client, Box<dyn Error>> {
     // Use a port that's guaranteed to be unreachable
     let client = ClientBuilder::new()
-        .base_url("http://127.0.0.1:19999")  // Different port that should be unreachable
+        .network(Network::Custom("http://127.0.0.1:19999".to_string()))  // Different port that should be unreachable
         .timeout(Duration::from_secs(2))     // Shorter timeout for faster test
         .build()?;
     println!(
