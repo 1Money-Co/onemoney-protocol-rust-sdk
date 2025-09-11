@@ -79,7 +79,7 @@ impl ClientBuilder {
                 .build()?
         };
 
-        Ok(Client::new(network, http_client, self.hooks)?)
+        Client::new(network, http_client, self.hooks)
     }
 }
 
