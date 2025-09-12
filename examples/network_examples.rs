@@ -128,10 +128,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Custom URL client
     println!("\n   - Custom URL client:");
     println!("     Example: ClientBuilder::new()");
-    println!("         .base_url(\"https://my-custom-node.example.com\")");
+    println!("         .network(Network::Custom(\"https://my-custom-node.example.com\".to_string()))");
     println!("         .timeout(Duration::from_secs(60))");
     println!("         .build()?;");
-    println!("     Note: base_url takes precedence over network setting");
 
     // 5. Network Switching Example
     println!("\n5. Network Switching Example");
