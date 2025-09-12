@@ -605,7 +605,7 @@ fn test_error_types() {
 async fn test_api_error_responses() {
     // Test how we handle HTTP error responses
     let client = ClientBuilder::new()
-        .network(Network::Custom("http://httpbin.org/status/404".to_string())) // Returns 404
+        .network(Network::Custom("http://httpbin.org/status/404".into())) // Returns 404
         .timeout(Duration::from_secs(5))
         .build()
         .expect("Client should build");

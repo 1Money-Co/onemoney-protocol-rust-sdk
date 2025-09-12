@@ -46,7 +46,7 @@ async fn test_client_creation() -> std::result::Result<(), Box<dyn Error>> {
 
     // Test custom URL
     let _custom_client = ClientBuilder::new()
-        .network(Network::Custom("http://localhost:8080".to_string()))
+        .network(Network::Custom("http://localhost:8080".into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -115,7 +115,7 @@ async fn test_address_validation() -> Result<(), Box<dyn Error>> {
 async fn test_error_handling() -> Result<(), Box<dyn Error>> {
     // Test error handling with unreachable endpoint
     let client = ClientBuilder::new()
-        .network(Network::Custom("http://127.0.0.1:1".to_string())) // Invalid port
+        .network(Network::Custom("http://127.0.0.1:1".into())) // Invalid port
         .timeout(Duration::from_secs(1))
         .build()?;
 
@@ -143,7 +143,7 @@ async fn test_error_handling() -> Result<(), Box<dyn Error>> {
 async fn test_timeout_handling() -> Result<(), Box<dyn Error>> {
     // Test very short timeout
     let client = ClientBuilder::new()
-        .network(Network::Custom("http://httpbin.org/delay/10".to_string())) // Delayed response
+        .network(Network::Custom("http://httpbin.org/delay/10".into())) // Delayed response
         .timeout(Duration::from_millis(100))     // Very short timeout
         .build()?;
 

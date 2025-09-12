@@ -46,7 +46,7 @@ mod mock_utils {
     /// Create a test client for mock testing
     pub fn create_mock_client() -> Result<Client, Box<dyn std::error::Error>> {
         Ok(ClientBuilder::new()
-            .network(Network::Custom("http://127.0.0.1:1".to_string())) // Intentionally unreachable for mock testing
+            .network(Network::Custom("http://127.0.0.1:1".into())) // Intentionally unreachable for mock testing
             .timeout(TEST_TIMEOUT)
             .build()?)
     }
@@ -140,7 +140,7 @@ async fn test_chain_id_mock() -> Result<(), Box<dyn Error>> {
 
     // Create client pointing to mock server
     let client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -169,7 +169,7 @@ async fn test_account_nonce_mock() -> Result<(), Box<dyn Error>> {
         .create();
 
     let client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -217,7 +217,7 @@ async fn test_token_metadata_mock() -> Result<(), Box<dyn Error>> {
         .create();
 
     let client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -249,7 +249,7 @@ async fn test_latest_state_mock() -> Result<(), Box<dyn Error>> {
         .create();
 
     let client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -278,7 +278,7 @@ async fn test_http_error_responses() -> Result<(), Box<dyn Error>> {
         .create();
 
     let client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -303,7 +303,7 @@ async fn test_api_rate_limiting_simulation() -> Result<(), Box<dyn Error>> {
         .create();
 
     let client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -327,7 +327,7 @@ async fn test_invalid_json_response() -> Result<(), Box<dyn Error>> {
         .create();
 
     let client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -365,7 +365,7 @@ async fn test_missing_fields_in_response() -> Result<(), Box<dyn Error>> {
         .create();
 
     let client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -396,7 +396,7 @@ async fn test_network_timeout_mock() -> Result<(), Box<dyn Error>> {
 
     // Create client with very short timeout
     let client = ClientBuilder::new()
-        .network(Network::Custom("http://127.0.0.1:1".to_string())) // Connect to nothing
+        .network(Network::Custom("http://127.0.0.1:1".into())) // Connect to nothing
         .timeout(Duration::from_millis(100))
         .build()?;
 
@@ -419,7 +419,7 @@ async fn test_content_type_validation() -> Result<(), Box<dyn Error>> {
         .create();
 
     let client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -449,7 +449,7 @@ async fn test_large_response_handling() -> Result<(), Box<dyn Error>> {
         .create();
 
     let client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(10)) // Longer timeout for large response
         .build()?;
 
@@ -489,7 +489,7 @@ async fn test_multiple_concurrent_requests() -> Result<(), Box<dyn Error>> {
         .create();
 
     let _client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -497,7 +497,7 @@ async fn test_multiple_concurrent_requests() -> Result<(), Box<dyn Error>> {
     let mut handles = Vec::new();
     for i in 0..5 {
         let client_for_task = ClientBuilder::new()
-            .network(Network::Custom(server.url().to_string()))
+            .network(Network::Custom(server.url().into()))
             .timeout(Duration::from_secs(5))
             .build()?;
         let handle = tokio::spawn(async move {
@@ -931,7 +931,7 @@ async fn test_mock_response_consistency() -> Result<(), Box<dyn Error>> {
         .create();
 
     let client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 
@@ -972,7 +972,7 @@ async fn test_mock_error_response_formats() -> Result<(), Box<dyn Error>> {
             .create();
 
         let client = ClientBuilder::new()
-            .network(Network::Custom(server.url().to_string()))
+            .network(Network::Custom(server.url().into()))
             .timeout(Duration::from_secs(5))
             .build()?;
 
@@ -998,7 +998,7 @@ async fn test_mock_server_edge_cases() -> Result<(), Box<dyn Error>> {
         .create();
 
     let client = ClientBuilder::new()
-        .network(Network::Custom(server.url().to_string()))
+        .network(Network::Custom(server.url().into()))
         .timeout(Duration::from_secs(5))
         .build()?;
 

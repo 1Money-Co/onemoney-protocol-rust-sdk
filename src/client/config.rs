@@ -1,6 +1,6 @@
 //! Network configuration and API endpoints.
 
-use std::time::Duration;
+use std::{borrow::Cow, time::Duration};
 
 /// Default mainnet API URL.
 pub const MAINNET_URL: &str = "https://api.mainnet.1money.network";
@@ -45,7 +45,7 @@ pub enum Network {
     /// Local development environment.
     Local,
     /// Custom network environment.
-    Custom(String),
+    Custom(Cow<'static, str>),
 }
 
 impl Network {
@@ -239,7 +239,7 @@ mod tests {
     #[test]  
     #[should_panic(expected = "Custom network does not have a predefined chain ID")]  
     fn test_predefined_chain_id_panics_for_custom() {  
-        let n = Network::Custom("http://localhost:18555".to_string());  
+        let n = Network::Custom("http://localhost:18555".into());  
         let _ = n.predefined_chain_id();  
     }  
 

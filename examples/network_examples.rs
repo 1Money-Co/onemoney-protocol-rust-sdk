@@ -128,7 +128,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Custom URL client
     println!("\n   - Custom URL client:");
     println!("     Example: ClientBuilder::new()");
-    println!("         .network(Network::Custom(\"https://my-custom-node.example.com\".to_string()))");
+    println!("         .network(Network::Custom(\"https://my-custom-node.example.com\".into()))");
     println!("         .timeout(Duration::from_secs(60))");
     println!("         .build()?;");
 
@@ -150,7 +150,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Testing with invalid URL:");
     match ClientBuilder::new()
         .network(Network::Custom(
-            "https://invalid-url-that-does-not-exist.example.com".to_string(),
+            "https://invalid-url-that-does-not-exist.example.com".into(),
         ))
         .timeout(Duration::from_secs(5))
         .build()

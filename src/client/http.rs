@@ -45,7 +45,7 @@ impl Client {
     /// Create a new client for custom network.
     pub fn custom(base_url: String) -> Result<Self> {
         ClientBuilder::new()
-            .network(Network::Custom(base_url))
+            .network(Network::Custom(base_url.into()))
             .build()
     }
 
@@ -472,7 +472,7 @@ mod tests {
         let hooks: Vec<Box<dyn Hook>> = vec![];
 
         let client =
-            Client::new(Network::Custom(base_url.to_string()), http_client, hooks).unwrap();
+            Client::new(Network::Custom(base_url.to_string().into()), http_client, hooks).unwrap();
 
         assert_eq!(client.base_url, base_url);
         assert_eq!(client.hooks.len(), 0);

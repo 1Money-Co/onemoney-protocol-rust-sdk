@@ -385,7 +385,7 @@ fn create_test_client(name: &str) -> Result<Client, Box<dyn Error>> {
 fn create_unreachable_test_client(name: &str) -> Result<Client, Box<dyn Error>> {
     // Use a port that's guaranteed to be unreachable
     let client = ClientBuilder::new()
-        .network(Network::Custom("http://127.0.0.1:19999".to_string()))  // Different port that should be unreachable
+        .network(Network::Custom("http://127.0.0.1:19999".into()))  // Different port that should be unreachable
         .timeout(Duration::from_secs(2))     // Shorter timeout for faster test
         .build()?;
     println!(

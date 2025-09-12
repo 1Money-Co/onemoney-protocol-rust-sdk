@@ -151,9 +151,9 @@ mod tests {
         ];
 
         for url in test_urls {
-            let builder = ClientBuilder::new().network(Network::Custom(url.to_string()));
+            let builder = ClientBuilder::new().network(Network::Custom(url.into()));
 
-            assert_eq!(builder.network, Some(Network::Custom(url.to_string())));
+            assert_eq!(builder.network, Some(Network::Custom(url.into())));
 
             let client = builder.build();
             assert!(client.is_ok(), "Custom base URL should work for {}", url);
@@ -205,7 +205,7 @@ mod tests {
     fn test_builder_validation_errors() {
         // Test invalid URL
         let result = ClientBuilder::new()
-            .network(Network::Custom("invalid-url-format".to_string()))
+            .network(Network::Custom("invalid-url-format".into()))
             .build();
 
         assert!(result.is_err(), "Invalid URL should cause build error");
@@ -214,7 +214,7 @@ mod tests {
     #[test]
     fn test_builder_debug_implementation() {
         let builder = ClientBuilder::new()
-            .network(Network::Custom("http://example.com".to_string()))
+            .network(Network::Custom("http://example.com".into()))
             .timeout(Duration::from_secs(30));
 
         let debug_str = format!("{:?}", builder);
@@ -283,7 +283,7 @@ mod tests {
 
         for url in edge_case_urls {
             let client = ClientBuilder::new()
-                .network(Network::Custom(url.to_string()))
+                .network(Network::Custom(url.into()))
                 .build();
             assert!(client.is_ok(), "Edge case URL {} should work", url);
         }
