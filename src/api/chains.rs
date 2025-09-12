@@ -82,7 +82,7 @@ mod tests {
 
     #[test]
     fn test_get_chain_id() {
-        // Test get_chain_id method for different client types
+        // Test method for different client types
         let mainnet_client = Client::mainnet().expect("Should create mainnet client");
         let testnet_client = Client::testnet().expect("Should create testnet client");
         let local_client = Client::local().expect("Should create local client");
