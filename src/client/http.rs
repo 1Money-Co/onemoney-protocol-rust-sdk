@@ -471,8 +471,12 @@ mod tests {
         let http_client = HttpClient::new();
         let hooks: Vec<Box<dyn Hook>> = vec![];
 
-        let client =
-            Client::new(Network::Custom(base_url.to_string().into()), http_client, hooks).unwrap();
+        let client = Client::new(
+            Network::Custom(base_url.to_string().into()),
+            http_client,
+            hooks,
+        )
+        .unwrap();
 
         assert_eq!(client.base_url, base_url);
         assert_eq!(client.hooks.len(), 0);

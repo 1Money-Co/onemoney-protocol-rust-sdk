@@ -236,12 +236,12 @@ mod tests {
         assert_eq!(Network::Local.predefined_chain_id(), 1_212_101);
     }
 
-    #[test]  
-    #[should_panic(expected = "Custom network does not have a predefined chain ID")]  
-    fn test_predefined_chain_id_panics_for_custom() {  
-        let n = Network::Custom("http://localhost:18555".into());  
-        let _ = n.predefined_chain_id();  
-    }  
+    #[test]
+    #[should_panic(expected = "Custom network does not have a predefined chain ID")]
+    fn test_predefined_chain_id_panics_for_custom() {
+        let n = Network::Custom("http://localhost:18555".into());
+        let _ = n.predefined_chain_id();
+    }
 
     #[test]
     fn test_constants() {
