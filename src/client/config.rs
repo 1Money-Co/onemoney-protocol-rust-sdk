@@ -229,19 +229,12 @@ mod tests {
         assert_eq!(default_network, Network::Mainnet);
     }
 
-    // #[test]
-    // fn test_network_chain_ids() {
-    //     assert_eq!(Network::Mainnet.chain_id(), 21210);
-    //     assert_eq!(Network::Testnet.chain_id(), 1_212_101);
-    //     assert_eq!(Network::Local.chain_id(), 2_212_102);
-    // }
-
-    // #[test]
-    // fn test_chain_id_constants() {
-    //     assert_eq!(MAINNET_CHAIN_ID, 21210);
-    //     assert_eq!(TESTNET_CHAIN_ID, 1_212_101);
-    //     assert_eq!(LOCAL_CHAIN_ID, 2_212_102);
-    // }
+    #[test]
+    fn test_network_chain_ids() {
+        assert_eq!(Network::Mainnet.predefined_chain_id(), 21210);
+        assert_eq!(Network::Testnet.predefined_chain_id(), 1_212_101);
+        assert_eq!(Network::Local.predefined_chain_id(), 1_212_101);
+    }
 
     #[test]
     fn test_constants() {
