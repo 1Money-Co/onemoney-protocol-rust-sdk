@@ -20,7 +20,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // 1. Get Predefined Chain ID (Fast)
     println!("\n1. Get Predefined Chain ID");
     println!("==========================");
-    let chain_id = client.get_chain_id();
+    let chain_id = client.predefined_chain_id();
     println!("Expected chain ID: {}", chain_id);
 
     // 2. Fetch Chain ID from Network

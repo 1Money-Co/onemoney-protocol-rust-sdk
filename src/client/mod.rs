@@ -21,7 +21,7 @@ mod tests {
         // Test that all core public interfaces are exported correctly
 
         // Test ClientBuilder is accessible
-        let builder = ClientBuilder::new();
+        let builder = ClientBuilder::new().network(Network::Mainnet);
         assert!(
             builder.build().is_ok(),
             "ClientBuilder should be accessible"
@@ -108,7 +108,7 @@ mod tests {
         // Test that Network configuration works correctly
         for network in [Network::Mainnet, Network::Testnet, Network::Local] {
             let client = ClientBuilder::new()
-                .network(network)
+                .network(network.clone())
                 .build()
                 .expect("Network configuration should work");
 

@@ -42,19 +42,29 @@ impl Client {
         ClientBuilder::new().network(Network::Local).build()
     }
 
+    /// Create a new client for custom network.
+    pub fn custom(base_url: String) -> Result<Self> {
+        ClientBuilder::new()
+            .network(Network::Custom(base_url.into()))
+            .build()
+    }
+
+    pub fn base_url(&self) -> &Url {
+        &self.base_url
+    }
+
     /// Create a new client instance.
     pub(crate) fn new(
-        base_url: Url,
         network: Network,
         http_client: HttpClient,
         hooks: Vec<Box<dyn Hook>>,
-    ) -> Self {
-        Self {
-            base_url,
+    ) -> Result<Self> {
+        Ok(Self {
+            base_url: Url::parse(network.url())?,
             network,
             http_client,
             hooks,
-        }
+        })
     }
 
     /// Perform a GET request.
@@ -461,7 +471,12 @@ mod tests {
         let http_client = HttpClient::new();
         let hooks: Vec<Box<dyn Hook>> = vec![];
 
-        let client = Client::new(base_url.clone(), Network::Mainnet, http_client, hooks);
+        let client = Client::new(
+            Network::Custom(base_url.to_string().into()),
+            http_client,
+            hooks,
+        )
+        .unwrap();
 
         assert_eq!(client.base_url, base_url);
         assert_eq!(client.hooks.len(), 0);

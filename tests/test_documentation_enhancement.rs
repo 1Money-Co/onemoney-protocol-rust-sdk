@@ -196,7 +196,7 @@ fn test_comprehensive_client_configuration_matrix() -> Result<(), Box<dyn std::e
             total_tests += 1;
 
             let result = ClientBuilder::new()
-                .network(network)
+                .network(network.clone())
                 .timeout(timeout)
                 .build();
 

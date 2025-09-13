@@ -77,7 +77,7 @@ let client = Client::testnet();     // Testnet
 
 // Custom configuration
 let client = ClientBuilder::new()
-    .base_url("https://custom.api.endpoint.com")
+    .netwok(Network::Custom("https://custom.api.endpoint.com".into()))
     .timeout(Duration::from_secs(30))
     .build()?;
 ```

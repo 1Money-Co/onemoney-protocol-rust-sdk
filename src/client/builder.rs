@@ -5,16 +5,14 @@ use super::{
     hooks::Hook,
     http::Client,
 };
-use crate::Result;
+use crate::{Error, Result};
 use reqwest::Client as HttpClient;
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use std::time::Duration;
-use url::Url;
 
 /// Builder for configuring and creating clients.
 pub struct ClientBuilder {
     network: Option<Network>,
-    base_url: Option<String>,
     timeout: Option<Duration>,
     http_client: Option<HttpClient>,
     hooks: Vec<Box<dyn Hook>>,
@@ -24,7 +22,6 @@ impl Debug for ClientBuilder {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         f.debug_struct("ClientBuilder")
             .field("network", &self.network)
-            .field("base_url", &self.base_url)
             .field("timeout", &self.timeout)
             .field("hooks_count", &self.hooks.len())
             .finish()
@@ -36,7 +33,6 @@ impl ClientBuilder {
     pub fn new() -> Self {
         Self {
             network: None,
-            base_url: None,
             timeout: None,
             http_client: None,
             hooks: Vec::new(),
@@ -46,12 +42,6 @@ impl ClientBuilder {
     /// Set the network environment.
     pub fn network(mut self, network: Network) -> Self {
         self.network = Some(network);
-        self
-    }
-
-    /// Set the base URL.
-    pub fn base_url<S: Into<String>>(mut self, url: S) -> Self {
-        self.base_url = Some(url.into());
         self
     }
 
@@ -75,16 +65,9 @@ impl ClientBuilder {
 
     /// Build the client.
     pub fn build(self) -> Result<Client> {
-        // Determine the network - priority: network > default (mainnet)
-        let network = self.network.unwrap_or_default();
-
-        // Priority: base_url > network URL
-        let base_url = if let Some(url) = self.base_url {
-            url
-        } else {
-            network.url().to_string()
-        };
-        let base_url = Url::parse(&base_url)?;
+        let network = self
+            .network
+            .ok_or_else(|| Error::invalid_parameter("network", "Network is required"))?;
 
         let http_client = if let Some(client) = self.http_client {
             client
@@ -96,7 +79,7 @@ impl ClientBuilder {
                 .build()?
         };
 
-        Ok(Client::new(base_url, network, http_client, self.hooks))
+        Client::new(network, http_client, self.hooks)
     }
 }
 
@@ -113,22 +96,6 @@ mod tests {
     use std::time::Duration;
 
     #[test]
-    fn test_builder_default_configuration() {
-        let builder = ClientBuilder::new();
-
-        // Verify default state
-        assert!(builder.network.is_none());
-        assert!(builder.base_url.is_none());
-        assert!(builder.timeout.is_none());
-        assert!(builder.http_client.is_none());
-        assert!(builder.hooks.is_empty());
-
-        // Test that default can build successfully
-        let client = builder.build();
-        assert!(client.is_ok(), "Default builder should create valid client");
-    }
-
-    #[test]
     fn test_builder_network_configuration() {
         // Test all network types
         let networks = [
@@ -138,7 +105,7 @@ mod tests {
         ];
 
         for (network, _expected_url) in networks {
-            let builder = ClientBuilder::new().network(network);
+            let builder = ClientBuilder::new().network(network.clone());
 
             assert_eq!(builder.network, Some(network));
 
@@ -159,7 +126,9 @@ mod tests {
         ];
 
         for timeout in test_timeouts {
-            let builder = ClientBuilder::new().timeout(timeout);
+            let builder = ClientBuilder::new()
+                .network(Network::Mainnet)
+                .timeout(timeout);
 
             assert_eq!(builder.timeout, Some(timeout));
 
@@ -182,25 +151,13 @@ mod tests {
         ];
 
         for url in test_urls {
-            let builder = ClientBuilder::new().base_url(url);
+            let builder = ClientBuilder::new().network(Network::Custom(url.into()));
 
-            assert_eq!(builder.base_url, Some(url.to_string()));
+            assert_eq!(builder.network, Some(Network::Custom(url.into())));
 
             let client = builder.build();
             assert!(client.is_ok(), "Custom base URL should work for {}", url);
         }
-    }
-
-    #[test]
-    fn test_builder_url_priority() {
-        // Custom base_url should override network setting
-        let builder = ClientBuilder::new()
-            .network(Network::Mainnet)
-            .base_url("http://custom.example.com");
-
-        let client = builder.build().expect("URL priority test should work");
-        let debug_str = format!("{:?}", client);
-        assert!(debug_str.contains("base_url"));
     }
 
     #[test]
@@ -210,7 +167,9 @@ mod tests {
             .build()
             .expect("Custom HTTP client should build");
 
-        let builder = ClientBuilder::new().http_client(custom_client);
+        let builder = ClientBuilder::new()
+            .network(Network::Mainnet)
+            .http_client(custom_client);
 
         assert!(builder.http_client.is_some());
 
@@ -231,7 +190,10 @@ mod tests {
             }
         }
 
-        let builder = ClientBuilder::new().hook(TestHook).hook(TestHook);
+        let builder = ClientBuilder::new()
+            .network(Network::Mainnet)
+            .hook(TestHook)
+            .hook(TestHook);
 
         assert_eq!(builder.hooks.len(), 2);
 
@@ -242,7 +204,9 @@ mod tests {
     #[test]
     fn test_builder_validation_errors() {
         // Test invalid URL
-        let result = ClientBuilder::new().base_url("invalid-url-format").build();
+        let result = ClientBuilder::new()
+            .network(Network::Custom("invalid-url-format".into()))
+            .build();
 
         assert!(result.is_err(), "Invalid URL should cause build error");
     }
@@ -250,32 +214,18 @@ mod tests {
     #[test]
     fn test_builder_debug_implementation() {
         let builder = ClientBuilder::new()
-            .network(Network::Testnet)
-            .base_url("http://example.com")
+            .network(Network::Custom("http://example.com".into()))
             .timeout(Duration::from_secs(30));
 
         let debug_str = format!("{:?}", builder);
 
         assert!(debug_str.contains("ClientBuilder"));
         assert!(debug_str.contains("network"));
-        assert!(debug_str.contains("base_url"));
         assert!(debug_str.contains("timeout"));
         assert!(debug_str.contains("hooks_count"));
-        assert!(debug_str.contains("Testnet"));
+        assert!(debug_str.contains("Custom"));
         assert!(debug_str.contains("example.com"));
         assert!(debug_str.contains("30s"));
-    }
-
-    #[test]
-    fn test_builder_method_chaining() {
-        // Test that all methods return Self for chaining
-        let client = ClientBuilder::new()
-            .network(Network::Local)
-            .base_url("http://localhost:8080")
-            .timeout(Duration::from_secs(15))
-            .build();
-
-        assert!(client.is_ok(), "Method chaining should work correctly");
     }
 
     #[test]
@@ -301,7 +251,6 @@ mod tests {
 
         // Both should have same initial state
         assert_eq!(builder1.network, builder2.network);
-        assert_eq!(builder1.base_url, builder2.base_url);
         assert_eq!(builder1.timeout, builder2.timeout);
         assert_eq!(builder1.hooks.len(), builder2.hooks.len());
     }
@@ -310,12 +259,14 @@ mod tests {
     fn test_builder_extreme_timeout_values() {
         // Test with very small timeout
         let client1 = ClientBuilder::new()
+            .network(Network::Mainnet)
             .timeout(Duration::from_nanos(1))
             .build();
         assert!(client1.is_ok(), "Very small timeout should be accepted");
 
         // Test with very large timeout
         let client2 = ClientBuilder::new()
+            .network(Network::Mainnet)
             .timeout(Duration::from_secs(u64::MAX / 1000)) // Avoid overflow
             .build();
         assert!(client2.is_ok(), "Very large timeout should be accepted");
@@ -331,7 +282,9 @@ mod tests {
         ];
 
         for url in edge_case_urls {
-            let client = ClientBuilder::new().base_url(url).build();
+            let client = ClientBuilder::new()
+                .network(Network::Custom(url.into()))
+                .build();
             assert!(client.is_ok(), "Edge case URL {} should work", url);
         }
     }
