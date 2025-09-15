@@ -93,10 +93,6 @@ pub enum Error {
     #[error("Hex decoding failed: {0}")]
     Hex(#[from] hex::FromHexError),
 
-    /// RLP encoding/decoding error.
-    #[error("RLP encoding/decoding failed: {0}")]
-    Rlp(#[from] rlp::DecoderError),
-
     /// Address parsing error.
     #[error("Invalid address format: {0}")]
     Address(String),

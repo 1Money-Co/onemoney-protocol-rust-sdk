@@ -1,7 +1,6 @@
 //! Token-related API response types.
 
 use alloy_primitives::Address;
-use rlp::RlpStream;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
@@ -134,11 +133,23 @@ impl Display for MetadataKVPair {
     }
 }
 
-impl rlp::Encodable for MetadataKVPair {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(2);
-        s.append(&self.key);
-        s.append(&self.value);
+impl alloy_rlp::Encodable for MetadataKVPair {
+    fn encode(&self, out: &mut dyn alloy_rlp::BufMut) {
+        // Calculate the actual payload length by encoding to a temporary buffer first
+        let mut temp_buf = Vec::new();
+
+        self.key.encode(&mut temp_buf);
+        self.value.encode(&mut temp_buf);
+
+        // Now encode the proper header with correct payload length
+        alloy_rlp::Header {
+            list: true,
+            payload_length: temp_buf.len(),
+        }
+        .encode(out);
+
+        // Write the actual payload
+        out.put_slice(&temp_buf);
     }
 }
 
@@ -146,7 +157,7 @@ impl rlp::Encodable for MetadataKVPair {
 mod tests {
     use super::*;
     use alloy_primitives::Address;
-    use rlp::Encodable;
+    use alloy_rlp::Encodable;
     use std::str::FromStr;
 
     #[test]
@@ -488,16 +499,15 @@ mod tests {
     }
 
     #[test]
-    fn test_metadata_kv_pair_rlp_encoding() {
+    fn test_metadata_kv_pair_alloy_rlp_encoding() {
         let kv_pair = MetadataKVPair {
             key: "token_type".to_string(),
             value: "utility".to_string(),
         };
 
-        // Test RLP encoding
-        let mut stream = RlpStream::new();
-        kv_pair.rlp_append(&mut stream);
-        let encoded = stream.out();
+        // Test alloy_rlp encoding
+        let mut encoded = Vec::new();
+        kv_pair.encode(&mut encoded);
 
         // Verify that something was encoded (basic check)
         assert!(!encoded.is_empty());

@@ -134,9 +134,9 @@ mod tests {
         };
 
         // Test transaction response types
-        let _tx_response = crate::responses::TransactionResponse {
-            hash: alloy_primitives::B256::ZERO,
-        };
+        use crate::responses::TransactionResponse;
+        use alloy_primitives::B256;
+        let _tx_response = TransactionResponse { hash: B256::ZERO };
 
         // All response types are constructible if compilation succeeds
     }

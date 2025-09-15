@@ -310,11 +310,6 @@ fn test_error_from_conversions() {
     let hex_err = hex::decode("not-hex").unwrap_err();
     let error: Error = hex_err.into();
     assert!(format!("{}", error).contains("Hex decoding failed"));
-
-    // Test RLP decoding error conversion
-    let rlp_err = rlp::decode::<String>(&[0xff]).unwrap_err();
-    let error: Error = rlp_err.into();
-    assert!(format!("{}", error).contains("RLP encoding/decoding failed"));
 }
 
 #[test]

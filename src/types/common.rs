@@ -75,14 +75,14 @@ mod tests {
         let signature = Signature {
             r: U256::from_str_radix("12345678901234567890", 10).expect("Valid decimal"),
             s: U256::from_str_radix("98765432109876543210", 10).expect("Valid decimal"),
-            v: 27,
+            v: 1, // Updated to L1 compatible format (0 or 1)
         };
 
         // Test serialization
         let json = serde_json::to_string(&signature).expect("Should serialize");
         // U256 serializes as hex strings with 0x prefix
         assert!(json.contains("\"0x"));
-        assert!(json.contains("27"));
+        assert!(json.contains("1")); // Updated to L1 format
 
         // Test deserialization
         let deserialized: Signature = serde_json::from_str(&json).expect("Should deserialize");
@@ -94,27 +94,27 @@ mod tests {
             deserialized.s,
             U256::from_str_radix("98765432109876543210", 10).expect("Valid decimal")
         );
-        assert_eq!(deserialized.v, 27);
+        assert_eq!(deserialized.v, 1);
 
         // Test display
         let display_str = format!("{}", signature);
         assert!(display_str.contains("Signature(r:"));
         assert!(display_str.contains("s:"));
-        assert!(display_str.contains("v: 27"));
+        assert!(display_str.contains("v: 1"));
 
         // Test debug
         let debug_str = format!("{:?}", signature);
         assert!(debug_str.contains("Signature"));
         assert!(debug_str.contains("r:"));
         assert!(debug_str.contains("s:"));
-        assert!(debug_str.contains("v: 27"));
+        assert!(debug_str.contains("v: 1"));
     }
 
     #[test]
     fn test_signature_new_constructor() {
         let r = U256::from(1111111111111111111u64);
         let s = U256::from(2222222222222222222u64);
-        let v = 28;
+        let v = 1; // Updated to L1 format
 
         let signature = Signature::new(r, s, v);
 
@@ -143,9 +143,9 @@ mod tests {
 
     #[test]
     fn test_signature_equality_and_hashing() {
-        let signature1 = Signature::new(U256::from(123u64), U256::from(456u64), 27);
-        let signature2 = Signature::new(U256::from(123u64), U256::from(456u64), 27);
-        let signature3 = Signature::new(U256::from(123u64), U256::from(456u64), 28);
+        let signature1 = Signature::new(U256::from(123u64), U256::from(456u64), 0);
+        let signature2 = Signature::new(U256::from(123u64), U256::from(456u64), 0);
+        let signature3 = Signature::new(U256::from(123u64), U256::from(456u64), 1);
 
         // Test equality
         assert_eq!(signature1, signature2);
@@ -166,7 +166,7 @@ mod tests {
 
     #[test]
     fn test_signature_clone() {
-        let signature = Signature::new(U256::from(999u64), U256::from(888u64), 27);
+        let signature = Signature::new(U256::from(999u64), U256::from(888u64), 0);
         let cloned = signature.clone();
 
         assert_eq!(signature.r, cloned.r);
@@ -205,8 +205,8 @@ mod tests {
 
     #[test]
     fn test_signature_with_ethereum_recovery_ids() {
-        // Test typical Ethereum recovery IDs
-        let recovery_ids = [0, 1, 27, 28];
+        // Test L1-compatible recovery IDs
+        let recovery_ids = [0, 1];
 
         for &recovery_id in &recovery_ids {
             let signature = Signature::new(U256::from(100u64), U256::from(200u64), recovery_id);
@@ -319,19 +319,19 @@ mod tests {
         // Test that our structures match expected JSON format from L1 API
 
         // Signature should serialize with field names preserved
-        let signature = Signature::new(U256::from(123u64), U256::from(456u64), 27);
+        let signature = Signature::new(U256::from(123u64), U256::from(456u64), 0);
         let json = serde_json::to_string(&signature).expect("Should serialize");
         assert!(json.contains("\"r\""));
         assert!(json.contains("\"s\""));
         assert!(json.contains("\"v\""));
 
         // Test deserialization from L1-compatible format
-        let l1_signature_json = r#"{"r":"123","s":"456","v":27}"#;
+        let l1_signature_json = r#"{"r":"123","s":"456","v":0}"#;
         let deserialized: Signature =
             serde_json::from_str(l1_signature_json).expect("Should deserialize");
         assert_eq!(deserialized.r, U256::from(123u64));
         assert_eq!(deserialized.s, U256::from(456u64));
-        assert_eq!(deserialized.v, 27);
+        assert_eq!(deserialized.v, 0);
 
         // ActionType should serialize as snake_case strings
         let action = ActionType::TokenMint;
@@ -351,7 +351,7 @@ mod tests {
         let partial_zero_sig = Signature {
             r: U256::ZERO,
             s: U256::from(12345u64),
-            v: 27,
+            v: 1, // Updated to L1 format
         };
 
         let json = serde_json::to_string(&partial_zero_sig).expect("Should serialize");
