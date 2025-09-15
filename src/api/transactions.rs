@@ -1,18 +1,16 @@
 //! Transaction-related API operations.
 
 use crate::client::Client;
-use crate::client::config::api_path;
 use crate::client::config::endpoints::transactions::{
     BY_HASH, ESTIMATE_FEE, PAYMENT, RECEIPT_BY_HASH,
 };
+use crate::client::config::{API_VERSION, api_path};
 use crate::crypto::sign_transaction_payload;
 use crate::requests::{FeeEstimateRequest, PaymentPayload, PaymentRequest};
 use crate::responses::FeeEstimate;
 use crate::responses::TransactionReceipt;
 use crate::responses::TransactionResponse;
 use crate::{Result, Transaction};
-#[cfg(test)]
-use rlp::encode as rlp_encode;
 
 impl Client {
     /// Send a payment transaction.
@@ -59,125 +57,62 @@ impl Client {
         payload: PaymentPayload,
         private_key: &str,
     ) -> Result<TransactionResponse> {
-        // Use the L1-compatible signing method
         let signature = sign_transaction_payload(&payload, private_key)?;
         let request = PaymentRequest { payload, signature };
 
-        self.post(&api_path(PAYMENT), &request).await
+        let path = api_path(PAYMENT);
+        self.post(&path, &request).await
     }
 
     /// Get transaction by hash.
     ///
     /// # Arguments
     ///
-    /// * `hash` - The transaction hash to query
+    /// * `hash` - Transaction hash
     ///
     /// # Returns
     ///
-    /// The transaction information.
-    ///
-    /// # Example
-    ///
-    /// ```rust,no_run
-    /// use onemoney_protocol::Client;
-    ///
-    /// #[tokio::main]
-    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet()?;
-    ///
-    ///     let tx_hash = "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
-    ///     let transaction = client.get_transaction_by_hash(tx_hash).await?;
-    ///
-    ///     println!("Transaction hash: {}", transaction.hash);
-    ///
-    ///     Ok(())
-    /// }
-    /// ```
+    /// The transaction details.
     pub async fn get_transaction_by_hash(&self, hash: &str) -> Result<Transaction> {
-        let path = api_path(&format!("{}?hash={}", BY_HASH, hash));
+        let path = format!("{}{}?hash={}", API_VERSION, BY_HASH, hash);
         self.get(&path).await
-    }
-
-    /// Estimate fees for a transaction.
-    ///
-    /// # Arguments
-    ///
-    /// * `request` - Fee estimation request parameters
-    ///
-    /// # Returns
-    ///
-    /// The fee estimate information.
-    ///
-    /// # Example
-    ///
-    /// ```rust,no_run
-    /// use onemoney_protocol::{Client, FeeEstimateRequest};
-    ///
-    /// #[tokio::main]
-    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet()?;
-    ///
-    ///     let request = FeeEstimateRequest {
-    ///         from: "0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0".to_string(),
-    ///         value: "1000000000000000000".to_string(),
-    ///         token: None,
-    ///     };
-    ///
-    ///     let estimate = client.estimate_fee(request).await?;
-    ///     println!("Estimated fee: {}", estimate.fee);
-    ///
-    ///     Ok(())
-    /// }
-    /// ```
-    pub async fn estimate_fee(&self, request: FeeEstimateRequest) -> Result<FeeEstimate> {
-        let mut path = ESTIMATE_FEE.to_string();
-        let mut query_params = Vec::new();
-
-        query_params.push(format!("from={}", request.from));
-        query_params.push(format!("value={}", request.value));
-        if let Some(token) = request.token {
-            query_params.push(format!("token={}", token));
-        }
-
-        if !query_params.is_empty() {
-            path.push('?');
-            path.push_str(&query_params.join("&"));
-        }
-
-        self.get(&api_path(&path)).await
     }
 
     /// Get transaction receipt by hash.
     ///
     /// # Arguments
     ///
-    /// * `hash` - The transaction hash to query
+    /// * `hash` - Transaction hash
     ///
     /// # Returns
     ///
-    /// The transaction receipt information.
-    ///
-    /// # Example
-    ///
-    /// ```rust,no_run
-    /// use onemoney_protocol::Client;
-    ///
-    /// #[tokio::main]
-    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::mainnet()?;
-    ///
-    ///     let tx_hash = "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
-    ///     let receipt = client.get_transaction_receipt_by_hash(tx_hash).await?;
-    ///
-    ///     println!("Transaction success: {}", receipt.success);
-    ///     println!("Fee used: {}", receipt.fee_used);
-    ///
-    ///     Ok(())
-    /// }
-    /// ```
+    /// The transaction receipt.
     pub async fn get_transaction_receipt_by_hash(&self, hash: &str) -> Result<TransactionReceipt> {
-        let path = api_path(&format!("{}?hash={}", RECEIPT_BY_HASH, hash));
+        let path = format!("{}{}?hash={}", API_VERSION, RECEIPT_BY_HASH, hash);
         self.get(&path).await
+    }
+
+    /// Estimate transaction fee.
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - Fee estimation parameters
+    ///
+    /// # Returns
+    ///
+    /// The estimated fee.
+    pub async fn estimate_fee(&self, request: FeeEstimateRequest) -> Result<FeeEstimate> {
+        let path = api_path(ESTIMATE_FEE);
+        // Build query string manually
+        let token_query = match request.token {
+            Some(ref token) => format!("&token={}", token),
+            None => String::new(),
+        };
+        let full_path = format!(
+            "{}?from={}&value={}{}",
+            path, request.from, request.value, token_query
+        );
+        self.get(&full_path).await
     }
 }
 
@@ -188,7 +123,9 @@ mod tests {
     use std::str::FromStr;
 
     #[test]
-    fn test_payment_payload_rlp() {
+    fn test_payment_payload_alloy_rlp() {
+        use alloy_rlp::Encodable as AlloyEncodable;
+
         let payload = PaymentPayload {
             recent_epoch: 123,
             recent_checkpoint: 456,
@@ -201,7 +138,8 @@ mod tests {
                 .expect("Test data should be valid"),
         };
 
-        let encoded = rlp_encode(&payload);
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
         assert!(!encoded.is_empty());
     }
 
@@ -210,10 +148,13 @@ mod tests {
         let request = FeeEstimateRequest {
             from: "0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0".to_string(),
             value: "1000000000000000000".to_string(),
-            token: None,
+            token: Some("0x1234567890abcdef1234567890abcdef12345678".to_string()),
         };
 
-        let json = serde_json::to_string(&request).expect("Test data should be valid");
-        assert!(json.contains("742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0"));
+        // Test serialization
+        let json = serde_json::to_string(&request).expect("Should serialize");
+        assert!(json.contains("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0"));
+        assert!(json.contains("1000000000000000000"));
+        assert!(json.contains("0x1234567890abcdef1234567890abcdef12345678"));
     }
 }

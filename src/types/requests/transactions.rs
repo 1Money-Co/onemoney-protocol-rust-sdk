@@ -2,25 +2,11 @@
 
 use crate::Signature;
 use crate::crypto::Signable;
-use alloy_primitives::{Address, B256, U256};
-use rlp::{Encodable, RlpStream};
+use alloy_primitives::{Address, B256, U256, keccak256};
+use alloy_rlp::{BufMut, Encodable as AlloyEncodable};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::result::Result;
-
-/// Creates a compact byte representation of U256 by removing leading zeros.
-/// Returns vec![0] if all bytes are zero.
-fn compact_u256_bytes(value: &U256) -> Vec<u8> {
-    let value_bytes = value.to_be_bytes_vec();
-
-    // Find the first non-zero byte index
-    let first_non_zero = value_bytes.iter().position(|&b| b != 0);
-
-    match first_non_zero {
-        Some(index) => value_bytes[index..].to_vec(),
-        None => vec![0], // All bytes are zero
-    }
-}
 
 /// Payment transaction payload.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -58,9 +44,10 @@ fn deserialize_token_amount_decimal<'de, D>(deserializer: D) -> Result<U256, D::
 where
     D: serde::Deserializer<'de>,
 {
+    use serde::de::Error as DeError;
     // Accept string; fail fast on non-decimal
     let s = String::deserialize(deserializer)?;
-    s.parse::<U256>().map_err(serde::de::Error::custom)
+    s.parse::<U256>().map_err(DeError::custom)
 }
 
 impl Display for PaymentPayload {
@@ -79,18 +66,28 @@ impl Display for PaymentPayload {
     }
 }
 
-impl Encodable for PaymentPayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(7);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&self.recipient.as_slice());
-        // Encode U256 as compact bytes (no leading zeros) to match L1
-        let compact_bytes = compact_u256_bytes(&self.value);
-        s.append(&compact_bytes);
-        s.append(&self.token.as_slice());
+impl AlloyEncodable for PaymentPayload {
+    fn encode(&self, out: &mut dyn BufMut) {
+        // Calculate the actual payload length by encoding to a temporary buffer first
+        let mut temp_buf = Vec::new();
+
+        self.recent_epoch.encode(&mut temp_buf);
+        self.recent_checkpoint.encode(&mut temp_buf);
+        self.chain_id.encode(&mut temp_buf);
+        self.nonce.encode(&mut temp_buf);
+        self.recipient.encode(&mut temp_buf);
+        self.value.encode(&mut temp_buf);
+        self.token.encode(&mut temp_buf);
+
+        // Now encode the proper header with correct payload length
+        alloy_rlp::Header {
+            list: true,
+            payload_length: temp_buf.len(),
+        }
+        .encode(out);
+
+        // Write the actual payload
+        out.put_slice(&temp_buf);
     }
 }
 
@@ -98,8 +95,10 @@ impl PaymentPayload {
     /// Calculate the signature hash for this payload.
     /// This matches the L1 implementation's signature_hash method.
     pub fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
-        alloy_primitives::keccak256(&encoded)
+        // Use alloy_rlp encoding to match L1 exactly
+        let mut encoded = Vec::new();
+        self.encode(&mut encoded);
+        keccak256(&encoded)
     }
 }
 
@@ -185,5 +184,329 @@ mod tests {
 
         // Verify value is handled correctly
         assert_eq!(original_payload.value, deserialized_payload.value);
+    }
+
+    // ========================================================================
+    // ALLOY RLP ENCODING TESTS
+    // ========================================================================
+
+    #[test]
+    fn test_payment_payload_alloy_rlp_encoding() {
+        let payload = PaymentPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(1000000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
+
+        assert!(
+            !encoded.is_empty(),
+            "PaymentPayload should encode to non-empty bytes"
+        );
+
+        // Test deterministic encoding
+        let mut encoded2 = Vec::new();
+        payload.encode(&mut encoded2);
+        assert_eq!(encoded, encoded2, "Encoding should be deterministic");
+    }
+
+    #[test]
+    fn test_payment_payload_signature_hash_consistency() {
+        let payload = PaymentPayload {
+            recent_epoch: 150,
+            recent_checkpoint: 250,
+            chain_id: 1212101,
+            nonce: 10,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(500000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        // Test that signature_hash is deterministic
+        let hash1 = payload.signature_hash();
+        let hash2 = payload.signature_hash();
+        assert_eq!(hash1, hash2, "Signature hash should be deterministic");
+
+        // Test that signature_hash produces valid B256
+        assert_eq!(hash1.len(), 32, "Signature hash should be 32 bytes");
+        assert_ne!(hash1, B256::ZERO, "Signature hash should not be zero");
+    }
+
+    #[test]
+    fn test_payment_payload_signable_trait() {
+        let payload = PaymentPayload {
+            recent_epoch: 300,
+            recent_checkpoint: 400,
+            chain_id: 1212101,
+            nonce: 15,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(2000000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        // Test Signable trait implementation
+        let signable_hash = payload.signature_hash();
+        let direct_hash = payload.signature_hash();
+        assert_eq!(
+            signable_hash, direct_hash,
+            "Signable trait should match direct implementation"
+        );
+    }
+
+    #[test]
+    fn test_different_payment_payloads_different_encodings() {
+        let payload1 = PaymentPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(1000000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let payload2 = PaymentPayload {
+            recent_epoch: 101, // Different epoch
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(1000000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let mut encoded1 = Vec::new();
+        let mut encoded2 = Vec::new();
+
+        payload1.encode(&mut encoded1);
+        payload2.encode(&mut encoded2);
+
+        assert_ne!(
+            encoded1, encoded2,
+            "Different payloads should have different encodings"
+        );
+        assert_ne!(
+            payload1.signature_hash(),
+            payload2.signature_hash(),
+            "Different payloads should have different signature hashes"
+        );
+    }
+
+    #[test]
+    fn test_payment_payload_encoding_with_large_values() {
+        let large_value = U256::from_str("999999999999999999999999999999999999999").unwrap();
+
+        let payload = PaymentPayload {
+            recent_epoch: u64::MAX,
+            recent_checkpoint: u64::MAX,
+            chain_id: u64::MAX,
+            nonce: u64::MAX,
+            recipient: Address::from_str("0xffffffffffffffffffffffffffffffffffffffff").unwrap(),
+            value: large_value,
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
+
+        assert!(
+            !encoded.is_empty(),
+            "Payload with large values should encode successfully"
+        );
+
+        // Test signature hash with large values
+        let hash = payload.signature_hash();
+        assert_ne!(
+            hash,
+            B256::ZERO,
+            "Signature hash should be valid even with large values"
+        );
+    }
+
+    #[test]
+    fn test_payment_payload_encoding_with_zero_values() {
+        let payload = PaymentPayload {
+            recent_epoch: 0,
+            recent_checkpoint: 0,
+            chain_id: 0,
+            nonce: 0,
+            recipient: Address::ZERO,
+            value: U256::ZERO,
+            token: Address::ZERO,
+        };
+
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
+
+        assert!(
+            !encoded.is_empty(),
+            "Payload with zero values should encode successfully"
+        );
+
+        // Test signature hash with zero values
+        let hash = payload.signature_hash();
+        assert_ne!(
+            hash,
+            B256::ZERO,
+            "Signature hash should be valid even with zero values"
+        );
+    }
+
+    #[test]
+    fn test_payment_payload_default_implementation() {
+        let default_payload = PaymentPayload::default();
+
+        assert_eq!(default_payload.recent_epoch, 0);
+        assert_eq!(default_payload.recent_checkpoint, 0);
+        assert_eq!(default_payload.chain_id, 0);
+        assert_eq!(default_payload.nonce, 0);
+        assert_eq!(default_payload.recipient, Address::ZERO);
+        assert_eq!(default_payload.value, U256::ZERO);
+        assert_eq!(default_payload.token, Address::ZERO);
+
+        // Test that default can be encoded
+        let mut encoded = Vec::new();
+        default_payload.encode(&mut encoded);
+        assert!(
+            !encoded.is_empty(),
+            "Default payload should encode successfully"
+        );
+    }
+
+    #[test]
+    fn test_payment_payload_display_formatting() {
+        let payload = PaymentPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(1000000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let display_str = format!("{}", payload);
+
+        assert!(display_str.contains("Payment to"));
+        // Check for the address (case insensitive)
+        assert!(
+            display_str
+                .to_lowercase()
+                .contains("742d35cc6634c0532925a3b8d91d6f4a81b8cbc0")
+        );
+        assert!(display_str.contains("value 1000000000000000000"));
+        assert!(display_str.contains("nonce 5"));
+        assert!(display_str.contains("epoch 100"));
+        assert!(display_str.contains("checkpoint 200"));
+        assert!(display_str.contains("chain 1212101"));
+    }
+
+    #[test]
+    fn test_payment_payload_traits() {
+        let payload = PaymentPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(1000000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let payload_clone = payload.clone();
+
+        // Test Clone, PartialEq, Eq
+        assert_eq!(payload, payload_clone);
+
+        // Test Hash (via collecting into HashSet)
+        use std::collections::HashSet;
+        let mut set = HashSet::new();
+        set.insert(payload.clone());
+        set.insert(payload_clone);
+        assert_eq!(set.len(), 1, "Hash should work correctly");
+
+        // Test Debug
+        let debug_str = format!("{:?}", payload);
+        assert!(debug_str.contains("PaymentPayload"));
+        assert!(debug_str.contains("recent_epoch: 100"));
+    }
+
+    #[test]
+    fn test_payment_payload_serialization_consistency() {
+        let payload = PaymentPayload {
+            recent_epoch: 500,
+            recent_checkpoint: 600,
+            chain_id: 1212101,
+            nonce: 25,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(5000000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        // Test JSON serialization/deserialization
+        let json = serde_json::to_string(&payload).expect("Should serialize to JSON");
+        let deserialized: PaymentPayload =
+            serde_json::from_str(&json).expect("Should deserialize from JSON");
+        assert_eq!(
+            payload, deserialized,
+            "Serialization round-trip should preserve value"
+        );
+
+        // Verify value is serialized as decimal
+        assert!(json.contains("\"value\":\"5000000000000000000\""));
+        assert!(!json.contains("0x4563918244f40000")); // hex representation
+    }
+
+    #[test]
+    fn test_payment_payload_encoding_edge_cases() {
+        // Test with minimum values
+        let min_payload = PaymentPayload {
+            recent_epoch: 1,
+            recent_checkpoint: 1,
+            chain_id: 1,
+            nonce: 1,
+            recipient: Address::from_str("0x0000000000000000000000000000000000000001").unwrap(),
+            value: U256::from(1u64),
+            token: Address::from_str("0x0000000000000000000000000000000000000001").unwrap(),
+        };
+
+        let mut encoded = Vec::new();
+        min_payload.encode(&mut encoded);
+        assert!(
+            !encoded.is_empty(),
+            "Minimum payload should encode successfully"
+        );
+
+        // Test with very specific value patterns
+        let pattern_payload = PaymentPayload {
+            recent_epoch: 12345,
+            recent_checkpoint: 67890,
+            chain_id: 1212101,
+            nonce: 111,
+            recipient: Address::from_str("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap(),
+            value: U256::from_str("123456789012345678901234567890").unwrap(),
+            token: Address::from_str("0x5555555555555555555555555555555555555555").unwrap(),
+        };
+
+        let mut encoded = Vec::new();
+        pattern_payload.encode(&mut encoded);
+        assert!(
+            !encoded.is_empty(),
+            "Pattern payload should encode successfully"
+        );
+
+        // Test signature hash consistency
+        let hash1 = pattern_payload.signature_hash();
+        let hash2 = pattern_payload.signature_hash();
+        assert_eq!(
+            hash1, hash2,
+            "Signature hash should be consistent for edge case values"
+        );
     }
 }

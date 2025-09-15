@@ -80,6 +80,8 @@ impl EvmWallet {
 
 #[cfg(test)]
 mod tests {
+    use crate::is_valid_address_format;
+
     use super::*;
 
     #[test]
@@ -128,9 +130,8 @@ mod tests {
         assert_eq!(public_key_hex.len(), 130);
         assert!(public_key_hex.chars().all(|c| c.is_ascii_hexdigit()));
 
-        // Validate address format using our utility function
         let address_str = wallet.address.to_string();
-        assert!(crate::utils::address::is_valid_address_format(&address_str));
+        assert!(is_valid_address_format(&address_str));
     }
 
     #[test]

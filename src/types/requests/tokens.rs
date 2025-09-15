@@ -4,7 +4,7 @@ use crate::crypto::Signable;
 use crate::responses::MetadataKVPair;
 use crate::{Authority, AuthorityAction, Signature};
 use alloy_primitives::{Address, B256, U256, keccak256};
-use rlp::{Encodable, RlpStream};
+use alloy_rlp::{BufMut, Encodable as AlloyEncodable};
 use serde::{Deserialize, Serialize};
 
 // Serialize U256 as decimal string instead of hex (L1 compatibility)
@@ -23,23 +23,10 @@ fn deserialize_token_amount_decimal<'de, D>(deserializer: D) -> Result<U256, D::
 where
     D: serde::Deserializer<'de>,
 {
+    use serde::de::Error as DeError;
     // Accept string; fail fast on non-decimal
     let s = String::deserialize(deserializer)?;
-    s.parse::<U256>().map_err(serde::de::Error::custom)
-}
-
-/// Creates a compact byte representation of U256 by removing leading zeros.
-/// Returns vec![0] if all bytes are zero.
-fn compact_u256_bytes(value: &U256) -> Vec<u8> {
-    let value_bytes = value.to_be_bytes_vec();
-
-    // Find the first non-zero byte index
-    let first_non_zero = value_bytes.iter().position(|&b| b != 0);
-
-    match first_non_zero {
-        Some(index) => value_bytes[index..].to_vec(),
-        None => vec![0], // All bytes are zero
-    }
+    s.parse::<U256>().map_err(DeError::custom)
 }
 
 /// Token mint payload.
@@ -65,24 +52,36 @@ pub struct TokenMintPayload {
     pub token: Address,
 }
 
-impl Encodable for TokenMintPayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(7);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&self.recipient.as_slice());
-        // Encode U256 as compact bytes (no leading zeros) to match L1
-        let compact_bytes = compact_u256_bytes(&self.value);
-        s.append(&compact_bytes);
-        s.append(&self.token.as_slice());
+impl AlloyEncodable for TokenMintPayload {
+    fn encode(&self, out: &mut dyn BufMut) {
+        // Calculate the actual payload length by encoding to a temporary buffer first
+        let mut temp_buf = Vec::new();
+
+        self.recent_epoch.encode(&mut temp_buf);
+        self.recent_checkpoint.encode(&mut temp_buf);
+        self.chain_id.encode(&mut temp_buf);
+        self.nonce.encode(&mut temp_buf);
+        self.recipient.encode(&mut temp_buf);
+        self.value.encode(&mut temp_buf);
+        self.token.encode(&mut temp_buf);
+
+        // Now encode the proper header with correct payload length
+        alloy_rlp::Header {
+            list: true,
+            payload_length: temp_buf.len(),
+        }
+        .encode(out);
+
+        // Write the actual payload
+        out.put_slice(&temp_buf);
     }
 }
 
 impl Signable for TokenMintPayload {
     fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
+        // Use alloy_rlp encoding to match L1 exactly
+        let mut encoded = Vec::new();
+        self.encode(&mut encoded);
         keccak256(&encoded)
     }
 }
@@ -110,24 +109,36 @@ pub struct TokenBurnPayload {
     pub token: Address,
 }
 
-impl Encodable for TokenBurnPayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(7);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&self.recipient.as_slice());
-        // Encode U256 as compact bytes (no leading zeros) to match L1
-        let compact_bytes = compact_u256_bytes(&self.value);
-        s.append(&compact_bytes);
-        s.append(&self.token.as_slice());
+impl AlloyEncodable for TokenBurnPayload {
+    fn encode(&self, out: &mut dyn BufMut) {
+        // Calculate the actual payload length by encoding to a temporary buffer first
+        let mut temp_buf = Vec::new();
+
+        self.recent_epoch.encode(&mut temp_buf);
+        self.recent_checkpoint.encode(&mut temp_buf);
+        self.chain_id.encode(&mut temp_buf);
+        self.nonce.encode(&mut temp_buf);
+        self.recipient.encode(&mut temp_buf);
+        self.value.encode(&mut temp_buf);
+        self.token.encode(&mut temp_buf);
+
+        // Now encode the proper header with correct payload length
+        alloy_rlp::Header {
+            list: true,
+            payload_length: temp_buf.len(),
+        }
+        .encode(out);
+
+        // Write the actual payload
+        out.put_slice(&temp_buf);
     }
 }
 
 impl Signable for TokenBurnPayload {
     fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
+        // Use alloy_rlp encoding to match L1 exactly
+        let mut encoded = Vec::new();
+        self.encode(&mut encoded);
         keccak256(&encoded)
     }
 }
@@ -159,26 +170,39 @@ pub struct TokenAuthorityPayload {
     pub value: U256,
 }
 
-impl Encodable for TokenAuthorityPayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(9);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&self.action.as_str());
-        s.append(&self.authority_type.as_str());
-        s.append(&self.authority_address.as_slice());
-        s.append(&self.token.as_slice());
-        // Encode U256 as compact bytes (no leading zeros) to match L1
-        let compact_bytes = compact_u256_bytes(&self.value);
-        s.append(&compact_bytes);
+impl AlloyEncodable for TokenAuthorityPayload {
+    fn encode(&self, out: &mut dyn BufMut) {
+        // Use alloy_rlp encoding to match L1 implementation exactly
+        // Calculate the actual payload length by encoding to a temporary buffer first
+        let mut temp_buf = Vec::new();
+
+        self.recent_epoch.encode(&mut temp_buf);
+        self.recent_checkpoint.encode(&mut temp_buf);
+        self.chain_id.encode(&mut temp_buf);
+        self.nonce.encode(&mut temp_buf);
+        self.action.encode(&mut temp_buf);
+        self.authority_type.encode(&mut temp_buf);
+        self.authority_address.encode(&mut temp_buf);
+        self.token.encode(&mut temp_buf);
+        self.value.encode(&mut temp_buf);
+
+        // Now encode the proper header with correct payload length
+        alloy_rlp::Header {
+            list: true,
+            payload_length: temp_buf.len(),
+        }
+        .encode(out);
+
+        // Write the actual payload
+        out.put_slice(&temp_buf);
     }
 }
 
 impl Signable for TokenAuthorityPayload {
     fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
+        // Use alloy_rlp encoding to match L1 exactly
+        let mut encoded = Vec::new();
+        self.encode(&mut encoded);
         keccak256(&encoded)
     }
 }
@@ -203,6 +227,12 @@ impl PauseAction {
     }
 }
 
+impl AlloyEncodable for PauseAction {
+    fn encode(&self, out: &mut dyn BufMut) {
+        self.as_str().encode(out);
+    }
+}
+
 /// Token pause payload.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenPausePayload {
@@ -220,21 +250,35 @@ pub struct TokenPausePayload {
     pub token: Address,
 }
 
-impl Encodable for TokenPausePayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(6);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&self.action.as_str());
-        s.append(&self.token.as_slice());
+impl AlloyEncodable for TokenPausePayload {
+    fn encode(&self, out: &mut dyn BufMut) {
+        // Calculate the actual payload length by encoding to a temporary buffer first
+        let mut temp_buf = Vec::new();
+
+        self.recent_epoch.encode(&mut temp_buf);
+        self.recent_checkpoint.encode(&mut temp_buf);
+        self.chain_id.encode(&mut temp_buf);
+        self.nonce.encode(&mut temp_buf);
+        self.action.encode(&mut temp_buf);
+        self.token.encode(&mut temp_buf);
+
+        // Now encode the proper header with correct payload length
+        alloy_rlp::Header {
+            list: true,
+            payload_length: temp_buf.len(),
+        }
+        .encode(out);
+
+        // Write the actual payload
+        out.put_slice(&temp_buf);
     }
 }
 
 impl Signable for TokenPausePayload {
     fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
+        // Use alloy_rlp encoding to match L1 exactly
+        let mut encoded = Vec::new();
+        self.encode(&mut encoded);
         keccak256(&encoded)
     }
 }
@@ -259,6 +303,12 @@ impl BlacklistAction {
     }
 }
 
+impl AlloyEncodable for BlacklistAction {
+    fn encode(&self, out: &mut dyn BufMut) {
+        self.as_str().encode(out);
+    }
+}
+
 /// Token blacklist management payload.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenBlacklistPayload {
@@ -278,22 +328,36 @@ pub struct TokenBlacklistPayload {
     pub token: Address,
 }
 
-impl Encodable for TokenBlacklistPayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(7);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&self.action.as_str());
-        s.append(&self.address.as_slice());
-        s.append(&self.token.as_slice());
+impl AlloyEncodable for TokenBlacklistPayload {
+    fn encode(&self, out: &mut dyn BufMut) {
+        // Calculate the actual payload length by encoding to a temporary buffer first
+        let mut temp_buf = Vec::new();
+
+        self.recent_epoch.encode(&mut temp_buf);
+        self.recent_checkpoint.encode(&mut temp_buf);
+        self.chain_id.encode(&mut temp_buf);
+        self.nonce.encode(&mut temp_buf);
+        self.action.encode(&mut temp_buf);
+        self.address.encode(&mut temp_buf);
+        self.token.encode(&mut temp_buf);
+
+        // Now encode the proper header with correct payload length
+        alloy_rlp::Header {
+            list: true,
+            payload_length: temp_buf.len(),
+        }
+        .encode(out);
+
+        // Write the actual payload
+        out.put_slice(&temp_buf);
     }
 }
 
 impl Signable for TokenBlacklistPayload {
     fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
+        // Use alloy_rlp encoding to match L1 exactly
+        let mut encoded = Vec::new();
+        self.encode(&mut encoded);
         keccak256(&encoded)
     }
 }
@@ -318,6 +382,12 @@ impl WhitelistAction {
     }
 }
 
+impl AlloyEncodable for WhitelistAction {
+    fn encode(&self, out: &mut dyn BufMut) {
+        self.as_str().encode(out);
+    }
+}
+
 /// Token whitelist management payload.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenWhitelistPayload {
@@ -337,22 +407,36 @@ pub struct TokenWhitelistPayload {
     pub token: Address,
 }
 
-impl Encodable for TokenWhitelistPayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(7);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&self.action.as_str());
-        s.append(&self.address.as_slice());
-        s.append(&self.token.as_slice());
+impl AlloyEncodable for TokenWhitelistPayload {
+    fn encode(&self, out: &mut dyn BufMut) {
+        // Calculate the actual payload length by encoding to a temporary buffer first
+        let mut temp_buf = Vec::new();
+
+        self.recent_epoch.encode(&mut temp_buf);
+        self.recent_checkpoint.encode(&mut temp_buf);
+        self.chain_id.encode(&mut temp_buf);
+        self.nonce.encode(&mut temp_buf);
+        self.action.encode(&mut temp_buf);
+        self.address.encode(&mut temp_buf);
+        self.token.encode(&mut temp_buf);
+
+        // Now encode the proper header with correct payload length
+        alloy_rlp::Header {
+            list: true,
+            payload_length: temp_buf.len(),
+        }
+        .encode(out);
+
+        // Write the actual payload
+        out.put_slice(&temp_buf);
     }
 }
 
 impl Signable for TokenWhitelistPayload {
     fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
+        // Use alloy_rlp encoding to match L1 exactly
+        let mut encoded = Vec::new();
+        self.encode(&mut encoded);
         keccak256(&encoded)
     }
 }
@@ -378,24 +462,37 @@ pub struct TokenMetadataUpdatePayload {
     pub additional_metadata: Vec<MetadataKVPair>,
 }
 
-impl Encodable for TokenMetadataUpdatePayload {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(8);
-        s.append(&self.recent_epoch);
-        s.append(&self.recent_checkpoint);
-        s.append(&self.chain_id);
-        s.append(&self.nonce);
-        s.append(&self.name);
-        s.append(&self.uri);
-        s.append(&self.token.as_slice()); // token at position 7
-        // Encode Vec<MetadataKVPair> as nested RLP list
-        s.append_list(&self.additional_metadata);
+impl AlloyEncodable for TokenMetadataUpdatePayload {
+    fn encode(&self, out: &mut dyn BufMut) {
+        // Calculate the actual payload length by encoding to a temporary buffer first
+        let mut temp_buf = Vec::new();
+
+        self.recent_epoch.encode(&mut temp_buf);
+        self.recent_checkpoint.encode(&mut temp_buf);
+        self.chain_id.encode(&mut temp_buf);
+        self.nonce.encode(&mut temp_buf);
+        self.name.encode(&mut temp_buf);
+        self.uri.encode(&mut temp_buf);
+        self.token.encode(&mut temp_buf);
+        self.additional_metadata.encode(&mut temp_buf);
+
+        // Now encode the proper header with correct payload length
+        alloy_rlp::Header {
+            list: true,
+            payload_length: temp_buf.len(),
+        }
+        .encode(out);
+
+        // Write the actual payload
+        out.put_slice(&temp_buf);
     }
 }
 
 impl Signable for TokenMetadataUpdatePayload {
     fn signature_hash(&self) -> B256 {
-        let encoded = rlp::encode(self);
+        // Use alloy_rlp encoding to match L1 exactly
+        let mut encoded = Vec::new();
+        self.encode(&mut encoded);
         keccak256(&encoded)
     }
 }
@@ -785,5 +882,399 @@ mod tests {
             serde_json::from_str(json).expect("Should deserialize hex value");
         // This hex value should equal 1000000000000000000 in decimal
         assert_eq!(payload.value, U256::from(1000000000000000000u64));
+    }
+
+    // ========================================================================
+    // ALLOY RLP ENCODING TESTS
+    // ========================================================================
+
+    #[test]
+    fn test_token_mint_payload_alloy_rlp_encoding() {
+        let payload = TokenMintPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(1000000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
+
+        assert!(
+            !encoded.is_empty(),
+            "TokenMintPayload should encode to non-empty bytes"
+        );
+
+        // Test deterministic encoding
+        let mut encoded2 = Vec::new();
+        payload.encode(&mut encoded2);
+        assert_eq!(encoded, encoded2, "Encoding should be deterministic");
+    }
+
+    #[test]
+    fn test_token_burn_payload_alloy_rlp_encoding() {
+        let payload = TokenBurnPayload {
+            recent_epoch: 150,
+            recent_checkpoint: 250,
+            chain_id: 1212101,
+            nonce: 10,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(500000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
+
+        assert!(
+            !encoded.is_empty(),
+            "TokenBurnPayload should encode to non-empty bytes"
+        );
+
+        // Test deterministic encoding
+        let mut encoded2 = Vec::new();
+        payload.encode(&mut encoded2);
+        assert_eq!(encoded, encoded2, "Encoding should be deterministic");
+    }
+
+    #[test]
+    fn test_token_authority_payload_alloy_rlp_encoding() {
+        let payload = TokenAuthorityPayload {
+            recent_epoch: 300,
+            recent_checkpoint: 400,
+            chain_id: 1212101,
+            nonce: 15,
+            action: AuthorityAction::Grant,
+            authority_type: Authority::MintBurnTokens,
+            authority_address: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .unwrap(),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+            value: U256::from(2000000000000000000u64),
+        };
+
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
+
+        assert!(
+            !encoded.is_empty(),
+            "TokenAuthorityPayload should encode to non-empty bytes"
+        );
+
+        // Test deterministic encoding
+        let mut encoded2 = Vec::new();
+        payload.encode(&mut encoded2);
+        assert_eq!(encoded, encoded2, "Encoding should be deterministic");
+    }
+
+    #[test]
+    fn test_pause_action_alloy_rlp_encoding() {
+        let pause_action = PauseAction::Pause;
+        let unpause_action = PauseAction::Unpause;
+
+        let mut pause_encoded = Vec::new();
+        let mut unpause_encoded = Vec::new();
+
+        pause_action.encode(&mut pause_encoded);
+        unpause_action.encode(&mut unpause_encoded);
+
+        assert!(
+            !pause_encoded.is_empty(),
+            "Pause action should encode to non-empty bytes"
+        );
+        assert!(
+            !unpause_encoded.is_empty(),
+            "Unpause action should encode to non-empty bytes"
+        );
+        assert_ne!(
+            pause_encoded, unpause_encoded,
+            "Different actions should have different encodings"
+        );
+    }
+
+    #[test]
+    fn test_token_pause_payload_alloy_rlp_encoding() {
+        let payload = TokenPausePayload {
+            recent_epoch: 500,
+            recent_checkpoint: 600,
+            chain_id: 1212101,
+            nonce: 20,
+            action: PauseAction::Pause,
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
+
+        assert!(
+            !encoded.is_empty(),
+            "TokenPausePayload should encode to non-empty bytes"
+        );
+
+        // Test deterministic encoding
+        let mut encoded2 = Vec::new();
+        payload.encode(&mut encoded2);
+        assert_eq!(encoded, encoded2, "Encoding should be deterministic");
+    }
+
+    #[test]
+    fn test_blacklist_action_alloy_rlp_encoding() {
+        let add_action = BlacklistAction::Add;
+        let remove_action = BlacklistAction::Remove;
+
+        let mut add_encoded = Vec::new();
+        let mut remove_encoded = Vec::new();
+
+        add_action.encode(&mut add_encoded);
+        remove_action.encode(&mut remove_encoded);
+
+        assert!(
+            !add_encoded.is_empty(),
+            "Add action should encode to non-empty bytes"
+        );
+        assert!(
+            !remove_encoded.is_empty(),
+            "Remove action should encode to non-empty bytes"
+        );
+        assert_ne!(
+            add_encoded, remove_encoded,
+            "Different actions should have different encodings"
+        );
+    }
+
+    #[test]
+    fn test_token_blacklist_payload_alloy_rlp_encoding() {
+        let payload = TokenBlacklistPayload {
+            recent_epoch: 700,
+            recent_checkpoint: 800,
+            chain_id: 1212101,
+            nonce: 25,
+            action: BlacklistAction::Add,
+            address: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
+
+        assert!(
+            !encoded.is_empty(),
+            "TokenBlacklistPayload should encode to non-empty bytes"
+        );
+
+        // Test deterministic encoding
+        let mut encoded2 = Vec::new();
+        payload.encode(&mut encoded2);
+        assert_eq!(encoded, encoded2, "Encoding should be deterministic");
+    }
+
+    #[test]
+    fn test_whitelist_action_alloy_rlp_encoding() {
+        let add_action = WhitelistAction::Add;
+        let remove_action = WhitelistAction::Remove;
+
+        let mut add_encoded = Vec::new();
+        let mut remove_encoded = Vec::new();
+
+        add_action.encode(&mut add_encoded);
+        remove_action.encode(&mut remove_encoded);
+
+        assert!(
+            !add_encoded.is_empty(),
+            "Add action should encode to non-empty bytes"
+        );
+        assert!(
+            !remove_encoded.is_empty(),
+            "Remove action should encode to non-empty bytes"
+        );
+        assert_ne!(
+            add_encoded, remove_encoded,
+            "Different actions should have different encodings"
+        );
+    }
+
+    #[test]
+    fn test_token_whitelist_payload_alloy_rlp_encoding() {
+        let payload = TokenWhitelistPayload {
+            recent_epoch: 900,
+            recent_checkpoint: 1000,
+            chain_id: 1212101,
+            nonce: 30,
+            action: WhitelistAction::Add,
+            address: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
+
+        assert!(
+            !encoded.is_empty(),
+            "TokenWhitelistPayload should encode to non-empty bytes"
+        );
+
+        // Test deterministic encoding
+        let mut encoded2 = Vec::new();
+        payload.encode(&mut encoded2);
+        assert_eq!(encoded, encoded2, "Encoding should be deterministic");
+    }
+
+    #[test]
+    fn test_token_metadata_update_payload_alloy_rlp_encoding() {
+        let payload = TokenMetadataUpdatePayload {
+            recent_epoch: 1100,
+            recent_checkpoint: 1200,
+            chain_id: 1212101,
+            nonce: 35,
+            name: "Test Token".to_string(),
+            uri: "https://example.com/token.json".to_string(),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+            additional_metadata: vec![
+                MetadataKVPair {
+                    key: "version".to_string(),
+                    value: "1.0".to_string(),
+                },
+                MetadataKVPair {
+                    key: "author".to_string(),
+                    value: "OneMoney Team".to_string(),
+                },
+            ],
+        };
+
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
+
+        assert!(
+            !encoded.is_empty(),
+            "TokenMetadataUpdatePayload should encode to non-empty bytes"
+        );
+
+        // Test deterministic encoding
+        let mut encoded2 = Vec::new();
+        payload.encode(&mut encoded2);
+        assert_eq!(encoded, encoded2, "Encoding should be deterministic");
+    }
+
+    #[test]
+    fn test_payload_signature_hash_consistency() {
+        let payload = TokenMintPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(1000000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        // Test that signature_hash is deterministic
+        let hash1 = payload.signature_hash();
+        let hash2 = payload.signature_hash();
+        assert_eq!(hash1, hash2, "Signature hash should be deterministic");
+
+        // Test that signature_hash produces valid B256
+        assert_eq!(hash1.len(), 32, "Signature hash should be 32 bytes");
+        assert_ne!(hash1, B256::ZERO, "Signature hash should not be zero");
+    }
+
+    #[test]
+    fn test_different_payloads_different_encodings() {
+        let payload1 = TokenMintPayload {
+            recent_epoch: 100,
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(1000000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let payload2 = TokenMintPayload {
+            recent_epoch: 101, // Different epoch
+            recent_checkpoint: 200,
+            chain_id: 1212101,
+            nonce: 5,
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
+            value: U256::from(1000000000000000000u64),
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let mut encoded1 = Vec::new();
+        let mut encoded2 = Vec::new();
+
+        payload1.encode(&mut encoded1);
+        payload2.encode(&mut encoded2);
+
+        assert_ne!(
+            encoded1, encoded2,
+            "Different payloads should have different encodings"
+        );
+        assert_ne!(
+            payload1.signature_hash(),
+            payload2.signature_hash(),
+            "Different payloads should have different signature hashes"
+        );
+    }
+
+    #[test]
+    fn test_encoding_with_large_values() {
+        let large_value = U256::from_str("123456789012345678901234567890123456789").unwrap();
+
+        let payload = TokenMintPayload {
+            recent_epoch: u64::MAX,
+            recent_checkpoint: u64::MAX,
+            chain_id: u64::MAX,
+            nonce: u64::MAX,
+            recipient: Address::from_str("0xffffffffffffffffffffffffffffffffffffffff").unwrap(),
+            value: large_value,
+            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
+        };
+
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
+
+        assert!(
+            !encoded.is_empty(),
+            "Payload with large values should encode successfully"
+        );
+
+        // Test signature hash with large values
+        let hash = payload.signature_hash();
+        assert_ne!(
+            hash,
+            B256::ZERO,
+            "Signature hash should be valid even with large values"
+        );
+    }
+
+    #[test]
+    fn test_encoding_with_zero_values() {
+        let payload = TokenBurnPayload {
+            recent_epoch: 0,
+            recent_checkpoint: 0,
+            chain_id: 0,
+            nonce: 0,
+            recipient: Address::ZERO,
+            value: U256::ZERO,
+            token: Address::ZERO,
+        };
+
+        let mut encoded = Vec::new();
+        payload.encode(&mut encoded);
+
+        assert!(
+            !encoded.is_empty(),
+            "Payload with zero values should encode successfully"
+        );
+
+        // Test signature hash with zero values
+        let hash = payload.signature_hash();
+        assert_ne!(
+            hash,
+            B256::ZERO,
+            "Signature hash should be valid even with zero values"
+        );
     }
 }
