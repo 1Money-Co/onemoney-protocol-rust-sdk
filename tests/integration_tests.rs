@@ -189,17 +189,6 @@ mod integration_with_server {
     }
 
     #[tokio::test]
-    async fn test_state_operations() -> Result<(), Box<dyn Error>> {
-        let client = test_utils::create_test_client()?;
-
-        // Test latest checkpoint number
-        let checkpoint_info = client.get_checkpoint_number().await?;
-        println!("Latest checkpoint: {}", checkpoint_info);
-
-        Ok(())
-    }
-
-    #[tokio::test]
     async fn test_account_operations() -> Result<(), Box<dyn Error>> {
         let client = test_utils::create_test_client()?;
         let address = test_utils::test_address();

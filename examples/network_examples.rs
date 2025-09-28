@@ -178,7 +178,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("   - Always test connectivity before production use");
     println!("\nNext steps:");
     println!("   - Check out transactions_example.rs for API examples");
-    println!("   - See states_example.rs for network state information");
     println!("   - Review chains_example.rs for chain-specific operations");
 
     Ok(())

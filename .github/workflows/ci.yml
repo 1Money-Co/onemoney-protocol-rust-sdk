@@ -85,7 +85,6 @@ jobs:
           cargo check --example chains_example
           cargo check --example checkpoints_example
           cargo check --example network_examples
-          cargo check --example states_example
           cargo check --example tokens_example
           cargo check --example transactions_example
 
