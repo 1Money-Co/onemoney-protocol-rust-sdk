@@ -230,6 +230,7 @@ mod tests {
     use serde::{Deserialize, Serialize};
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
+    #[allow(dead_code)]
     struct TestResponse {
         id: u64,
         message: String,
