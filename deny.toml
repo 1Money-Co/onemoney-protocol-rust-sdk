@@ -99,6 +99,7 @@ allow = [
     "BlueOak-1.0.0",
     "BSL-1.0",
     "MPL-2.0",
+    "CDLA-Permissive-2.0",
 ]
 # List of allowed licenses for particular crate
 #[[licenses.exceptions]]
