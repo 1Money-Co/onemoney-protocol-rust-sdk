@@ -25,7 +25,7 @@ pub use requests::transactions::*;
 pub use responses::accounts::*;
 pub use responses::chains::*;
 pub use responses::checkpoints::*;
-pub use responses::states::*;
+// pub use responses::states::*;
 pub use responses::tokens::*;
 pub use responses::transactions::*;
 
@@ -122,12 +122,6 @@ mod tests {
 
         // Test chain response types
         let _chain_id = ChainIdResponse { chain_id: 1 };
-
-        // Test state response types
-        let _latest_state = LatestStateResponse {
-            epoch: 100,
-            checkpoint: 200,
-        };
 
         // Test transaction response types
         use crate::responses::TransactionResponse;
