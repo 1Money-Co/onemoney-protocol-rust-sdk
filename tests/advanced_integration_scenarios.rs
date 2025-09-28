@@ -39,7 +39,6 @@ async fn test_complete_token_lifecycle_simulation() -> Result<(), Box<dyn Error>
 
     // Step 3: Create token mint payload
     let mint_payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
@@ -50,7 +49,6 @@ async fn test_complete_token_lifecycle_simulation() -> Result<(), Box<dyn Error>
 
     // Step 4: Create authority payload
     let authority_payload = TokenAuthorityPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 2,
@@ -113,7 +111,6 @@ fn test_multi_client_coordination_pattern() -> Result<(), Box<dyn Error>> {
         .enumerate()
         .map(|(i, addr)| {
             Ok(TokenMintPayload {
-                recent_epoch: 100 + i as u64,
                 recent_checkpoint: 200 + i as u64,
                 chain_id: 1,
                 nonce: i as u64 + 1,
@@ -150,7 +147,7 @@ async fn test_client_recovery_from_network_errors() {
         create_unreachable_test_client("recovery_test").expect("Client creation should succeed");
 
     // Test graceful handling of unreachable endpoints
-    let test_operations = ["get_chain_id", "get_latest_epoch_checkpoint"];
+    let test_operations = ["get_chain_id", "get_checkpoint_number"];
 
     for operation in test_operations {
         match operation {
@@ -172,8 +169,8 @@ async fn test_client_recovery_from_network_errors() {
                     }
                 }
             }
-            "get_latest_epoch_checkpoint" => {
-                let result = client.get_latest_epoch_checkpoint().await;
+            "get_checkpoint_number" => {
+                let result = client.get_checkpoint_number().await;
                 assert!(result.is_err(), "Should fail gracefully for {}", operation);
                 println!(
                     "Operation {} failed as expected: {:?}",
@@ -246,7 +243,6 @@ fn test_complex_payload_transformations() -> Result<(), Box<dyn Error>> {
     // Test complex transformations and validations of payloads
 
     let base_payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
@@ -329,7 +325,6 @@ async fn test_cross_component_data_consistency() -> Result<(), Box<dyn Error>> {
 
     // Create payload
     let payload = TokenMintPayload {
-        recent_epoch: 150,
         recent_checkpoint: 250,
         chain_id: 42,
         nonce: 5,
@@ -342,7 +337,6 @@ async fn test_cross_component_data_consistency() -> Result<(), Box<dyn Error>> {
     let json = serde_json::to_string(&payload)?;
     let restored: TokenMintPayload = serde_json::from_str(&json)?;
 
-    assert_eq!(payload.recent_epoch, restored.recent_epoch);
     assert_eq!(payload.recent_checkpoint, restored.recent_checkpoint);
     assert_eq!(payload.chain_id, restored.chain_id);
     assert_eq!(payload.nonce, restored.nonce);
@@ -413,7 +407,6 @@ fn test_high_volume_payload_processing() -> Result<(), Box<dyn Error>> {
 
     for i in 0..payload_count {
         let payload = TokenMintPayload {
-            recent_epoch: 100 + i as u64,
             recent_checkpoint: 200 + i as u64,
             chain_id: 1,
             nonce: i as u64 + 1,

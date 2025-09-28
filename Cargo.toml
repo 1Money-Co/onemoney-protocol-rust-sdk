@@ -38,10 +38,6 @@ name = "network_examples"
 path = "examples/network_examples.rs"
 
 [[example]]
-name = "states_example"
-path = "examples/states_example.rs"
-
-[[example]]
 name = "tokens_example"
 path = "examples/tokens_example.rs"
 

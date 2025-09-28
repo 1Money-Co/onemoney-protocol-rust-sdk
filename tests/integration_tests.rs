@@ -192,9 +192,9 @@ mod integration_with_server {
     async fn test_state_operations() -> Result<(), Box<dyn Error>> {
         let client = test_utils::create_test_client()?;
 
-        // Test latest epoch checkpoint
-        let state = client.get_latest_epoch_checkpoint().await?;
-        println!("Latest state: {}", state);
+        // Test latest checkpoint number
+        let checkpoint_info = client.get_checkpoint_number().await?;
+        println!("Latest checkpoint: {}", checkpoint_info);
 
         Ok(())
     }

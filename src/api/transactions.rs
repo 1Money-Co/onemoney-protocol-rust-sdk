@@ -36,7 +36,6 @@ impl Client {
     ///     let client = Client::mainnet()?;
     ///
     ///     let payload = PaymentPayload {
-    ///         recent_epoch: 123,
     ///         recent_checkpoint: 456,
     ///         chain_id: 1212101,
     ///         nonce: 0,
@@ -127,7 +126,6 @@ mod tests {
         use alloy_rlp::Encodable as AlloyEncodable;
 
         let payload = PaymentPayload {
-            recent_epoch: 123,
             recent_checkpoint: 456,
             chain_id: 1212101,
             nonce: 0,

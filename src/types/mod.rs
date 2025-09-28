@@ -65,7 +65,6 @@ mod tests {
 
         // Test token request types
         let _mint_payload = TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
@@ -75,7 +74,6 @@ mod tests {
         };
 
         let _burn_payload = TokenBurnPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
@@ -85,7 +83,6 @@ mod tests {
         };
 
         let _authority_payload = TokenAuthorityPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
@@ -98,7 +95,6 @@ mod tests {
 
         // Test transaction request types
         let _payment_payload = PaymentPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
@@ -209,7 +205,6 @@ mod tests {
         let recipient = Address::from([0xFF; 20]);
 
         let mint_payload = TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
@@ -227,7 +222,6 @@ mod tests {
         assert!(restored.is_ok(), "Types should be deserializable");
 
         let restored_payload = restored.unwrap();
-        assert_eq!(restored_payload.recent_epoch, mint_payload.recent_epoch);
         assert_eq!(restored_payload.token, mint_payload.token);
         assert_eq!(restored_payload.value, mint_payload.value);
     }
@@ -244,7 +238,6 @@ mod tests {
 
         // Both should be accessible and distinct
         let _request_mint = RequestMintPayload {
-            recent_epoch: 1,
             recent_checkpoint: 1,
             chain_id: 1,
             nonce: 1,

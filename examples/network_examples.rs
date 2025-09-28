@@ -71,9 +71,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("\n3. Network State Information");
     println!("============================");
 
-    match client.get_latest_epoch_checkpoint().await {
-        Ok(state) => {
-            println!("{}", state);
+    match client.get_checkpoint_number().await {
+        Ok(checkpoint_info) => {
+            println!("{}", checkpoint_info);
         }
         Err(e) => {
             print_detailed_error("Could not get network state", &e);

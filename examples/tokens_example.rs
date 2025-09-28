@@ -51,12 +51,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("\n0. Fetching Dynamic Parameters");
     println!("==============================");
 
-    let state = match client.get_latest_epoch_checkpoint().await {
+    let checkpoint_info = match client.get_checkpoint_number().await {
         Ok(s) => {
-            println!(
-                "Latest state: Epoch {}, Checkpoint {}",
-                s.epoch, s.checkpoint
-            );
+            println!("Latest checkpoint: {}", s.number);
             s
         }
         Err(e) => {
@@ -112,8 +109,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("==============");
 
     let mint_payload = TokenMintPayload {
-        recent_epoch: state.epoch,
-        recent_checkpoint: state.checkpoint,
+        recent_checkpoint: checkpoint_info.number,
         chain_id,
         nonce: current_nonce,
         recipient: sender_address, // Mint to sender's own account
@@ -137,8 +133,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("==============");
 
     let burn_payload = TokenBurnPayload {
-        recent_epoch: state.epoch,
-        recent_checkpoint: state.checkpoint,
+        recent_checkpoint: checkpoint_info.number,
         chain_id,
         nonce: current_nonce,
         recipient: sender_address, // Burn from sender's own account
@@ -162,8 +157,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("==================");
 
     let grant_payload = TokenAuthorityPayload {
-        recent_epoch: state.epoch,
-        recent_checkpoint: state.checkpoint,
+        recent_checkpoint: checkpoint_info.number,
         chain_id,
         nonce: current_nonce,
         action: AuthorityAction::Grant,
@@ -189,8 +183,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("===================");
 
     let revoke_payload = TokenAuthorityPayload {
-        recent_epoch: state.epoch,
-        recent_checkpoint: state.checkpoint,
+        recent_checkpoint: checkpoint_info.number,
         chain_id,
         nonce: current_nonce,
         action: AuthorityAction::Revoke,
@@ -216,8 +209,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("==============");
 
     let pause_payload = TokenPausePayload {
-        recent_epoch: state.epoch,
-        recent_checkpoint: state.checkpoint,
+        recent_checkpoint: checkpoint_info.number,
         chain_id,
         nonce: current_nonce,
         action: PauseAction::Pause,
@@ -240,8 +232,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("================");
 
     let unpause_payload = TokenPausePayload {
-        recent_epoch: state.epoch,
-        recent_checkpoint: state.checkpoint,
+        recent_checkpoint: checkpoint_info.number,
         chain_id,
         nonce: current_nonce,
         action: PauseAction::Unpause,
@@ -267,8 +258,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if !info.is_private {
             println!("Token is public - proceeding with blacklist operation");
             let blacklist_payload = TokenBlacklistPayload {
-                recent_epoch: state.epoch,
-                recent_checkpoint: state.checkpoint,
+                recent_checkpoint: checkpoint_info.number,
                 chain_id,
                 nonce: current_nonce,
                 action: BlacklistAction::Add,
@@ -304,8 +294,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if !info.is_private {
             println!("Token is public - proceeding with blacklist removal operation");
             let remove_blacklist_payload = TokenBlacklistPayload {
-                recent_epoch: state.epoch,
-                recent_checkpoint: state.checkpoint,
+                recent_checkpoint: checkpoint_info.number,
                 chain_id,
                 nonce: current_nonce,
                 action: BlacklistAction::Remove,
@@ -341,8 +330,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if info.is_private {
             println!("Token is private - proceeding with whitelist operation");
             let whitelist_payload = TokenWhitelistPayload {
-                recent_epoch: state.epoch,
-                recent_checkpoint: state.checkpoint,
+                recent_checkpoint: checkpoint_info.number,
                 chain_id,
                 nonce: current_nonce,
                 action: WhitelistAction::Add,
@@ -375,8 +363,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("=========================");
 
     let metadata_payload = TokenMetadataUpdatePayload {
-        recent_epoch: state.epoch,
-        recent_checkpoint: state.checkpoint,
+        recent_checkpoint: checkpoint_info.number,
         chain_id,
         nonce: current_nonce,
         name: "Updated Test Token".to_string(),

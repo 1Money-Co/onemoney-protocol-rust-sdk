@@ -55,9 +55,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let nonce = client.get_account_nonce(address).await?;
     println!("Account nonce: {}", nonce.nonce);
 
-    // Get latest blockchain state
-    let state = client.get_latest_epoch_checkpoint().await?;
-    println!("Current epoch: {}, checkpoint: {}", state.epoch, state.checkpoint);
+    // Get latest checkpoint number
+    let checkpoint_info = client.get_checkpoint_number().await?;
+    println!("Current checkpoint: {}", checkpoint_info.number);
 
     Ok(())
 }
@@ -104,10 +104,12 @@ let token_account_addr = client.derive_token_account_address(wallet, mint);
 ```rust
 use onemoney_protocol::{TokenMintPayload, Authority};
 
+// Get current checkpoint for transaction
+let checkpoint_info = client.get_checkpoint_number().await?;
+
 // Mint tokens
 let mint_payload = TokenMintPayload {
-    recent_epoch: state.epoch,
-    recent_checkpoint: state.checkpoint,
+    recent_checkpoint: checkpoint_info.number,
     chain_id: 1212101,
     nonce: 1,
     token: token_address,
@@ -123,10 +125,12 @@ let result = client.mint_token(mint_payload, private_key).await?;
 ```rust
 use onemoney_protocol::PaymentPayload;
 
+// Get current checkpoint for transaction
+let checkpoint_info = client.get_checkpoint_number().await?;
+
 // Send a payment
 let payment = PaymentPayload {
-    recent_epoch: state.epoch,
-    recent_checkpoint: state.checkpoint,
+    recent_checkpoint: checkpoint_info.number,
     chain_id: 1212101,
     nonce: 2,
     recipient: recipient_address,
@@ -152,8 +156,8 @@ let confirmed_tx = client.wait_for_transaction(
 ### Blockchain State
 
 ```rust
-// Get latest state (for transaction construction)
-let state = client.get_latest_epoch_checkpoint().await?;
+// Get latest checkpoint number (for transaction construction)
+let checkpoint_info = client.get_checkpoint_number().await?;
 
 // Get chain information
 let chain = client.get_chain_info().await?;
