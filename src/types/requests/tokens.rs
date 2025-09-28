@@ -32,8 +32,6 @@ where
 /// Token mint payload.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenMintPayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
     /// Recent checkpoint number.
     pub recent_checkpoint: u64,
     /// Chain ID.
@@ -57,7 +55,6 @@ impl AlloyEncodable for TokenMintPayload {
         // Calculate the actual payload length by encoding to a temporary buffer first
         let mut temp_buf = Vec::new();
 
-        self.recent_epoch.encode(&mut temp_buf);
         self.recent_checkpoint.encode(&mut temp_buf);
         self.chain_id.encode(&mut temp_buf);
         self.nonce.encode(&mut temp_buf);
@@ -89,8 +86,6 @@ impl Signable for TokenMintPayload {
 /// Token burn payload.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenBurnPayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
     /// Recent checkpoint number.
     pub recent_checkpoint: u64,
     /// Chain ID.
@@ -114,7 +109,6 @@ impl AlloyEncodable for TokenBurnPayload {
         // Calculate the actual payload length by encoding to a temporary buffer first
         let mut temp_buf = Vec::new();
 
-        self.recent_epoch.encode(&mut temp_buf);
         self.recent_checkpoint.encode(&mut temp_buf);
         self.chain_id.encode(&mut temp_buf);
         self.nonce.encode(&mut temp_buf);
@@ -146,8 +140,6 @@ impl Signable for TokenBurnPayload {
 /// Token authority payload (unified for grant/revoke operations).
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenAuthorityPayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
     /// Recent checkpoint number.
     pub recent_checkpoint: u64,
     /// Chain ID.
@@ -176,7 +168,6 @@ impl AlloyEncodable for TokenAuthorityPayload {
         // Calculate the actual payload length by encoding to a temporary buffer first
         let mut temp_buf = Vec::new();
 
-        self.recent_epoch.encode(&mut temp_buf);
         self.recent_checkpoint.encode(&mut temp_buf);
         self.chain_id.encode(&mut temp_buf);
         self.nonce.encode(&mut temp_buf);
@@ -236,8 +227,6 @@ impl AlloyEncodable for PauseAction {
 /// Token pause payload.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenPausePayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
     /// Recent checkpoint number.
     pub recent_checkpoint: u64,
     /// Chain ID.
@@ -255,7 +244,6 @@ impl AlloyEncodable for TokenPausePayload {
         // Calculate the actual payload length by encoding to a temporary buffer first
         let mut temp_buf = Vec::new();
 
-        self.recent_epoch.encode(&mut temp_buf);
         self.recent_checkpoint.encode(&mut temp_buf);
         self.chain_id.encode(&mut temp_buf);
         self.nonce.encode(&mut temp_buf);
@@ -312,8 +300,6 @@ impl AlloyEncodable for BlacklistAction {
 /// Token blacklist management payload.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenBlacklistPayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
     /// Recent checkpoint number.
     pub recent_checkpoint: u64,
     /// Chain ID.
@@ -333,7 +319,6 @@ impl AlloyEncodable for TokenBlacklistPayload {
         // Calculate the actual payload length by encoding to a temporary buffer first
         let mut temp_buf = Vec::new();
 
-        self.recent_epoch.encode(&mut temp_buf);
         self.recent_checkpoint.encode(&mut temp_buf);
         self.chain_id.encode(&mut temp_buf);
         self.nonce.encode(&mut temp_buf);
@@ -391,8 +376,6 @@ impl AlloyEncodable for WhitelistAction {
 /// Token whitelist management payload.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenWhitelistPayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
     /// Recent checkpoint number.
     pub recent_checkpoint: u64,
     /// Chain ID.
@@ -412,7 +395,6 @@ impl AlloyEncodable for TokenWhitelistPayload {
         // Calculate the actual payload length by encoding to a temporary buffer first
         let mut temp_buf = Vec::new();
 
-        self.recent_epoch.encode(&mut temp_buf);
         self.recent_checkpoint.encode(&mut temp_buf);
         self.chain_id.encode(&mut temp_buf);
         self.nonce.encode(&mut temp_buf);
@@ -444,8 +426,6 @@ impl Signable for TokenWhitelistPayload {
 /// Token metadata update payload.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenMetadataUpdatePayload {
-    /// Recent epoch number.
-    pub recent_epoch: u64,
     /// Recent checkpoint number.
     pub recent_checkpoint: u64,
     /// Chain ID.
@@ -467,7 +447,6 @@ impl AlloyEncodable for TokenMetadataUpdatePayload {
         // Calculate the actual payload length by encoding to a temporary buffer first
         let mut temp_buf = Vec::new();
 
-        self.recent_epoch.encode(&mut temp_buf);
         self.recent_checkpoint.encode(&mut temp_buf);
         self.chain_id.encode(&mut temp_buf);
         self.nonce.encode(&mut temp_buf);
@@ -571,7 +550,6 @@ mod tests {
     #[test]
     fn test_token_mint_payload_decimal_serialization() {
         let payload = TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -592,7 +570,6 @@ mod tests {
     #[test]
     fn test_token_burn_payload_decimal_serialization() {
         let payload = TokenBurnPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -613,7 +590,6 @@ mod tests {
     #[test]
     fn test_token_authority_payload_decimal_serialization() {
         let payload = TokenAuthorityPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -645,7 +621,6 @@ mod tests {
 
         // Test PaymentPayload serialization
         let payment_payload = PaymentPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -656,7 +631,6 @@ mod tests {
 
         // Test TokenMintPayload serialization
         let mint_payload = TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -684,7 +658,6 @@ mod tests {
         let large_value = U256::from_str("123456789012345678901234567890123456789").unwrap();
 
         let payload = TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -704,7 +677,6 @@ mod tests {
     #[test]
     fn test_zero_value_decimal_serialization() {
         let payload = TokenBurnPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -725,7 +697,6 @@ mod tests {
     #[test]
     fn test_token_mint_payload_decimal_deserialization() {
         let json = r#"{
-            "recent_epoch": 100,
             "recent_checkpoint": 200,
             "chain_id": 1212101,
             "nonce": 5,
@@ -737,14 +708,12 @@ mod tests {
         let payload: TokenMintPayload =
             serde_json::from_str(json).expect("Should deserialize decimal value");
         assert_eq!(payload.value, U256::from(1000000000000000000u64));
-        assert_eq!(payload.recent_epoch, 100);
         assert_eq!(payload.nonce, 5);
     }
 
     #[test]
     fn test_token_burn_payload_decimal_deserialization() {
         let json = r#"{
-            "recent_epoch": 100,
             "recent_checkpoint": 200,
             "chain_id": 1212101,
             "nonce": 5,
@@ -761,7 +730,6 @@ mod tests {
     #[test]
     fn test_token_authority_payload_decimal_deserialization() {
         let json = r#"{
-            "recent_epoch": 100,
             "recent_checkpoint": 200,
             "chain_id": 1212101,
             "nonce": 5,
@@ -782,7 +750,6 @@ mod tests {
     #[test]
     fn test_round_trip_serialization_deserialization() {
         let original_payload = TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -812,7 +779,6 @@ mod tests {
         let large_value_str = "123456789012345678901234567890123456789";
         let json = format!(
             r#"{{
-            "recent_epoch": 100,
             "recent_checkpoint": 200,
             "chain_id": 1212101,
             "nonce": 5,
@@ -832,7 +798,6 @@ mod tests {
     #[test]
     fn test_zero_value_decimal_deserialization() {
         let json = r#"{
-            "recent_epoch": 100,
             "recent_checkpoint": 200,
             "chain_id": 1212101,
             "nonce": 5,
@@ -849,7 +814,6 @@ mod tests {
     #[test]
     fn test_invalid_decimal_value_deserialization_fails() {
         let json = r#"{
-            "recent_epoch": 100,
             "recent_checkpoint": 200,
             "chain_id": 1212101,
             "nonce": 5,
@@ -869,7 +833,6 @@ mod tests {
     fn test_hex_value_deserialization_works() {
         // U256::parse can handle both hex and decimal formats
         let json = r#"{
-            "recent_epoch": 100,
             "recent_checkpoint": 200,
             "chain_id": 1212101,
             "nonce": 5,
@@ -891,7 +854,6 @@ mod tests {
     #[test]
     fn test_token_mint_payload_alloy_rlp_encoding() {
         let payload = TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -917,7 +879,6 @@ mod tests {
     #[test]
     fn test_token_burn_payload_alloy_rlp_encoding() {
         let payload = TokenBurnPayload {
-            recent_epoch: 150,
             recent_checkpoint: 250,
             chain_id: 1212101,
             nonce: 10,
@@ -943,7 +904,6 @@ mod tests {
     #[test]
     fn test_token_authority_payload_alloy_rlp_encoding() {
         let payload = TokenAuthorityPayload {
-            recent_epoch: 300,
             recent_checkpoint: 400,
             chain_id: 1212101,
             nonce: 15,
@@ -997,7 +957,6 @@ mod tests {
     #[test]
     fn test_token_pause_payload_alloy_rlp_encoding() {
         let payload = TokenPausePayload {
-            recent_epoch: 500,
             recent_checkpoint: 600,
             chain_id: 1212101,
             nonce: 20,
@@ -1047,7 +1006,6 @@ mod tests {
     #[test]
     fn test_token_blacklist_payload_alloy_rlp_encoding() {
         let payload = TokenBlacklistPayload {
-            recent_epoch: 700,
             recent_checkpoint: 800,
             chain_id: 1212101,
             nonce: 25,
@@ -1098,7 +1056,6 @@ mod tests {
     #[test]
     fn test_token_whitelist_payload_alloy_rlp_encoding() {
         let payload = TokenWhitelistPayload {
-            recent_epoch: 900,
             recent_checkpoint: 1000,
             chain_id: 1212101,
             nonce: 30,
@@ -1124,7 +1081,6 @@ mod tests {
     #[test]
     fn test_token_metadata_update_payload_alloy_rlp_encoding() {
         let payload = TokenMetadataUpdatePayload {
-            recent_epoch: 1100,
             recent_checkpoint: 1200,
             chain_id: 1212101,
             nonce: 35,
@@ -1160,7 +1116,6 @@ mod tests {
     #[test]
     fn test_payload_signature_hash_consistency() {
         let payload = TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -1182,7 +1137,6 @@ mod tests {
     #[test]
     fn test_different_payloads_different_encodings() {
         let payload1 = TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -1192,8 +1146,7 @@ mod tests {
         };
 
         let payload2 = TokenMintPayload {
-            recent_epoch: 101, // Different epoch
-            recent_checkpoint: 200,
+            recent_checkpoint: 201,
             chain_id: 1212101,
             nonce: 5,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
@@ -1223,7 +1176,6 @@ mod tests {
         let large_value = U256::from_str("123456789012345678901234567890123456789").unwrap();
 
         let payload = TokenMintPayload {
-            recent_epoch: u64::MAX,
             recent_checkpoint: u64::MAX,
             chain_id: u64::MAX,
             nonce: u64::MAX,
@@ -1252,7 +1204,6 @@ mod tests {
     #[test]
     fn test_encoding_with_zero_values() {
         let payload = TokenBurnPayload {
-            recent_epoch: 0,
             recent_checkpoint: 0,
             chain_id: 0,
             nonce: 0,

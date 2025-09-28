@@ -233,17 +233,14 @@ async fn test_token_metadata_mock() -> Result<(), Box<dyn Error>> {
 async fn test_latest_state_mock() -> Result<(), Box<dyn Error>> {
     let mut server = setup_mock_server().await;
 
-    // Mock the latest state endpoint (correct path: /v1/states/latest_epoch_checkpoint)
+    // Mock the checkpoint number endpoint (correct path: /v1/checkpoints/number)
     let _mock = server
-        .mock("GET", "/v1/states/latest_epoch_checkpoint")
+        .mock("GET", "/v1/checkpoints/number")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(
             r#"{
-            "epoch": 100,
-            "checkpoint": 200,
-            "checkpoint_hash": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-            "checkpoint_parent_hash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+            "number": 200
         }"#,
         )
         .create();
@@ -253,8 +250,8 @@ async fn test_latest_state_mock() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_secs(5))
         .build()?;
 
-    let state = client.get_latest_epoch_checkpoint().await?;
-    println!("Latest state: {}", state);
+    let checkpoint_info = client.get_checkpoint_number().await?;
+    println!("Latest checkpoint: {}", checkpoint_info);
 
     Ok(())
 }
@@ -567,7 +564,6 @@ async fn test_token_payload_serialization() -> Result<(), Box<dyn Error>> {
 
     // Test TokenMintPayload
     let mint_payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
@@ -604,7 +600,6 @@ async fn test_invalid_payload_handling() -> Result<(), Box<dyn Error>> {
 
     // Test with invalid private key format
     let mint_payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
@@ -640,7 +635,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 1. mint_token
     let mint_payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
@@ -654,7 +648,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 2. burn_token
     let burn_payload = TokenBurnPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 2,
@@ -667,7 +660,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 3. grant_authority
     let authority_payload = TokenAuthorityPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 3,
@@ -693,7 +685,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 5. pause_token
     let pause_payload = TokenPausePayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 5,
@@ -705,7 +696,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 6. manage_blacklist
     let blacklist_payload = TokenBlacklistPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 6,
@@ -720,7 +710,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 7. manage_whitelist
     let whitelist_payload = TokenWhitelistPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 7,
@@ -735,7 +724,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 8. update_token_metadata
     let metadata_payload = TokenMetadataUpdatePayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 8,
@@ -765,7 +753,6 @@ async fn test_payload_edge_cases() -> Result<(), Box<dyn Error>> {
 
     // Test with maximum values
     let max_payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
@@ -785,7 +772,6 @@ async fn test_payload_edge_cases() -> Result<(), Box<dyn Error>> {
 
     // Test with zero values
     let zero_payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 2,
@@ -822,7 +808,6 @@ async fn test_concurrent_payload_operations() -> Result<(), Box<dyn Error>> {
 
         let handle = tokio::spawn(async move {
             let payload = TokenMintPayload {
-                recent_epoch: 100,
                 recent_checkpoint: 200,
                 chain_id: 1,
                 nonce: 1,
@@ -882,7 +867,6 @@ async fn test_request_structure_creation() -> Result<(), Box<dyn Error>> {
 
     // Test creating request structures (this tests the internal request creation)
     let mint_payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,

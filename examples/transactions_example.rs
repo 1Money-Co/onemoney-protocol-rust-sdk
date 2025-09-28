@@ -109,7 +109,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("=====================================");
 
     // Get latest state and chain ID for transaction
-    let state = match client.get_latest_epoch_checkpoint().await {
+    let checkpoint_info = match client.get_checkpoint_number().await {
         Ok(s) => s,
         Err(e) => {
             print_detailed_error("Could not get latest state", &e);
@@ -126,8 +126,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     };
 
     let payment_payload = PaymentPayload {
-        recent_epoch: state.epoch,
-        recent_checkpoint: state.checkpoint,
+        recent_checkpoint: checkpoint_info.number,
         chain_id,
         nonce,
         recipient: recipient_address,

@@ -114,7 +114,6 @@ fn test_token_mint_payload_signing_integration() -> Result<(), Box<dyn Error>> {
     let amount = U256::from(1000000000000000000u64); // 1 token with 18 decimals
 
     let payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
@@ -133,7 +132,6 @@ fn test_token_mint_payload_signing_integration() -> Result<(), Box<dyn Error>> {
 
     // Test signing with different payloads produces different hashes
     let payload2 = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 2,
@@ -160,7 +158,6 @@ fn test_end_to_end_transaction_signing() -> Result<(), Box<dyn Error>> {
     let amount = U256::from(1000000000000000000u64);
 
     let payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
@@ -185,7 +182,6 @@ fn test_end_to_end_transaction_signing() -> Result<(), Box<dyn Error>> {
 
     // Test that different payload produces different signature
     let payload2 = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 2,
@@ -214,7 +210,6 @@ fn test_signature_determinism_across_restarts() -> Result<(), Box<dyn Error>> {
     let amount = U256::from(5000000000000000000u64);
 
     let payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
@@ -258,7 +253,6 @@ fn test_complete_key_to_signature_workflow() -> Result<(), Box<dyn Error>> {
     let amount = U256::from(1500000000000000000u64);
 
     let payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 3,
@@ -305,7 +299,6 @@ fn test_multiple_transaction_types_signing() -> Result<(), Box<dyn Error>> {
 
     let payloads = [
         TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
@@ -314,7 +307,6 @@ fn test_multiple_transaction_types_signing() -> Result<(), Box<dyn Error>> {
             value: U256::from(1000u64),
         },
         TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
@@ -323,7 +315,6 @@ fn test_multiple_transaction_types_signing() -> Result<(), Box<dyn Error>> {
             value: U256::from(2000u64),
         },
         TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
@@ -332,7 +323,6 @@ fn test_multiple_transaction_types_signing() -> Result<(), Box<dyn Error>> {
             value: U256::from(3000u64),
         },
         TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
@@ -401,7 +391,6 @@ fn test_signing_with_invalid_private_keys() {
     let amount = U256::from(1000u64);
 
     let payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
@@ -431,7 +420,6 @@ fn test_extreme_value_handling() -> Result<(), Box<dyn Error>> {
     let payloads = [
         // Zero amount
         TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
@@ -441,7 +429,6 @@ fn test_extreme_value_handling() -> Result<(), Box<dyn Error>> {
         },
         // Maximum amount
         TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
@@ -451,7 +438,6 @@ fn test_extreme_value_handling() -> Result<(), Box<dyn Error>> {
         },
         // Mixed extremes
         TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
@@ -498,7 +484,6 @@ fn test_concurrent_signing_consistency() -> Result<(), Box<dyn Error>> {
     let amount = U256::from(7777777777777777777u64);
 
     let payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
@@ -558,7 +543,6 @@ fn test_signing_performance_baseline() -> Result<(), Box<dyn Error>> {
     let amount = U256::from(12345678901234567890u64);
 
     let _payload = TokenMintPayload {
-        recent_epoch: 100,
         recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
@@ -573,7 +557,6 @@ fn test_signing_performance_baseline() -> Result<(), Box<dyn Error>> {
     // Perform multiple signing operations
     for i in 0..iterations {
         let test_payload = TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,

@@ -68,9 +68,6 @@ pub struct Transaction {
     #[serde(default)]
     pub transaction_index: Option<u64>,
 
-    /// Epoch
-    pub recent_epoch: u64,
-
     /// Checkpoint
     pub recent_checkpoint: u64,
 
@@ -93,10 +90,9 @@ impl Display for Transaction {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         write!(
             f,
-            "Transaction {}: from {} at recent epoch {} checkpoint {} (nonce: {})",
+            "Transaction {}: from {} at checkpoint {} (nonce: {})",
             self.hash,
             self.from,
-            self.recent_epoch,
             self.checkpoint_number.unwrap_or(self.recent_checkpoint),
             self.nonce
         )?;
@@ -452,7 +448,6 @@ mod tests {
             ),
             checkpoint_number: Some(1500),
             transaction_index: Some(0),
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
@@ -467,7 +462,6 @@ mod tests {
             serde_json::from_str(&json).expect("Test data should be valid");
 
         assert_eq!(transaction.hash, deserialized.hash);
-        assert_eq!(transaction.recent_epoch, deserialized.recent_epoch);
         assert_eq!(
             transaction.recent_checkpoint,
             deserialized.recent_checkpoint
@@ -656,7 +650,6 @@ mod tests {
             ),
             checkpoint_number: Some(200),
             transaction_index: Some(1),
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
@@ -669,7 +662,7 @@ mod tests {
         let display_str = format!("{}", transaction);
         assert_eq!(
             display_str,
-            "Transaction 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777: from 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0 at recent epoch 100 checkpoint 200 (nonce: 5) in checkpoint 0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f"
+            "Transaction 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777: from 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0 at checkpoint 200 (nonce: 5) in checkpoint 0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f"
         );
     }
 
@@ -683,7 +676,6 @@ mod tests {
             checkpoint_hash: None, // This tests the None branch
             checkpoint_number: None,
             transaction_index: None,
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
@@ -696,7 +688,7 @@ mod tests {
         let display_str = format!("{}", transaction);
         assert_eq!(
             display_str,
-            "Transaction 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777: from 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0 at recent epoch 100 checkpoint 200 (nonce: 5)"
+            "Transaction 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777: from 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0 at checkpoint 200 (nonce: 5)"
         );
     }
 

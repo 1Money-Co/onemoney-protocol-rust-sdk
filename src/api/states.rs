@@ -9,7 +9,7 @@ impl Client {
     /// Get the latest epoch and checkpoint information.
     ///
     /// This is commonly used when creating transactions to get the required
-    /// recent_epoch and recent_checkpoint values.
+    /// recent_checkpoint value.
     ///
     /// # Returns
     ///
@@ -28,7 +28,6 @@ impl Client {
     ///     println!("Latest state: epoch {} checkpoint {}", state.epoch, state.checkpoint);
     ///
     ///     // Use in transaction payload
-    ///     let recent_epoch = state.epoch;
     ///     let recent_checkpoint = state.checkpoint;
     ///
     ///     Ok(())

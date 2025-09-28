@@ -264,7 +264,6 @@ mod tests {
             .expect("Test data should be valid");
 
         let payload = TokenMintPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -273,7 +272,6 @@ mod tests {
             token,
         };
 
-        assert_eq!(payload.recent_epoch, 100);
         assert_eq!(payload.recent_checkpoint, 200);
         assert_eq!(payload.chain_id, 1212101);
         assert_eq!(payload.nonce, 5);
@@ -290,7 +288,6 @@ mod tests {
             .expect("Test data should be valid");
 
         let payload = TokenBurnPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -299,7 +296,6 @@ mod tests {
             token,
         };
 
-        assert_eq!(payload.recent_epoch, 100);
         assert_eq!(payload.recipient, address);
         assert_eq!(payload.value, U256::from(500000000000000000u64));
     }
@@ -360,7 +356,6 @@ mod tests {
             .expect("Test data should be valid");
 
         let payload = TokenAuthorityPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -382,7 +377,6 @@ mod tests {
             .expect("Test data should be valid");
 
         let payload = TokenPausePayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -402,7 +396,6 @@ mod tests {
             .expect("Test data should be valid");
 
         let payload = TokenBlacklistPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
@@ -424,7 +417,6 @@ mod tests {
             .expect("Test data should be valid");
 
         let payload = TokenWhitelistPayload {
-            recent_epoch: 100,
             recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,

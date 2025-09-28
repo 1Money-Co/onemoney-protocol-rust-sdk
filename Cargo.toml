@@ -1,6 +1,6 @@
 [package]
 name = "onemoney-protocol"
-version = "0.5.0"
+version = "0.6.0"
 edition = "2024"
 description = "Official Rust SDK for OneMoney Protocol - L1 blockchain network client"
 license = "Apache-2.0"
@@ -36,10 +36,6 @@ path = "examples/checkpoints_example.rs"
 [[example]]
 name = "network_examples"
 path = "examples/network_examples.rs"
-
-[[example]]
-name = "states_example"
-path = "examples/states_example.rs"
 
 [[example]]
 name = "tokens_example"
