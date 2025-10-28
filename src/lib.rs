@@ -44,3 +44,9 @@ pub use requests::{
 pub use transport::*;
 pub use types::*;
 pub use utils::*;
+
+#[cfg(feature = "bridge")]
+pub use requests::{
+    TokenBridgeAndMintPayload, TokenBridgeAndMintRequest, TokenBurnAndBridgePayload,
+    TokenBurnAndBridgeRequest,
+};

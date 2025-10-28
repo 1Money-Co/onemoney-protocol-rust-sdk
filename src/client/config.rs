@@ -121,6 +121,12 @@ pub mod endpoints {
         pub const TOKEN_METADATA: &str = "/tokens/token_metadata";
     }
 
+    /// Bridge-related endpoints.
+    #[cfg(feature = "bridge")]
+    pub mod bridge {
+        pub const BRIDGE_AND_MINT: &str = "/tokens/bridge_and_mint";
+    }
+
     /// State-related endpoints.
     pub mod states {
         pub const LATEST_EPOCH_CHECKPOINT: &str = "/states/latest_epoch_checkpoint";

@@ -7,6 +7,9 @@ pub mod checkpoints;
 pub mod tokens;
 pub mod transactions;
 
+#[cfg(feature = "bridge")]
+pub mod bridge;
+
 // Re-export client types from the new client module
 pub use crate::client::{Client, ClientBuilder, Network};
 
@@ -14,4 +17,10 @@ pub use crate::client::{Client, ClientBuilder, Network};
 pub use crate::requests::{
     PaymentPayload, TokenAuthorityPayload, TokenBlacklistPayload, TokenBurnPayload,
     TokenMetadataUpdatePayload, TokenMintPayload, TokenPausePayload, TokenWhitelistPayload,
+};
+
+#[cfg(feature = "bridge")]
+pub use crate::requests::{
+    TokenBridgeAndMintPayload, TokenBridgeAndMintRequest, TokenBurnAndBridgePayload,
+    TokenBurnAndBridgeRequest,
 };
