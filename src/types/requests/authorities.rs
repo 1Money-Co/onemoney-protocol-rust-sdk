@@ -32,6 +32,8 @@ pub enum Authority {
     ManageList,
     /// Can update token metadata.
     UpdateMetadata,
+    /// Can bridge tokens to/from other chains.
+    Bridge,
 }
 
 impl Display for Authority {
@@ -49,6 +51,7 @@ impl Authority {
             Authority::Pause => "Pause",
             Authority::ManageList => "ManageList",
             Authority::UpdateMetadata => "UpdateMetadata",
+            Authority::Bridge => "Bridge",
         }
     }
 }
@@ -93,6 +96,7 @@ mod tests {
         assert_eq!(Authority::Pause.to_string(), "Pause");
         assert_eq!(Authority::ManageList.to_string(), "ManageList");
         assert_eq!(Authority::UpdateMetadata.to_string(), "UpdateMetadata");
+        assert_eq!(Authority::Bridge.to_string(), "Bridge");
     }
 
     #[test]
@@ -108,6 +112,7 @@ mod tests {
         assert_eq!(Authority::Pause.as_str(), "Pause");
         assert_eq!(Authority::ManageList.as_str(), "ManageList");
         assert_eq!(Authority::UpdateMetadata.as_str(), "UpdateMetadata");
+        assert_eq!(Authority::Bridge.as_str(), "Bridge");
     }
 
     #[test]
@@ -149,6 +154,7 @@ mod tests {
             Authority::Pause,
             Authority::ManageList,
             Authority::UpdateMetadata,
+            Authority::Bridge,
         ];
 
         let mut encodings = Vec::new();
@@ -232,6 +238,7 @@ mod tests {
             Authority::Pause,
             Authority::ManageList,
             Authority::UpdateMetadata,
+            Authority::Bridge,
         ];
 
         for authority in &authorities {
