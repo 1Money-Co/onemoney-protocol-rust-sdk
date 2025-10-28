@@ -56,30 +56,20 @@ pub struct TokenBridgeAndMintPayload {
 
 impl AlloyEncodable for TokenBridgeAndMintPayload {
     fn encode(&self, out: &mut dyn BufMut) {
-        let mut temp_buf = Vec::new();
-
-        self.recent_checkpoint.encode(&mut temp_buf);
-        self.chain_id.encode(&mut temp_buf);
-        self.nonce.encode(&mut temp_buf);
-        self.recipient.encode(&mut temp_buf);
-        self.value.encode(&mut temp_buf);
-        self.token.encode(&mut temp_buf);
-        self.source_chain_id.encode(&mut temp_buf);
-        self.source_tx_hash.encode(&mut temp_buf);
-
-        // Encode Option<String> - use empty string if None
-        match &self.bridge_metadata {
-            Some(metadata) => metadata.encode(&mut temp_buf),
-            None => "".encode(&mut temp_buf),
+        self.recent_checkpoint.encode(out);
+        self.chain_id.encode(out);
+        self.nonce.encode(out);
+        self.recipient.encode(out);
+        self.value.encode(out);
+        self.token.encode(out);
+        self.source_chain_id.encode(out);
+        self.source_tx_hash.encode(out);
+        // Encode presence flag + value when present to preserve Some("") vs None distinction
+        // This matches the L1 implementation
+        self.bridge_metadata.is_some().encode(out);
+        if let Some(meta) = &self.bridge_metadata {
+            meta.encode(out);
         }
-
-        alloy_rlp::Header {
-            list: true,
-            payload_length: temp_buf.len(),
-        }
-        .encode(out);
-
-        out.put_slice(&temp_buf);
     }
 }
 
@@ -126,31 +116,21 @@ pub struct TokenBurnAndBridgePayload {
 
 impl AlloyEncodable for TokenBurnAndBridgePayload {
     fn encode(&self, out: &mut dyn BufMut) {
-        let mut temp_buf = Vec::new();
-
-        self.recent_checkpoint.encode(&mut temp_buf);
-        self.chain_id.encode(&mut temp_buf);
-        self.nonce.encode(&mut temp_buf);
-        self.sender.encode(&mut temp_buf);
-        self.value.encode(&mut temp_buf);
-        self.token.encode(&mut temp_buf);
-        self.destination_chain_id.encode(&mut temp_buf);
-        self.destination_address.encode(&mut temp_buf);
-        self.escrow_fee.encode(&mut temp_buf);
-
-        // Encode Option<String> - use empty string if None
-        match &self.bridge_metadata {
-            Some(metadata) => metadata.encode(&mut temp_buf),
-            None => "".encode(&mut temp_buf),
+        self.recent_checkpoint.encode(out);
+        self.chain_id.encode(out);
+        self.nonce.encode(out);
+        self.sender.encode(out);
+        self.value.encode(out);
+        self.token.encode(out);
+        self.destination_chain_id.encode(out);
+        self.destination_address.encode(out);
+        self.escrow_fee.encode(out);
+        // Encode presence flag + value when present to preserve Some("") vs None distinction
+        // This matches the L1 implementation
+        self.bridge_metadata.is_some().encode(out);
+        if let Some(meta) = &self.bridge_metadata {
+            meta.encode(out);
         }
-
-        alloy_rlp::Header {
-            list: true,
-            payload_length: temp_buf.len(),
-        }
-        .encode(out);
-
-        out.put_slice(&temp_buf);
     }
 }
 
