@@ -125,6 +125,7 @@ pub mod endpoints {
     #[cfg(feature = "bridge")]
     pub mod bridge {
         pub const BRIDGE_AND_MINT: &str = "/tokens/bridge_and_mint";
+        pub const BURN_AND_BRIDGE: &str = "/tokens/burn_and_bridge";
     }
 
     /// State-related endpoints.
