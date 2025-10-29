@@ -72,10 +72,6 @@ mod tests {
 
         // Test various endpoint modules
         assert_eq!(chains::CHAIN_ID, "/chains/chain_id");
-        assert_eq!(
-            states::LATEST_EPOCH_CHECKPOINT,
-            "/states/latest_epoch_checkpoint"
-        );
         assert_eq!(tokens::MINT, "/tokens/mint");
         assert_eq!(transactions::PAYMENT, "/transactions/payment");
         assert_eq!(accounts::NONCE, "/accounts/nonce");
@@ -141,6 +137,5 @@ mod tests {
         // Endpoint constants should be organized properly
         assert!(endpoints::tokens::MINT.contains("tokens"));
         assert!(endpoints::chains::CHAIN_ID.contains("chains"));
-        assert!(endpoints::states::LATEST_EPOCH_CHECKPOINT.contains("states"));
     }
 }

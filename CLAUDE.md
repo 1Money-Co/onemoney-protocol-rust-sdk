@@ -24,47 +24,73 @@ This is the OneMoney Protocol Rust SDK - a Rust library/SDK project for interact
 
 ### Common Rust/Cargo Commands
 - **Build**: `cargo build` (debug mode) or `cargo build --release` (optimized)
+- **Build with all features**: `cargo build --all-features` (includes optional features like bridge)
 - **Run**: `cargo run`
-- **Test**: `cargo test`
+- **Test**: `cargo test` (default features only)
+- **Test with all features**: `cargo test --all-features` (includes bridge feature tests)
 - **Single test**: `cargo test test_name` or `cargo test -- --exact test_name`
 - **Check compilation**: `cargo check` (faster than build, doesn't produce binaries)
+- **Check with all features**: `cargo check --all-features`
 - **Format code**: `cargo fmt`
 - **Lint**: `cargo clippy`
 - **Comprehensive lint**: `cargo clippy --all-targets --workspace --lib --examples --all-features --tests --benches -- -D warnings`
 - **Documentation**: `cargo doc --open`
+- **Documentation with all features**: `cargo doc --all-features --open`
 - **Clean build artifacts**: `cargo clean`
 
 ### Development Workflow
 1. Install pre-commit hooks: `pre-commit install`
 2. Before committing changes, pre-commit hooks will automatically run:
    - Code formatting checks (`cargo fmt`)
-   - Compilation checks (`cargo check`)
-   - Linting (`cargo clippy`)
-   - Tests (`cargo test`)
+   - Compilation checks (`cargo check --all-features`)
+   - Linting (`cargo clippy --all-features`)
+   - Tests (`cargo test --all-features`)
 3. Manual commands (also run by pre-commit):
    - `cargo fmt` to ensure consistent formatting
-   - `cargo clippy` to catch common mistakes and improve code quality
+   - `cargo clippy --all-features` to catch common mistakes and improve code quality
    - `cargo clippy --all-targets --workspace --lib --examples --all-features --tests --benches -- -D warnings` for comprehensive linting with strict warnings
-   - `cargo test` to ensure all tests pass
+   - `cargo test --all-features` to ensure all tests pass (including bridge feature tests)
 
 ## Project Structure
 
 This is a Rust project using Cargo as the build system. The codebase follows standard Rust project conventions:
 
-- `Cargo.toml` - Project manifest with dependencies and metadata
+- `Cargo.toml` - Project manifest with dependencies, metadata, and feature flags
 - `src/` - Source code directory
-  - `main.rs` - Entry point (currently a simple "Hello, world!" program)
+  - `lib.rs` - Library root for the SDK's public API
+  - `client/` - API client implementation and configuration
+  - `api/` - API endpoint implementations (accounts, tokens, transactions, bridge)
+  - `types/` - Data structures and types (requests, responses, common types)
+  - `crypto/` - Cryptographic utilities (signing, hashing, keys)
+  - `error.rs` - Error handling types
+  - `transport/` - HTTP transport and retry logic
+  - `utils/` - Utility functions (address validation, wallet generation)
+- `tests/` - Integration tests
 - `target/` - Build output directory (git-ignored)
 
 ## Architecture Notes
 
-As this SDK develops, consider organizing the code into:
-- `src/lib.rs` - Library root for the SDK's public API
-- `src/client/` - API client implementation
-- `src/models/` - Data structures and types
-- `src/error.rs` - Error handling types
-- `examples/` - Usage examples
-- `tests/` - Integration tests
+The SDK is organized into logical modules:
+- `src/lib.rs` - Library root exposing the public API
+- `src/client/` - HTTP client, builder pattern, network configuration
+- `src/api/` - API operations organized by resource (accounts, chains, checkpoints, tokens, transactions)
+  - `src/api/bridge.rs` - Bridge operations (feature-gated with `bridge` flag)
+- `src/types/` - Type definitions split into requests and responses
+  - `src/types/requests/` - Request payloads (tokens, transactions, bridge)
+  - `src/types/responses/` - Response types (accounts, chains, transactions, tokens)
+- `src/crypto/` - Cryptographic operations (signing, hashing)
+- `src/error.rs` - Comprehensive error types using thiserror
+- `src/transport/` - HTTP transport configuration and retry policies
+- `src/utils/` - Helper utilities
+
+### Feature Flags
+
+The project uses Cargo feature flags for optional functionality:
+- **bridge**: Enables cross-chain bridge operations (bridge-and-mint, burn-and-bridge)
+- **rustls**: Uses rustls for TLS (default)
+- **native-tls**: Uses native TLS implementation
+- **uuid**: Enables UUID support
+- **integration**: Enables integration tests
 
 The project uses Rust edition 2024 and includes dependencies for HTTP client, serialization, cryptography, and error handling.
 
@@ -85,7 +111,7 @@ When implementing the Rust SDK:
 4. **Import Organization and Path Cleanliness** - Always use explicit `use` statements and avoid inline paths for maximum code readability and maintainability:
 
    **4.1 Import Types and Constants Explicitly**
-   - **Never use inline paths**: Avoid `crate::client::api_path(crate::client::endpoints::states::LATEST)`
+   - **Never use inline paths**: Avoid `crate::client::api_path(crate::client::config::endpoints::checkpoints::NUMBER)`
    - **Import constants and functions**: Import constants, functions, and types at the file top with `use` statements
    - **Use short, clean references**: After importing, reference items directly by their name
 
@@ -98,20 +124,20 @@ When implementing the Rust SDK:
 
    **Good Example - Clean Method Implementation:**
    ```rust
-   use crate::client::api_path;
-   use crate::client::endpoints::states::LATEST_EPOCH_CHECKPOINT;
-   use crate::{LatestStateResponse, Result};
+   use crate::client::config::api_path;
+   use crate::client::config::endpoints::checkpoints::NUMBER;
+   use crate::{CheckpointNumber, Result};
 
-   pub async fn get_latest_epoch_checkpoint(&self) -> Result<LatestStateResponse> {
-       self.get(&api_path(LATEST_EPOCH_CHECKPOINT)).await
+   pub async fn get_checkpoint_number(&self) -> Result<CheckpointNumber> {
+       self.get(&api_path(NUMBER)).await
    }
    ```
 
    **Bad Example - Inline Paths:**
    ```rust
-   pub async fn get_latest_epoch_checkpoint(&self) -> Result<LatestStateResponse> {
-       self.get(&crate::client::api_path(
-           crate::client::endpoints::states::LATEST_EPOCH_CHECKPOINT,
+   pub async fn get_checkpoint_number(&self) -> Result<CheckpointNumber> {
+       self.get(&crate::client::config::api_path(
+           crate::client::config::endpoints::checkpoints::NUMBER,
        ))
        .await
    }
@@ -252,14 +278,17 @@ When implementing the Rust SDK:
    - Catches common mistakes and enforces best practices
    - Must pass with zero warnings or errors
    - All clippy suggestions must be addressed
+   - **Note**: `--all-features` flag includes optional features like bridge
 
-3. **Full test suite**: `cargo test`
+3. **Full test suite**: `cargo test --all-features`
    - Ensures all unit tests, integration tests, and doc tests pass
    - Must have 100% test success rate
+   - **Note**: `--all-features` flag ensures bridge feature tests are included
 
-4. **Compilation check**: `cargo check`
-   - Verifies all code compiles successfully
+4. **Compilation check**: `cargo check --all-features`
+   - Verifies all code compiles successfully including optional features
    - Must pass without compilation errors
+   - **Note**: `--all-features` flag includes bridge feature code
 
 5. **Pre-commit file fixes**: Run the following pre-commit hooks to ensure file consistency:
    - `pre-commit run end-of-file-fixer --all-files` - Ensures files end with a newline
@@ -267,6 +296,15 @@ When implementing the Rust SDK:
    - `pre-commit run trailing-whitespace --all-files` - Removes trailing whitespace
 
 **These checks replicate the pre-commit pipeline and ensure code quality. Do not consider a task complete until all five check categories pass successfully.**
+
+### Optional Features
+
+The project includes optional features that can be enabled via Cargo features:
+
+- **bridge**: Cross-chain token bridge functionality (bridge-and-mint, burn-and-bridge)
+  - Enable with: `cargo build --features bridge`
+  - Test with: `cargo test --features bridge`
+  - Enable all features: `cargo build --all-features`
 
 ## CI/CD Setup
 
@@ -276,7 +314,7 @@ The project uses self-hosted AWS runners with Docker containers to ensure consis
 
 #### Architecture
 - **Self-hosted runners**: Runs on AWS EC2 instances for better resource control
-- **Docker containers**: Each job runs in `rust:1.87-bookworm` containers for version consistency
+- **Docker containers**: Each job runs in `rust:1.90-bookworm` containers for version consistency
 - **Consistent environment**: Same Rust/Cargo versions across all CI stages
 
 #### CI Jobs
@@ -284,7 +322,7 @@ The project uses self-hosted AWS runners with Docker containers to ensure consis
 - **Security Audit**: Checks for known vulnerabilities using `cargo audit`
 - **Dependency Check**: Monitors for outdated dependencies with `cargo outdated`
 - **Code Coverage**: Generates coverage reports and uploads to Codecov using OIDC
-- **MSRV Check**: Validates minimum supported Rust version (1.87)
+- **MSRV Check**: Validates minimum supported Rust version (1.90)
 - **Documentation**: Builds and validates project documentation
 - **Release**: Automatically creates releases with changelog generation when version tags are pushed
 - **GitHub Actions Lint**: Validates workflow files when `.github/` changes
@@ -292,7 +330,7 @@ The project uses self-hosted AWS runners with Docker containers to ensure consis
 #### Docker Configuration
 
 **Dockerfile**: Provides consistent build environment with:
-- Rust 1.87 on Debian Bookworm
+- Rust 1.90 on Debian Bookworm
 - Pre-installed cargo tools (cargo-llvm-cov, cargo-audit, cargo-outdated)
 - System dependencies (OpenSSL, Git, build tools)
 - Pre-commit hooks support
@@ -316,8 +354,8 @@ docker-compose run rust-dev /bin/bash
 # Build the Docker image
 docker build -t onemoney-rust-sdk .
 
-# Run tests
-docker run --rm -v $(pwd):/workspace onemoney-rust-sdk cargo test
+# Run tests with all features
+docker run --rm -v $(pwd):/workspace onemoney-rust-sdk cargo test --all-features
 
 # Interactive development
 docker-compose run rust-dev /bin/bash
@@ -330,8 +368,8 @@ docker-compose up rust-dev
 
 # Run specific commands
 docker-compose run rust-ci cargo fmt
-docker-compose run rust-ci cargo clippy
-docker-compose run rust-ci cargo test
+docker-compose run rust-ci cargo clippy --all-features
+docker-compose run rust-ci cargo test --all-features
 ```
 
 #### Benefits of Docker CI

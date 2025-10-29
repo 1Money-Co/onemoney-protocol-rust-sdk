@@ -9,7 +9,7 @@ pub mod responses;
 
 // Re-export commonly used types from original SDK
 pub use common::*;
-// Note: accounts, checkpoints, states, transactions types are now in responses/
+// Note: accounts, checkpoints, transactions types are now in responses/
 
 // Re-export authority types (avoid conflicts with API types)
 pub use requests::authorities::{Authority, AuthorityAction};
@@ -25,7 +25,6 @@ pub use requests::transactions::*;
 pub use responses::accounts::*;
 pub use responses::chains::*;
 pub use responses::checkpoints::*;
-// pub use responses::states::*;
 pub use responses::tokens::*;
 pub use responses::transactions::*;
 

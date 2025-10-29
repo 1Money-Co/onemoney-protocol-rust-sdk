@@ -11,7 +11,6 @@ use onemoney_protocol::client::config::endpoints::{
     accounts::*,
     chains::*,
     checkpoints::{BY_HASH as CHECKPOINT_BY_HASH, BY_NUMBER},
-    states::*,
     tokens::*,
     transactions::{BY_HASH as TRANSACTION_BY_HASH, ESTIMATE_FEE, PAYMENT, RECEIPT_BY_HASH},
 };
@@ -126,25 +125,6 @@ fn test_checkpoints_query_parameter_formatting() {
         assert!(path.contains(&format!("full={}", full_param)));
         assert!(path.contains("hash=0x123"));
     }
-}
-
-//
-// ============================================================================
-// STATES API TESTS
-// ============================================================================
-//
-
-#[test]
-fn test_states_endpoint_constants() {
-    // Test state endpoint constants
-    assert_eq!(LATEST_EPOCH_CHECKPOINT, "/states/latest_epoch_checkpoint");
-}
-
-#[test]
-fn test_states_api_path_construction() {
-    // Test path construction for state endpoints
-    let latest_state_path = api_path(LATEST_EPOCH_CHECKPOINT);
-    assert_eq!(latest_state_path, "/v1/states/latest_epoch_checkpoint");
 }
 
 //
@@ -290,7 +270,6 @@ fn test_api_version_consistency() {
         api_path(CHAIN_ID),
         api_path(BY_NUMBER),
         api_path(CHECKPOINT_BY_HASH),
-        api_path(LATEST_EPOCH_CHECKPOINT),
         api_path(MINT),
         api_path(BURN),
         api_path(GRANT_AUTHORITY),
@@ -324,7 +303,6 @@ fn test_api_path_uniqueness() {
         api_path(CHAIN_ID),
         api_path(BY_NUMBER),
         api_path(CHECKPOINT_BY_HASH),
-        api_path(LATEST_EPOCH_CHECKPOINT),
         api_path(MINT),
         api_path(BURN),
         api_path(GRANT_AUTHORITY),
@@ -365,9 +343,6 @@ fn test_api_module_organization() {
     // Checkpoint APIs should contain "/checkpoints/"
     assert!(api_path(BY_NUMBER).contains("/checkpoints/"));
     assert!(api_path(CHECKPOINT_BY_HASH).contains("/checkpoints/"));
-
-    // State APIs should contain "/states/"
-    assert!(api_path(LATEST_EPOCH_CHECKPOINT).contains("/states/"));
 
     // Token APIs should contain "/tokens/"
     assert!(api_path(MINT).contains("/tokens/"));

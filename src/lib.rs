@@ -42,5 +42,12 @@ pub use requests::{
     TokenMetadataUpdatePayload, TokenMintPayload, TokenPausePayload, TokenWhitelistPayload,
 };
 pub use transport::*;
+pub use types::requests;
 pub use types::*;
 pub use utils::*;
+
+#[cfg(feature = "bridge")]
+pub use requests::{
+    TokenBridgeAndMintPayload, TokenBridgeAndMintRequest, TokenBurnAndBridgePayload,
+    TokenBurnAndBridgeRequest,
+};
