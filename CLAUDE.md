@@ -111,7 +111,7 @@ When implementing the Rust SDK:
 4. **Import Organization and Path Cleanliness** - Always use explicit `use` statements and avoid inline paths for maximum code readability and maintainability:
 
    **4.1 Import Types and Constants Explicitly**
-   - **Never use inline paths**: Avoid `crate::client::api_path(crate::client::endpoints::states::LATEST)`
+   - **Never use inline paths**: Avoid `crate::client::api_path(crate::client::config::endpoints::checkpoints::NUMBER)`
    - **Import constants and functions**: Import constants, functions, and types at the file top with `use` statements
    - **Use short, clean references**: After importing, reference items directly by their name
 
@@ -124,20 +124,20 @@ When implementing the Rust SDK:
 
    **Good Example - Clean Method Implementation:**
    ```rust
-   use crate::client::api_path;
-   use crate::client::endpoints::states::LATEST_EPOCH_CHECKPOINT;
-   use crate::{LatestStateResponse, Result};
+   use crate::client::config::api_path;
+   use crate::client::config::endpoints::checkpoints::NUMBER;
+   use crate::{CheckpointNumber, Result};
 
-   pub async fn get_latest_epoch_checkpoint(&self) -> Result<LatestStateResponse> {
-       self.get(&api_path(LATEST_EPOCH_CHECKPOINT)).await
+   pub async fn get_checkpoint_number(&self) -> Result<CheckpointNumber> {
+       self.get(&api_path(NUMBER)).await
    }
    ```
 
    **Bad Example - Inline Paths:**
    ```rust
-   pub async fn get_latest_epoch_checkpoint(&self) -> Result<LatestStateResponse> {
-       self.get(&crate::client::api_path(
-           crate::client::endpoints::states::LATEST_EPOCH_CHECKPOINT,
+   pub async fn get_checkpoint_number(&self) -> Result<CheckpointNumber> {
+       self.get(&crate::client::config::api_path(
+           crate::client::config::endpoints::checkpoints::NUMBER,
        ))
        .await
    }
