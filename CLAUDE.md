@@ -314,7 +314,7 @@ The project uses self-hosted AWS runners with Docker containers to ensure consis
 
 #### Architecture
 - **Self-hosted runners**: Runs on AWS EC2 instances for better resource control
-- **Docker containers**: Each job runs in `rust:1.87-bookworm` containers for version consistency
+- **Docker containers**: Each job runs in `rust:1.90-bookworm` containers for version consistency
 - **Consistent environment**: Same Rust/Cargo versions across all CI stages
 
 #### CI Jobs
@@ -322,7 +322,7 @@ The project uses self-hosted AWS runners with Docker containers to ensure consis
 - **Security Audit**: Checks for known vulnerabilities using `cargo audit`
 - **Dependency Check**: Monitors for outdated dependencies with `cargo outdated`
 - **Code Coverage**: Generates coverage reports and uploads to Codecov using OIDC
-- **MSRV Check**: Validates minimum supported Rust version (1.87)
+- **MSRV Check**: Validates minimum supported Rust version (1.90)
 - **Documentation**: Builds and validates project documentation
 - **Release**: Automatically creates releases with changelog generation when version tags are pushed
 - **GitHub Actions Lint**: Validates workflow files when `.github/` changes
@@ -330,7 +330,7 @@ The project uses self-hosted AWS runners with Docker containers to ensure consis
 #### Docker Configuration
 
 **Dockerfile**: Provides consistent build environment with:
-- Rust 1.87 on Debian Bookworm
+- Rust 1.90 on Debian Bookworm
 - Pre-installed cargo tools (cargo-llvm-cov, cargo-audit, cargo-outdated)
 - System dependencies (OpenSSL, Git, build tools)
 - Pre-commit hooks support
