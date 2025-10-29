@@ -42,6 +42,7 @@ pub use requests::{
     TokenMetadataUpdatePayload, TokenMintPayload, TokenPausePayload, TokenWhitelistPayload,
 };
 pub use transport::*;
+pub use types::requests;
 pub use types::*;
 pub use utils::*;
 
