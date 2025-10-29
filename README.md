@@ -234,7 +234,6 @@ The SDK is organized into several modules:
 - **`transactions`** - Payment sending, transaction queries, fee estimation
 - **`chains`** - Chain information and network details
 - **`checkpoints`** - Checkpoint queries and blockchain state
-- **`states`** - Latest state queries and network statistics
 - **`crypto`** - Cryptographic utilities for signing and verification
 
 ## Configuration

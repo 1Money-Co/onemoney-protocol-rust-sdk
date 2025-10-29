@@ -127,11 +127,6 @@ pub mod endpoints {
         pub const BRIDGE_AND_MINT: &str = "/tokens/bridge_and_mint";
         pub const BURN_AND_BRIDGE: &str = "/tokens/burn_and_bridge";
     }
-
-    /// State-related endpoints.
-    pub mod states {
-        pub const LATEST_EPOCH_CHECKPOINT: &str = "/states/latest_epoch_checkpoint";
-    }
 }
 
 #[cfg(test)]
@@ -183,12 +178,6 @@ mod tests {
 
         // Test chain endpoints
         assert_eq!(endpoints::chains::CHAIN_ID, "/chains/chain_id");
-
-        // Test state endpoints
-        assert_eq!(
-            endpoints::states::LATEST_EPOCH_CHECKPOINT,
-            "/states/latest_epoch_checkpoint"
-        );
 
         // Test checkpoint endpoints
         assert_eq!(endpoints::checkpoints::NUMBER, "/checkpoints/number");
