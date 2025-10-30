@@ -59,6 +59,7 @@ impl EvmWallet {
 
         // Get private key bytes
         let private_key_bytes = signing_key.to_bytes();
+        #[allow(deprecated)]
         let private_key = format!("0x{}", hex_encode(private_key_bytes.as_slice()));
 
         // Get public key

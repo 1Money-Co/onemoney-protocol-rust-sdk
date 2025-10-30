@@ -336,6 +336,8 @@ pub enum TxPayload {
         source_tx_hash: String,
         /// Optional bridge metadata for additional verification.
         bridge_metadata: Option<String>,
+        /// The token address
+        token: Address,
     },
 
     /// Burns tokens then bridges to another chain.
@@ -355,6 +357,8 @@ pub enum TxPayload {
         escrow_fee: String,
         /// Optional bridge metadata for additional information
         bridge_metadata: Option<String>,
+        /// The token address
+        token: Address,
     },
 
     /// Raw transaction data, all unsupported instructions are encoded as raw
@@ -368,9 +372,6 @@ pub enum TxPayload {
         /// The token address
         token: Address,
     },
-
-    // *FIXLATER*: for governance, we don't support them for now.
-    Governance,
 }
 
 impl TxPayload {
@@ -626,6 +627,8 @@ mod tests {
             source_tx_hash: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
                 .to_string(),
             bridge_metadata: Some("bridge_ref_123".to_string()),
+            token: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8CbAA")
+                .expect("Test data should be valid"),
         };
 
         let json = serde_json::to_string(&payload).expect("Test data should be valid");
@@ -639,6 +642,7 @@ mod tests {
                 source_chain_id,
                 source_tx_hash,
                 bridge_metadata,
+                token,
             } => {
                 assert_eq!(
                     recipient,
@@ -652,6 +656,11 @@ mod tests {
                     "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
                 );
                 assert_eq!(bridge_metadata, Some("bridge_ref_123".to_string()));
+                assert_eq!(
+                    token,
+                    Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8CbAA")
+                        .expect("Test data should be valid")
+                );
             }
             _ => panic!("Wrong payload type"),
         }
@@ -667,6 +676,8 @@ mod tests {
             destination_address: "0x9876543210fedcba9876543210fedcba98765432".to_string(),
             escrow_fee: "100000000000000000".to_string(),
             bridge_metadata: Some("bridge_tx_456".to_string()),
+            token: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8CbAA")
+                .expect("Test data should be valid"),
         };
 
         let json = serde_json::to_string(&payload).expect("Test data should be valid");
@@ -681,6 +692,7 @@ mod tests {
                 destination_address,
                 escrow_fee,
                 bridge_metadata,
+                token,
             } => {
                 assert_eq!(value, "3000000000000000000");
                 assert_eq!(
@@ -695,6 +707,11 @@ mod tests {
                 );
                 assert_eq!(escrow_fee, "100000000000000000");
                 assert_eq!(bridge_metadata, Some("bridge_tx_456".to_string()));
+                assert_eq!(
+                    token,
+                    Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8CbAA")
+                        .expect("Test data should be valid")
+                );
             }
             _ => panic!("Wrong payload type"),
         }
