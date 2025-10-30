@@ -321,6 +321,46 @@ pub enum TxPayload {
         token: Address,
     },
 
+    /// Bridges tokens from another chain then mints new tokens to the recipient
+    /// address.
+    ///
+    /// Refer to `TokenInstruction::BridgeAndMint`.
+    TokenBridgeAndMint {
+        /// The recipient address to mint tokens to.
+        recipient: Address,
+        /// The amount of tokens to mint from the bridge.
+        value: String,
+        /// The chain ID from which tokens are being bridged.
+        source_chain_id: u64,
+        /// The transaction hash on the source chain proving the lock/burn.
+        source_tx_hash: String,
+        /// Optional bridge metadata for additional verification.
+        bridge_metadata: Option<String>,
+        /// The token address
+        token: Address,
+    },
+
+    /// Burns tokens then bridges to another chain.
+    ///
+    /// Refer to `TokenInstruction::BurnAndBridge`.
+    TokenBurnAndBridge {
+        /// The amount of tokens to burn for bridging
+        value: String,
+        /// The address to burn tokens from
+        sender: Address,
+        /// The destination chain ID to bridge tokens to
+        destination_chain_id: u64,
+        /// The destination address on the target chain
+        destination_address: String,
+        /// The bridging fee necessary to escrow for transferring tokens to the
+        /// destination chain
+        escrow_fee: String,
+        /// Optional bridge metadata for additional information
+        bridge_metadata: Option<String>,
+        /// The token address
+        token: Address,
+    },
+
     /// Raw transaction data, all unsupported instructions are encoded as raw
     /// data.
     ///
@@ -332,9 +372,6 @@ pub enum TxPayload {
         /// The token address
         token: Address,
     },
-
-    // *FIXLATER*: for governance, we don't support them for now.
-    Governance,
 }
 
 impl TxPayload {
@@ -574,6 +611,106 @@ mod tests {
                         Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
                             .expect("Test data should be valid")
                     )
+                );
+            }
+            _ => panic!("Wrong payload type"),
+        }
+    }
+
+    #[test]
+    fn test_tx_payload_token_bridge_and_mint_serialization() {
+        let payload = TxPayload::TokenBridgeAndMint {
+            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .expect("Test data should be valid"),
+            value: "5000000000000000000".to_string(),
+            source_chain_id: 1,
+            source_tx_hash: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+                .to_string(),
+            bridge_metadata: Some("bridge_ref_123".to_string()),
+            token: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8CbAA")
+                .expect("Test data should be valid"),
+        };
+
+        let json = serde_json::to_string(&payload).expect("Test data should be valid");
+        let deserialized: TxPayload =
+            serde_json::from_str(&json).expect("Test data should be valid");
+
+        match deserialized {
+            TxPayload::TokenBridgeAndMint {
+                recipient,
+                value,
+                source_chain_id,
+                source_tx_hash,
+                bridge_metadata,
+                token,
+            } => {
+                assert_eq!(
+                    recipient,
+                    Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                        .expect("Test data should be valid")
+                );
+                assert_eq!(value, "5000000000000000000");
+                assert_eq!(source_chain_id, 1);
+                assert_eq!(
+                    source_tx_hash,
+                    "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+                );
+                assert_eq!(bridge_metadata, Some("bridge_ref_123".to_string()));
+                assert_eq!(
+                    token,
+                    Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8CbAA")
+                        .expect("Test data should be valid")
+                );
+            }
+            _ => panic!("Wrong payload type"),
+        }
+    }
+
+    #[test]
+    fn test_tx_payload_token_burn_and_bridge_serialization() {
+        let payload = TxPayload::TokenBurnAndBridge {
+            value: "3000000000000000000".to_string(),
+            sender: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                .expect("Test data should be valid"),
+            destination_chain_id: 137,
+            destination_address: "0x9876543210fedcba9876543210fedcba98765432".to_string(),
+            escrow_fee: "100000000000000000".to_string(),
+            bridge_metadata: Some("bridge_tx_456".to_string()),
+            token: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8CbAA")
+                .expect("Test data should be valid"),
+        };
+
+        let json = serde_json::to_string(&payload).expect("Test data should be valid");
+        let deserialized: TxPayload =
+            serde_json::from_str(&json).expect("Test data should be valid");
+
+        match deserialized {
+            TxPayload::TokenBurnAndBridge {
+                value,
+                sender,
+                destination_chain_id,
+                destination_address,
+                escrow_fee,
+                bridge_metadata,
+                token,
+            } => {
+                assert_eq!(value, "3000000000000000000");
+                assert_eq!(
+                    sender,
+                    Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                        .expect("Test data should be valid")
+                );
+                assert_eq!(destination_chain_id, 137);
+                assert_eq!(
+                    destination_address,
+                    "0x9876543210fedcba9876543210fedcba98765432"
+                );
+                assert_eq!(escrow_fee, "100000000000000000");
+                assert_eq!(bridge_metadata, Some("bridge_tx_456".to_string()));
+                assert_eq!(
+                    token,
+                    Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8CbAA")
+                        .expect("Test data should be valid")
                 );
             }
             _ => panic!("Wrong payload type"),
