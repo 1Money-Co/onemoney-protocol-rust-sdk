@@ -321,38 +321,31 @@ pub enum TxPayload {
         token: Address,
     },
 
-    /// Bridge tokens from another chain and mint them to an account. This
-    /// instruction creates new tokens representing bridged assets. The
-    /// signer must have bridge authority.
+    /// Bridges tokens from another chain then mints new tokens to the recipient
+    /// address.
     ///
     /// Refer to `TokenInstruction::BridgeAndMint`.
     TokenBridgeAndMint {
-        /// The amount of tokens to mint from the bridge
-        value: String,
-        /// The recipient address to mint tokens to
+        /// The recipient address to mint tokens to.
         recipient: Address,
-        /// The token address
-        token: Address,
-        /// The chain ID from which tokens are being bridged
+        /// The amount of tokens to mint from the bridge.
+        value: String,
+        /// The chain ID from which tokens are being bridged.
         source_chain_id: u64,
-        /// The transaction hash on the source chain proving the lock or burn
+        /// The transaction hash on the source chain proving the lock/burn.
         source_tx_hash: String,
-        /// Optional bridge metadata for additional verification
+        /// Optional bridge metadata for additional verification.
         bridge_metadata: Option<String>,
     },
 
-    /// Burn tokens and initiate bridge to another chain. This instruction burns
-    /// tokens and records bridge information for the destination chain. The
-    /// signer must be the account owner or have appropriate authority.
+    /// Burns tokens then bridges to another chain.
     ///
     /// Refer to `TokenInstruction::BurnAndBridge`.
     TokenBurnAndBridge {
         /// The amount of tokens to burn for bridging
         value: String,
         /// The address to burn tokens from
-        recipient: Address,
-        /// The token address
-        token: Address,
+        sender: Address,
         /// The destination chain ID to bridge tokens to
         destination_chain_id: u64,
         /// The destination address on the target chain
@@ -626,11 +619,9 @@ mod tests {
     #[test]
     fn test_tx_payload_token_bridge_and_mint_serialization() {
         let payload = TxPayload::TokenBridgeAndMint {
-            value: "5000000000000000000".to_string(),
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
-            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
-                .expect("Test data should be valid"),
+            value: "5000000000000000000".to_string(),
             source_chain_id: 1,
             source_tx_hash: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
                 .to_string(),
@@ -643,24 +634,18 @@ mod tests {
 
         match deserialized {
             TxPayload::TokenBridgeAndMint {
-                value,
                 recipient,
-                token,
+                value,
                 source_chain_id,
                 source_tx_hash,
                 bridge_metadata,
             } => {
-                assert_eq!(value, "5000000000000000000");
                 assert_eq!(
                     recipient,
                     Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                         .expect("Test data should be valid")
                 );
-                assert_eq!(
-                    token,
-                    Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
-                        .expect("Test data should be valid")
-                );
+                assert_eq!(value, "5000000000000000000");
                 assert_eq!(source_chain_id, 1);
                 assert_eq!(
                     source_tx_hash,
@@ -676,9 +661,7 @@ mod tests {
     fn test_tx_payload_token_burn_and_bridge_serialization() {
         let payload = TxPayload::TokenBurnAndBridge {
             value: "3000000000000000000".to_string(),
-            recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
-                .expect("Test data should be valid"),
-            token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+            sender: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
             destination_chain_id: 137,
             destination_address: "0x9876543210fedcba9876543210fedcba98765432".to_string(),
@@ -693,8 +676,7 @@ mod tests {
         match deserialized {
             TxPayload::TokenBurnAndBridge {
                 value,
-                recipient,
-                token,
+                sender,
                 destination_chain_id,
                 destination_address,
                 escrow_fee,
@@ -702,13 +684,8 @@ mod tests {
             } => {
                 assert_eq!(value, "3000000000000000000");
                 assert_eq!(
-                    recipient,
+                    sender,
                     Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
-                        .expect("Test data should be valid")
-                );
-                assert_eq!(
-                    token,
-                    Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
                         .expect("Test data should be valid")
                 );
                 assert_eq!(destination_chain_id, 137);
