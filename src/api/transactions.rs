@@ -5,12 +5,13 @@ use crate::client::config::endpoints::transactions::{
     BY_HASH, ESTIMATE_FEE, PAYMENT, RECEIPT_BY_HASH,
 };
 use crate::client::config::{API_VERSION, api_path};
+use crate::client::endpoints::transactions::FINALIZED_BY_HASH;
 use crate::crypto::sign_transaction_payload;
 use crate::requests::{FeeEstimateRequest, PaymentPayload, PaymentRequest};
 use crate::responses::FeeEstimate;
 use crate::responses::TransactionReceipt;
 use crate::responses::TransactionResponse;
-use crate::{Result, Transaction};
+use crate::{FinalizedTransaction, Result, Transaction};
 
 impl Client {
     /// Send a payment transaction.
@@ -112,6 +113,23 @@ impl Client {
             path, request.from, request.value, token_query
         );
         self.get(&full_path).await
+    }
+
+    /// Get finalized transaction and receipt by hash.
+    ///
+    /// # Arguments
+    ///
+    /// * `hash` - Transaction hash
+    ///
+    /// # Returns
+    ///
+    /// The finalized transaction and receipt.
+    pub async fn get_finalized_transaction_by_hash(
+        &self,
+        hash: &str,
+    ) -> Result<FinalizedTransaction> {
+        let path = format!("{}{}?hash={}", API_VERSION, FINALIZED_BY_HASH, hash);
+        self.get(&path).await
     }
 }
 

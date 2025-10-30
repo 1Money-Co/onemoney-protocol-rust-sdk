@@ -207,6 +207,7 @@ async fn test_token_metadata_mock() -> Result<(), Box<dyn Error>> {
             "black_list": [],
             "white_list": [],
             "metadata_update_authorities": [],
+            "bridge_authorities": [],
             "supply": "1000000",
             "decimals": 18,
             "is_paused": false,

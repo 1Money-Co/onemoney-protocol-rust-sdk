@@ -103,6 +103,14 @@ impl Display for Transaction {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FinalizedTransaction {
+    pub epoch: u64,
+    #[serde(flatten)]
+    pub receipt: TransactionReceipt,
+    pub counter_signatures: Vec<Signature>,
+}
+
 /// Transaction receipt response.
 /// Matches L1 server's TransactionReceipt structure with proper types.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -121,9 +129,12 @@ pub struct TransactionReceipt {
     pub fee_used: u128,
     /// Address of the sender.
     pub from: Address,
-    /// Address of the receiver. None when its a contract creation transaction.
-    pub to: Option<Address>,
-    /// Token address created, or None if not a deployment.
+    /// Address of the recipient. None when its a contract creation transaction.
+    /// This field will be deprecated, please use `recipient` instead.
+    // pub to: Option<Address>,
+    /// Address of the recipient. None when its a contract creation transaction.
+    pub recipient: Option<Address>,
+    /// The token address.
     pub token_address: Option<Address>,
 }
 
@@ -143,8 +154,8 @@ impl Display for TransactionReceipt {
             writeln!(f, "  Checkpoint Number: {}", num)?;
         }
         writeln!(f, "  From: {}", self.from)?;
-        if let Some(to) = &self.to {
-            writeln!(f, "  To: {}", to)?;
+        if let Some(recipient) = &self.recipient {
+            writeln!(f, "  Recipient: {}", recipient)?;
         }
         if let Some(token) = &self.token_address {
             write!(f, "  Token Address: {}", token)?;
@@ -266,6 +277,23 @@ pub enum TxPayload {
         token: Address,
     },
 
+    /// Bridges tokens from another chain then mints new tokens to the recipient
+    /// address.
+    ///
+    /// Refer to `TokenInstruction::BridgeAndMint`.
+    TokenBridgeAndMint {
+        /// The recipient address to mint tokens to.
+        recipient: Address,
+        /// The amount of tokens to mint from the bridge.
+        value: String,
+        /// The chain ID from which tokens are being bridged.
+        source_chain_id: u64,
+        /// The transaction hash on the source chain proving the lock/burn.
+        source_tx_hash: String,
+        /// Optional bridge metadata for additional verification.
+        bridge_metadata: Option<String>,
+    },
+
     /// Burns tokens by removing them from an account. The signer of the message
     /// must be Mint's `mint_burn` authority. Otherwise the transaction may
     /// fail.
@@ -279,6 +307,25 @@ pub enum TxPayload {
 
         /// The token address
         token: Address,
+    },
+
+    /// Burns tokens then bridges to another chain.
+    ///
+    /// Refer to `TokenInstruction::BurnAndBridge`.
+    TokenBurnAndBridge {
+        /// The amount of tokens to burn for bridging
+        value: String,
+        /// The address to burn tokens from
+        sender: Address,
+        /// The destination chain ID to bridge tokens to
+        destination_chain_id: u64,
+        /// The destination address on the target chain
+        destination_address: String,
+        /// The bridging fee necessary to escrow for transferring tokens to the
+        /// destination chain
+        escrow_fee: String,
+        /// Optional bridge metadata for additional information
+        bridge_metadata: Option<String>,
     },
 
     /// Close an account. Note that an account can be closed only if the token
@@ -332,9 +379,6 @@ pub enum TxPayload {
         /// The token address
         token: Address,
     },
-
-    // *FIXLATER*: for governance, we don't support them for now.
-    Governance,
 }
 
 impl TxPayload {
@@ -487,7 +531,7 @@ mod tests {
             fee_used: 1000000,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
-            to: Some(
+            recipient: Some(
                 Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
                     .expect("Test data should be valid"),
             ),
@@ -711,7 +755,7 @@ mod tests {
             fee_used: 1000000000000000000u128,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
-            to: Some(
+            recipient: Some(
                 Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
                     .expect("Test data should be valid"),
             ),
@@ -722,7 +766,7 @@ mod tests {
         };
 
         let display_str = format!("{}", receipt);
-        let expected = "Transaction Receipt:\n  Success: true\n  Transaction Hash: 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777\n  Fee Used: 1000000000000000000\n  Transaction Index: 5\n  Checkpoint Hash: 0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f\n  Checkpoint Number: 200\n  From: 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0\n  To: 0x1234567890AbcdEF1234567890aBcdef12345678\n  Token Address: 0xabCDEF1234567890ABcDEF1234567890aBCDeF12";
+        let expected = "Transaction Receipt:\n  Success: true\n  Transaction Hash: 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777\n  Fee Used: 1000000000000000000\n  Transaction Index: 5\n  Checkpoint Hash: 0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f\n  Checkpoint Number: 200\n  From: 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0\n  Recipient: 0x1234567890AbcdEF1234567890aBcdef12345678\n  Token Address: 0xabCDEF1234567890ABcDEF1234567890aBCDeF12";
         assert_eq!(display_str, expected);
     }
 
@@ -740,7 +784,7 @@ mod tests {
             fee_used: 500000000000000000u128,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
-            to: None,            // Test None branch
+            recipient: None,     // Test None branch
             token_address: None, // Test None branch
         };
 

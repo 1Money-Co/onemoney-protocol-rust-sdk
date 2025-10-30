@@ -7,6 +7,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 pub mod accounts;
 pub mod chains;
 pub mod checkpoints;
+pub mod governances;
 pub mod tokens;
 pub mod transactions;
 
