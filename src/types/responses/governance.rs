@@ -13,10 +13,10 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum CertificateData {
-    /// JSON-encoded certificate payload.
-    Json { certificate: Value },
     /// Hex-encoded BCS certificate payload (prefixed with `0x`).
     Bcs { certificate: String },
+    /// JSON-encoded certificate payload.
+    Json { certificate: Value },
 }
 
 impl CertificateData {
@@ -40,11 +40,11 @@ impl CertificateData {
 impl Display for CertificateData {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match self {
-            CertificateData::Json { certificate } => {
-                write!(f, "Certificate (JSON): {}", certificate)
-            }
             CertificateData::Bcs { certificate } => {
                 write!(f, "Certificate (BCS hex): {}", certificate)
+            }
+            CertificateData::Json { certificate } => {
+                write!(f, "Certificate (JSON): {}", certificate)
             }
         }
     }
@@ -117,5 +117,105 @@ mod tests {
 
         assert_eq!(response.certificate_bcs_hex(), Some("0xdeadbeef"));
         assert!(response.certificate_json().is_none());
+    }
+
+    #[test]
+    fn test_deserialize_json_certificate_payload() {
+        let json_payload = r#"{
+            "epoch_id": 99,
+            "certificate_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "certificate": {
+                "type": "Epoch",
+                "proposal": {
+                    "epoch": 99
+                }
+            }
+        }"#;
+
+        let response: EpochResponse =
+            serde_json::from_str(json_payload).expect("EpochResponse should deserialize from JSON");
+
+        assert_eq!(response.epoch_id, 99);
+        assert!(response.certificate_json().is_some());
+        assert!(response.certificate_bcs_hex().is_none());
+    }
+
+    #[test]
+    fn test_deserialize_bcs_certificate_payload() {
+        let json_payload = r#"{
+            "epoch_id": 45,
+            "certificate_hash": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "certificate": "0xfeedface"
+        }"#;
+
+        let response: EpochResponse =
+            serde_json::from_str(json_payload).expect("EpochResponse should deserialize from JSON");
+
+        assert_eq!(response.epoch_id, 45);
+        assert_eq!(response.certificate_bcs_hex(), Some("0xfeedface"));
+        assert!(response.certificate_json().is_none());
+    }
+
+    #[test]
+    fn test_serialization_roundtrip_json() {
+        let original = EpochResponse {
+            epoch_id: 9,
+            certificate_hash: B256::from([3u8; 32]),
+            certificate_data: CertificateData::Json {
+                certificate: json!({ "type": "Epoch", "proposal": { "epoch": 9 } }),
+            },
+        };
+
+        let json = serde_json::to_string(&original).expect("serialize to json");
+        let reconstructed: EpochResponse =
+            serde_json::from_str(&json).expect("deserialize from json");
+
+        assert_eq!(reconstructed.epoch_id, original.epoch_id);
+        assert_eq!(reconstructed.certificate_hash, original.certificate_hash);
+        assert_eq!(
+            reconstructed.certificate_json(),
+            original.certificate_json()
+        );
+    }
+
+    #[test]
+    fn test_serialization_roundtrip_bcs() {
+        let original = EpochResponse {
+            epoch_id: 21,
+            certificate_hash: B256::from([4u8; 32]),
+            certificate_data: CertificateData::Bcs {
+                certificate: "0x0011".to_string(),
+            },
+        };
+
+        let json = serde_json::to_string(&original).expect("serialize to json");
+        let reconstructed: EpochResponse =
+            serde_json::from_str(&json).expect("deserialize from json");
+
+        assert_eq!(reconstructed.certificate_bcs_hex(), Some("0x0011"));
+        assert_eq!(reconstructed.certificate_json(), None);
+    }
+
+    #[test]
+    fn test_display_formats() {
+        let json_variant = CertificateData::Json {
+            certificate: json!({"type": "Epoch"}),
+        };
+        let bcs_variant = CertificateData::Bcs {
+            certificate: "0xaaaa".to_string(),
+        };
+
+        assert!(format!("{}", json_variant).contains("Certificate (JSON)"));
+        assert!(format!("{}", bcs_variant).contains("Certificate (BCS hex)"));
+
+        let response = EpochResponse {
+            epoch_id: 5,
+            certificate_hash: B256::from([7u8; 32]),
+            certificate_data: json_variant,
+        };
+
+        let display_output = format!("{}", response);
+        assert!(display_output.contains("Epoch 5"));
+        assert!(display_output.contains("Certificate Hash"));
     }
 }

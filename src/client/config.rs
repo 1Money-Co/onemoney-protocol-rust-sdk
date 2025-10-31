@@ -223,6 +223,13 @@ mod tests {
         );
         assert_eq!(endpoints::tokens::PAUSE, "/tokens/pause");
         assert_eq!(endpoints::tokens::TOKEN_METADATA, "/tokens/token_metadata");
+
+        // Test governance endpoints
+        assert_eq!(endpoints::governance::CURRENT_EPOCH, "/governances/epoch");
+        assert_eq!(
+            endpoints::governance::EPOCH_BY_ID,
+            "/governances/epoch/by_id"
+        );
     }
 
     #[test]

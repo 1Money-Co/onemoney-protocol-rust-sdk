@@ -28,9 +28,9 @@ fn print_epoch_details(label: &str, epoch: &EpochResponse) -> Result<(), Box<dyn
         for line in formatted.lines() {
             println!("    {}", line);
         }
-    } else if let Some(certificate_hex) = epoch.certificate_bcs_hex() {
+    } else if let Some(_certificate_hex) = epoch.certificate_bcs_hex() {
         println!("  Certificate Format: BCS");
-        println!("    {}", certificate_hex);
+        println!("    [certificate omitted: sensitive data]");
     } else {
         println!("  Certificate Format: Unknown");
     }
