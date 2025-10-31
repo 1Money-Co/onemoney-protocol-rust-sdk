@@ -129,10 +129,6 @@ pub mod endpoints {
         pub const BRIDGE_AND_MINT: &str = "/tokens/bridge_and_mint";
         pub const BURN_AND_BRIDGE: &str = "/tokens/burn_and_bridge";
     }
-
-    pub mod governances {
-        pub const EPOCH_BY_ID: &str = "/governances/epoch/by_id";
-    }
 }
 
 #[cfg(test)]

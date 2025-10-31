@@ -68,7 +68,6 @@ sha3 = "0.10"
 
 # Utilities
 hex = "0.4"
-faster-hex = "0.10.0"
 url = "2.4"
 uuid = { version = "1.18", features = ["v4"], optional = true }
 
