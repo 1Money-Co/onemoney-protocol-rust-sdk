@@ -2,10 +2,9 @@
 
 use crate::client::Client;
 use crate::client::config::endpoints::transactions::{
-    BY_HASH, ESTIMATE_FEE, PAYMENT, RECEIPT_BY_HASH,
+    BY_HASH, ESTIMATE_FEE, FINALIZED_BY_HASH, PAYMENT, RECEIPT_BY_HASH,
 };
 use crate::client::config::{API_VERSION, api_path};
-use crate::client::endpoints::transactions::FINALIZED_BY_HASH;
 use crate::crypto::sign_transaction_payload;
 use crate::requests::{FeeEstimateRequest, PaymentPayload, PaymentRequest};
 use crate::responses::FeeEstimate;
@@ -176,8 +175,6 @@ mod tests {
 
     #[test]
     fn test_finalized_transaction_api_path_construction() {
-        use crate::client::endpoints::transactions::FINALIZED_BY_HASH;
-
         let hash = "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777";
         let expected_path = format!("{}{}?hash={}", API_VERSION, FINALIZED_BY_HASH, hash);
 
