@@ -234,6 +234,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 
+    // Fetch finalized transaction
+    println!("\nFetching finalized transaction...");
+    match client
+        .get_finalized_transaction_by_hash(&tx_hash.to_string())
+        .await
+    {
+        Ok(finalized_tx) => {
+            println!("Finalized transaction:");
+            println!("{:?}", finalized_tx);
+            println!("   Transaction has been finalized on chain");
+        }
+        Err(e) => {
+            println!("   Finalized transaction not available: {}", e);
+            println!("   The transaction may not be finalized yet");
+            println!("   Finalization typically requires multiple epoch confirmations");
+        }
+    }
+
     // 4. Error Handling Examples
     println!("\n4. Error Handling Examples");
     println!("==========================");
@@ -285,6 +303,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("\nAvailable Endpoints:");
     println!("   - GET /v1/transactions/by_hash - Get transaction by hash");
+    println!("   - GET /v1/transactions/finalized/by_hash - Get finalized transaction by hash");
     println!("   - GET /v1/transactions/receipt/by_hash - Get transaction receipt");
     println!("   - POST /v1/transactions/payment - Send payment transaction");
     println!("   - GET /v1/transactions/estimate_fee - Estimate transaction fees");

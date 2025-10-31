@@ -107,6 +107,8 @@ pub mod endpoints {
         pub const BY_HASH: &str = "/transactions/by_hash";
         pub const RECEIPT_BY_HASH: &str = "/transactions/receipt/by_hash";
         pub const ESTIMATE_FEE: &str = "/transactions/estimate_fee";
+
+        pub const FINALIZED_BY_HASH: &str = "/transactions/finalized/by_hash";
     }
 
     /// Token-related endpoints.

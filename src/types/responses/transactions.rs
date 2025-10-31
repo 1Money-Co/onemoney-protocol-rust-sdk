@@ -7,6 +7,26 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 use super::{accounts::Nonce, tokens::TokenMetadata};
 use crate::Signature;
 
+/// Custom serialization for u128 as string
+mod u128_as_string {
+    use serde::{Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S>(value: &u128, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&value.to_string())
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<u128, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        s.parse::<u128>().map_err(serde::de::Error::custom)
+    }
+}
+
 /// Chain ID type from L1 primitives
 pub type ChainId = u64;
 
@@ -103,6 +123,18 @@ impl Display for Transaction {
     }
 }
 
+/// A finalized transaction with epoch confirmation and validator signatures.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FinalizedTransaction {
+    /// The epoch in which this transaction was finalized.
+    pub epoch: u64,
+    /// The transaction receipt (flattened into this struct during serialization).
+    #[serde(flatten)]
+    pub receipt: TransactionReceipt,
+    /// Counter-signatures from validators confirming finalization.
+    pub counter_signatures: Vec<Signature>,
+}
+
 /// Transaction receipt response.
 /// Matches L1 server's TransactionReceipt structure with proper types.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -118,12 +150,16 @@ pub struct TransactionReceipt {
     /// Number of the checkpoint this transaction was included within.
     pub checkpoint_number: Option<u64>,
     /// Fee used.
+    #[serde(with = "u128_as_string")]
     pub fee_used: u128,
     /// Address of the sender.
     pub from: Address,
-    /// Address of the receiver. None when its a contract creation transaction.
-    pub to: Option<Address>,
-    /// Token address created, or None if not a deployment.
+    /// Address of the recipient. None when its a contract creation transaction.
+    /// This field will be deprecated, please use `recipient` instead.
+    // pub to: Option<Address>,
+    /// Address of the recipient. None when its a contract creation transaction.
+    pub recipient: Option<Address>,
+    /// The token address.
     pub token_address: Option<Address>,
 }
 
@@ -143,8 +179,8 @@ impl Display for TransactionReceipt {
             writeln!(f, "  Checkpoint Number: {}", num)?;
         }
         writeln!(f, "  From: {}", self.from)?;
-        if let Some(to) = &self.to {
-            writeln!(f, "  To: {}", to)?;
+        if let Some(recipient) = &self.recipient {
+            writeln!(f, "  Recipient: {}", recipient)?;
         }
         if let Some(token) = &self.token_address {
             write!(f, "  Token Address: {}", token)?;
@@ -524,7 +560,7 @@ mod tests {
             fee_used: 1000000,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
-            to: Some(
+            recipient: Some(
                 Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
                     .expect("Test data should be valid"),
             ),
@@ -848,7 +884,7 @@ mod tests {
             fee_used: 1000000000000000000u128,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
-            to: Some(
+            recipient: Some(
                 Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
                     .expect("Test data should be valid"),
             ),
@@ -859,7 +895,7 @@ mod tests {
         };
 
         let display_str = format!("{}", receipt);
-        let expected = "Transaction Receipt:\n  Success: true\n  Transaction Hash: 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777\n  Fee Used: 1000000000000000000\n  Transaction Index: 5\n  Checkpoint Hash: 0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f\n  Checkpoint Number: 200\n  From: 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0\n  To: 0x1234567890AbcdEF1234567890aBcdef12345678\n  Token Address: 0xabCDEF1234567890ABcDEF1234567890aBCDeF12";
+        let expected = "Transaction Receipt:\n  Success: true\n  Transaction Hash: 0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777\n  Fee Used: 1000000000000000000\n  Transaction Index: 5\n  Checkpoint Hash: 0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f\n  Checkpoint Number: 200\n  From: 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0\n  Recipient: 0x1234567890AbcdEF1234567890aBcdef12345678\n  Token Address: 0xabCDEF1234567890ABcDEF1234567890aBCDeF12";
         assert_eq!(display_str, expected);
     }
 
@@ -877,7 +913,7 @@ mod tests {
             fee_used: 500000000000000000u128,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
-            to: None,            // Test None branch
+            recipient: None,     // Test None branch
             token_address: None, // Test None branch
         };
 

@@ -49,6 +49,10 @@ pub struct MintInfo {
     /// The authorities for updating the metadata. Maximum of 5 authorities.
     pub metadata_update_authorities: Vec<Address>,
 
+    /// The authorities for bridge operations (minting from bridge and burning
+    /// to bridge).
+    pub bridge_authorities: Vec<Address>,
+
     /// Total supply of tokens.
     pub supply: String,
 
@@ -180,6 +184,7 @@ mod tests {
             black_list: vec![],
             white_list: vec![address1],
             metadata_update_authorities: vec![address2],
+            bridge_authorities: vec![],
             supply: "1000000000000000000000".to_string(),
             decimals: 18,
             is_paused: false,
@@ -545,6 +550,7 @@ mod tests {
             black_list: vec![address3],
             white_list: vec![address1, address2],
             metadata_update_authorities: vec![address1],
+            bridge_authorities: vec![],
             supply: "10000000000000000000000000".to_string(),
             decimals: 6,
             is_paused: true,
