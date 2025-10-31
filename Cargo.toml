@@ -40,10 +40,6 @@ path = "examples/tokens_example.rs"
 name = "transactions_example"
 path = "examples/transactions_example.rs"
 
-[[example]]
-name = "governances_example"
-path = "examples/governances_example.rs"
-
 [lib]
 name = "onemoney_protocol"
 path = "src/lib.rs"

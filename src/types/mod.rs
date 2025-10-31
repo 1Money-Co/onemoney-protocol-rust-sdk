@@ -3,8 +3,6 @@
 // Original SDK types
 pub mod common;
 
-pub mod hex_serde;
-
 // New organized API types
 pub mod requests;
 pub mod responses;
