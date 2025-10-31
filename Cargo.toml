@@ -44,6 +44,10 @@ path = "examples/transactions_example.rs"
 name = "finalized_example"
 path = "examples/finalized_example.rs"
 
+[[example]]
+name = "governance_example"
+path = "examples/governance_example.rs"
+
 [lib]
 name = "onemoney_protocol"
 path = "src/lib.rs"

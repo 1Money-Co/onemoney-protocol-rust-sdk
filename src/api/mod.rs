@@ -3,6 +3,7 @@
 pub mod accounts;
 pub mod chains;
 pub mod checkpoints;
+pub mod governance;
 pub mod tokens;
 pub mod transactions;
 

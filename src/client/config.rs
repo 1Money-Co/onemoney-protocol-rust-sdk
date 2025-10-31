@@ -123,6 +123,12 @@ pub mod endpoints {
         pub const TOKEN_METADATA: &str = "/tokens/token_metadata";
     }
 
+    /// Governance-related endpoints.
+    pub mod governance {
+        pub const CURRENT_EPOCH: &str = "/governances/epoch";
+        pub const EPOCH_BY_ID: &str = "/governances/epoch/by_id";
+    }
+
     /// Bridge-related endpoints.
     #[cfg(feature = "bridge")]
     pub mod bridge {
@@ -219,6 +225,13 @@ mod tests {
         );
         assert_eq!(endpoints::tokens::PAUSE, "/tokens/pause");
         assert_eq!(endpoints::tokens::TOKEN_METADATA, "/tokens/token_metadata");
+
+        // Test governance endpoints
+        assert_eq!(endpoints::governance::CURRENT_EPOCH, "/governances/epoch");
+        assert_eq!(
+            endpoints::governance::EPOCH_BY_ID,
+            "/governances/epoch/by_id"
+        );
     }
 
     #[test]
