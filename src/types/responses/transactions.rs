@@ -7,6 +7,26 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 use super::{accounts::Nonce, tokens::TokenMetadata};
 use crate::Signature;
 
+/// Custom serialization for u128 as string
+mod u128_as_string {
+    use serde::{Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S>(value: &u128, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&value.to_string())
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<u128, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        s.parse::<u128>().map_err(serde::de::Error::custom)
+    }
+}
+
 /// Chain ID type from L1 primitives
 pub type ChainId = u64;
 
@@ -130,6 +150,7 @@ pub struct TransactionReceipt {
     /// Number of the checkpoint this transaction was included within.
     pub checkpoint_number: Option<u64>,
     /// Fee used.
+    #[serde(with = "u128_as_string")]
     pub fee_used: u128,
     /// Address of the sender.
     pub from: Address,

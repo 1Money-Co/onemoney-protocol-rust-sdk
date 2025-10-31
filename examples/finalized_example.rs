@@ -12,7 +12,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let client = create_example_client();
 
     // Fetch finalized transaction
-    let tx_hash = "0x7c4738387aad15db50d2219db9fc889a010541c36d0472b3f20e5244a8822b1e";
+    let tx_hash = "0xc65b81a1088eaf113a5fa31a6af9d2b067410131c2fc3eb8be39fbdd6186d4b5";
+
+    let r = client.get_transaction_receipt_by_hash(tx_hash).await;
+    println!("receipt: {r:?}");
+
     match client.get_finalized_transaction_by_hash(tx_hash).await {
         Ok(finalized_tx) => {
             println!("Finalized transaction:");

@@ -274,7 +274,7 @@ mod tests {
             json.contains("\"transaction_hash\":\"0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777\"")
         );
         assert!(json.contains("\"success\":true"));
-        assert!(json.contains("\"fee_used\":1000000"));
+        assert!(json.contains("\"fee_used\":\"1000000\""));
         assert!(json.contains("\"counter_signatures\""));
     }
 }
