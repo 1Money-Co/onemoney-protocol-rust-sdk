@@ -121,6 +121,12 @@ pub mod endpoints {
         pub const TOKEN_METADATA: &str = "/tokens/token_metadata";
     }
 
+    /// Governance-related endpoints.
+    pub mod governance {
+        pub const CURRENT_EPOCH: &str = "/governances/epoch";
+        pub const EPOCH_BY_ID: &str = "/governances/epoch/by_id";
+    }
+
     /// Bridge-related endpoints.
     #[cfg(feature = "bridge")]
     pub mod bridge {

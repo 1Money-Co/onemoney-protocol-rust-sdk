@@ -7,6 +7,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 pub mod accounts;
 pub mod chains;
 pub mod checkpoints;
+pub mod governance;
 pub mod tokens;
 pub mod transactions;
 
@@ -31,6 +32,7 @@ impl Display for TransactionResponse {
 pub use accounts::*;
 pub use chains::*;
 pub use checkpoints::*;
+pub use governance::*;
 pub use tokens::*;
 pub use transactions::*;
 

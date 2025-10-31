@@ -25,6 +25,7 @@ pub use requests::transactions::*;
 pub use responses::accounts::*;
 pub use responses::chains::*;
 pub use responses::checkpoints::*;
+pub use responses::governance::*;
 pub use responses::tokens::*;
 pub use responses::transactions::*;
 
