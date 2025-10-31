@@ -103,11 +103,15 @@ impl Display for Transaction {
     }
 }
 
+/// A finalized transaction with epoch confirmation and validator signatures.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FinalizedTransaction {
+    /// The epoch in which this transaction was finalized.
     pub epoch: u64,
+    /// The transaction receipt (flattened into this struct during serialization).
     #[serde(flatten)]
     pub receipt: TransactionReceipt,
+    /// Counter-signatures from validators confirming finalization.
     pub counter_signatures: Vec<Signature>,
 }
 

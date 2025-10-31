@@ -173,4 +173,108 @@ mod tests {
         assert!(json.contains("1000000000000000000"));
         assert!(json.contains("0x1234567890abcdef1234567890abcdef12345678"));
     }
+
+    #[test]
+    fn test_finalized_transaction_api_path_construction() {
+        use crate::client::endpoints::transactions::FINALIZED_BY_HASH;
+
+        let hash = "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777";
+        let expected_path = format!("{}{}?hash={}", API_VERSION, FINALIZED_BY_HASH, hash);
+
+        assert!(expected_path.contains("/v1"));
+        assert!(expected_path.contains("/transactions/finalized/by_hash"));
+        assert!(
+            expected_path.contains(
+                "hash=0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777"
+            )
+        );
+    }
+
+    #[test]
+    fn test_finalized_transaction_structure() {
+        use crate::responses::TransactionReceipt;
+        use crate::{FinalizedTransaction, Signature};
+        use alloy_primitives::{Address, B256};
+
+        let finalized_tx = FinalizedTransaction {
+            epoch: 100,
+            receipt: TransactionReceipt {
+                success: true,
+                transaction_hash: B256::from_str(
+                    "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
+                )
+                .expect("Test data should be valid"),
+                transaction_index: Some(5),
+                checkpoint_hash: Some(
+                    B256::from_str(
+                        "0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f",
+                    )
+                    .expect("Test data should be valid"),
+                ),
+                checkpoint_number: Some(1500),
+                fee_used: 1000000,
+                from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                    .expect("Test data should be valid"),
+                recipient: Some(
+                    Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                        .expect("Test data should be valid"),
+                ),
+                token_address: None,
+            },
+            counter_signatures: vec![Signature::default(), Signature::default()],
+        };
+
+        assert_eq!(finalized_tx.epoch, 100);
+        assert!(finalized_tx.receipt.success);
+        assert_eq!(finalized_tx.counter_signatures.len(), 2);
+        assert_eq!(finalized_tx.receipt.fee_used, 1000000);
+    }
+
+    #[test]
+    fn test_finalized_transaction_json_output() {
+        use crate::responses::TransactionReceipt;
+        use crate::{FinalizedTransaction, Signature};
+        use alloy_primitives::{Address, B256};
+
+        let finalized_tx = FinalizedTransaction {
+            epoch: 200,
+            receipt: TransactionReceipt {
+                success: true,
+                transaction_hash: B256::from_str(
+                    "0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777",
+                )
+                .expect("Test data should be valid"),
+                transaction_index: Some(0),
+                checkpoint_hash: Some(
+                    B256::from_str(
+                        "0x20e081da293ae3b81e30f864f38f6911663d7f2cf98337fca38db3cf5bbe7a8f",
+                    )
+                    .expect("Test data should be valid"),
+                ),
+                checkpoint_number: Some(1500),
+                fee_used: 1000000,
+                from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+                    .expect("Test data should be valid"),
+                recipient: Some(
+                    Address::from_str("0x1234567890abcdef1234567890abcdef12345678")
+                        .expect("Test data should be valid"),
+                ),
+                token_address: Some(
+                    Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")
+                        .expect("Test data should be valid"),
+                ),
+            },
+            counter_signatures: vec![Signature::default()],
+        };
+
+        let json = serde_json::to_string(&finalized_tx).expect("Should serialize to JSON");
+
+        assert!(json.contains("\"epoch\":200"));
+        assert!(
+            json.contains("\"transaction_hash\":\"0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777\"")
+        );
+        assert!(json.contains("\"success\":true"));
+        assert!(json.contains("\"fee_used\":1000000"));
+        assert!(json.contains("\"counter_signatures\""));
+    }
 }
