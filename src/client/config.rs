@@ -86,6 +86,7 @@ pub mod endpoints {
     /// Account-related endpoints.
     pub mod accounts {
         pub const NONCE: &str = "/accounts/nonce";
+        pub const BBNONCE: &str = "/accounts/bbnonce";
         pub const TOKEN_ACCOUNT: &str = "/accounts/token_account";
     }
 
@@ -179,6 +180,7 @@ mod tests {
     fn test_endpoint_constants() {
         // Test account endpoints
         assert_eq!(endpoints::accounts::NONCE, "/accounts/nonce");
+        assert_eq!(endpoints::accounts::BBNONCE, "/accounts/bbnonce");
         assert_eq!(
             endpoints::accounts::TOKEN_ACCOUNT,
             "/accounts/token_account"

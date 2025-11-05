@@ -2,8 +2,8 @@
 
 use crate::client::Client;
 use crate::client::config::api_path;
-use crate::client::config::endpoints::accounts::{NONCE, TOKEN_ACCOUNT};
-use crate::{AccountNonce, AssociatedTokenAccount, Result};
+use crate::client::config::endpoints::accounts::{BBNONCE, NONCE, TOKEN_ACCOUNT};
+use crate::{AccountBBNonce, AccountNonce, AssociatedTokenAccount, Result};
 use alloy_primitives::Address;
 
 impl Client {
@@ -37,6 +37,39 @@ impl Client {
     /// ```
     pub async fn get_account_nonce(&self, address: Address) -> Result<AccountNonce> {
         let path = api_path(&format!("{NONCE}?address={address}"));
+        self.get(&path).await
+    }
+
+    /// Get the BB nonce for an account.
+    ///
+    /// # Arguments
+    ///
+    /// * `address` - The account address to query
+    ///
+    /// # Returns
+    ///
+    /// The account BB nonce information.
+    ///
+    /// # Example
+    ///
+    /// ```rust,no_run
+    /// use onemoney_protocol::Client;
+    /// use alloy_primitives::Address;
+    /// use std::str::FromStr;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let client = Client::mainnet()?;
+    ///     let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?;
+    ///
+    ///     let bbnonce = client.get_account_bbonce(address).await?;
+    ///     println!("Account BB nonce: {}", bbnonce.bbnonce);
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    pub async fn get_account_bbonce(&self, address: Address) -> Result<AccountBBNonce> {
+        let path = api_path(&format!("{BBNONCE}?address={address}"));
         self.get(&path).await
     }
 
@@ -101,6 +134,16 @@ mod tests {
     }
 
     #[test]
+    fn test_bbnonce_api_path_construction() {
+        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
+            .expect("Test data should be valid");
+        let expected_path = api_path(&format!("{BBNONCE}?address={address}"));
+
+        assert!(expected_path.contains("/accounts/bbnonce"));
+        assert!(expected_path.contains("address=0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0"));
+    }
+
+    #[test]
     fn test_token_account_api_path_construction() {
         let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
             .expect("Test data should be valid");
@@ -118,6 +161,13 @@ mod tests {
         let nonce = AccountNonce { nonce: 42 };
         let display_str = format!("{}", nonce);
         assert_eq!(display_str, "Account Nonce: 42");
+    }
+
+    #[test]
+    fn test_account_bbnonce_display() {
+        let bbnonce = AccountBBNonce { bbnonce: 42 };
+        let display_str = format!("{}", bbnonce);
+        assert_eq!(display_str, "Account BB Nonce: 42");
     }
 
     #[test]
