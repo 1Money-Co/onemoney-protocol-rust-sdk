@@ -127,11 +127,13 @@ mod tests {
             destination_address: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd".to_string(),
             escrow_fee: U256::from(1000000u64),
             bridge_metadata: None,
+            bbnonce: 42,
         };
 
         assert_eq!(payload.recent_checkpoint, 200);
         assert_eq!(payload.chain_id, 1212101);
         assert_eq!(payload.nonce, 5);
+        assert_eq!(payload.bbnonce, 42);
         assert_eq!(payload.sender, sender);
         assert_eq!(payload.value, U256::from(3000000000000000000u64));
         assert_eq!(payload.token, token);
@@ -180,6 +182,7 @@ mod tests {
             destination_address: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd".to_string(),
             escrow_fee: U256::from(1000000u64),
             bridge_metadata: None,
+            bbnonce: 42,
         };
 
         let mut encoded = Vec::new();
@@ -248,6 +251,7 @@ mod tests {
             destination_address: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd".to_string(),
             escrow_fee: U256::from(1000000u64),
             bridge_metadata: None,
+            bbnonce: 42,
         };
 
         let mut encoded1 = Vec::new();
