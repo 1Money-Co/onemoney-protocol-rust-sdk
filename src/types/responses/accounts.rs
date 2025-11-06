@@ -21,6 +21,20 @@ impl Display for AccountNonce {
     }
 }
 
+/// Account BB nonce information from API response.
+/// Matches the L1 server's AccountInfo structure: { "bbnonce": u64 }
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AccountBBNonce {
+    /// Current BB nonce.
+    pub bbnonce: u64,
+}
+
+impl Display for AccountBBNonce {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(f, "Account BB Nonce: {}", self.bbnonce)
+    }
+}
+
 /// Represents the token holdings and associated data for a specific address.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct AssociatedTokenAccount {
@@ -90,6 +104,52 @@ mod tests {
             // Test display
             let display_str = format!("{}", nonce);
             assert_eq!(display_str, format!("Account Nonce: {}", nonce_value));
+        }
+    }
+
+    #[test]
+    fn test_account_bbnonce_structure() {
+        let bbnonce = AccountBBNonce { bbnonce: 42 };
+
+        // Test serialization
+        let json = serde_json::to_string(&bbnonce).expect("Should serialize");
+        assert!(json.contains("42"));
+
+        // Test deserialization
+        let deserialized: AccountBBNonce = serde_json::from_str(&json).expect("Should deserialize");
+        assert_eq!(deserialized.bbnonce, 42);
+
+        // Test display
+        let display_str = format!("{}", bbnonce);
+        assert_eq!(display_str, "Account BB Nonce: 42");
+
+        // Test clone and debug
+        let cloned = bbnonce.clone();
+        assert_eq!(bbnonce.bbnonce, cloned.bbnonce);
+
+        let debug_str = format!("{:?}", bbnonce);
+        assert!(debug_str.contains("AccountBBNonce"));
+        assert!(debug_str.contains("42"));
+    }
+
+    #[test]
+    fn test_account_bbnonce_different_values() {
+        let test_cases = [0u64, 1, 100, 999999, u64::MAX];
+
+        for bbnonce_value in test_cases {
+            let bbnonce = AccountBBNonce {
+                bbnonce: bbnonce_value,
+            };
+
+            // Test serialization round-trip
+            let json = serde_json::to_string(&bbnonce).expect("Should serialize");
+            let deserialized: AccountBBNonce =
+                serde_json::from_str(&json).expect("Should deserialize");
+            assert_eq!(bbnonce.bbnonce, deserialized.bbnonce);
+
+            // Test display
+            let display_str = format!("{}", bbnonce);
+            assert_eq!(display_str, format!("Account BB Nonce: {}", bbnonce_value));
         }
     }
 
