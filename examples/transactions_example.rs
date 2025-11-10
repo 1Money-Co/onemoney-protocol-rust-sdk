@@ -188,49 +188,36 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let tx_hash = &payment_response.hash;
 
-    // Smart transaction confirmation with retry logic
-    println!("\nWaiting for transaction confirmation...");
-    let mut confirmed = false;
-
-    for attempt in 1..=5 {
-        println!("   Attempt {}/5: Checking transaction status...", attempt);
-
-        match client.get_transaction_by_hash(&tx_hash.to_string()).await {
-            Ok(tx) => {
-                println!("Transaction confirmed on chain:");
-                println!("{:?}", tx);
-                confirmed = true;
-                break;
-            }
-            Err(e) => {
-                println!("   Transaction not yet confirmed: {}", e);
-                if attempt < 5 {
-                    let wait_time = attempt * 2; // Progressive backoff: 2s, 4s, 6s, 8s
-                    println!("   Waiting {} seconds before retry...", wait_time);
-                    tokio::time::sleep(tokio::time::Duration::from_secs(wait_time)).await;
-                }
-            }
-        }
-    }
-
-    if !confirmed {
-        println!("Transaction confirmation timeout after 5 attempts");
-        println!("   The transaction may still be processing in the background");
-    }
-
-    // Try to get transaction receipt for additional details
-    println!("\nFetching transaction receipt...");
+    // Smart transaction confirmation with SDK helper
+    println!("\nWaiting for transaction confirmation via SDK helper...");
     match client
-        .get_transaction_receipt_by_hash(&tx_hash.to_string())
+        .wait_for_transaction_receipt(&tx_hash.to_string())
         .await
     {
         Ok(receipt) => {
-            println!("Transaction receipt:");
+            println!("Transaction confirmed:");
             println!("{}", receipt);
         }
         Err(e) => {
-            println!("   Receipt not available: {}", e);
-            println!("   This is normal for pending transactions");
+            print_detailed_error("Timed out waiting for receipt (30s default)", &e);
+        }
+    }
+
+    // Custom timeout example (useful for slower networks)
+    println!("\nWaiting for transaction receipt with custom timeout (60s)...");
+    match client
+        .wait_for_transaction_receipt_with_timeout(
+            &tx_hash.to_string(),
+            tokio::time::Duration::from_secs(60),
+        )
+        .await
+    {
+        Ok(receipt) => {
+            println!("Transaction confirmed with custom timeout:");
+            println!("{}", receipt);
+        }
+        Err(e) => {
+            print_detailed_error("Custom timeout receipt wait failed", &e);
         }
     }
 

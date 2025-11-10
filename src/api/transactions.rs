@@ -6,11 +6,17 @@ use crate::client::config::endpoints::transactions::{
 };
 use crate::client::config::{API_VERSION, api_path};
 use crate::crypto::sign_transaction_payload;
+use crate::error::Error;
 use crate::requests::{FeeEstimateRequest, PaymentPayload, PaymentRequest};
 use crate::responses::FeeEstimate;
 use crate::responses::TransactionReceipt;
 use crate::responses::TransactionResponse;
 use crate::{FinalizedTransaction, Result, Transaction};
+use std::time::Duration;
+use tokio::time::{Instant, sleep};
+
+const DEFAULT_RECEIPT_TIMEOUT: Duration = Duration::from_secs(30);
+const DEFAULT_RECEIPT_POLL_INTERVAL: Duration = Duration::from_millis(50);
 
 impl Client {
     /// Send a payment transaction.
@@ -91,6 +97,36 @@ impl Client {
         self.get(&path).await
     }
 
+    /// Wait for a transaction receipt using the default timeout.
+    ///
+    /// This method polls the receipt endpoint every 50ms for up to 30 seconds.
+    pub async fn wait_for_transaction_receipt(&self, hash: &str) -> Result<TransactionReceipt> {
+        self.wait_for_transaction_receipt_with_timeout(hash, DEFAULT_RECEIPT_TIMEOUT)
+            .await
+    }
+
+    /// Wait for a transaction receipt with a custom timeout.
+    ///
+    /// # Arguments
+    /// * `hash` - Transaction hash
+    /// * `timeout` - Maximum duration to poll before returning a timeout error
+    pub async fn wait_for_transaction_receipt_with_timeout(
+        &self,
+        hash: &str,
+        timeout: Duration,
+    ) -> Result<TransactionReceipt> {
+        let hash_owned = hash.to_string();
+        let request_path = format!("{}{}?hash={}", API_VERSION, RECEIPT_BY_HASH, hash);
+
+        poll_for_transaction_receipt(
+            || async { self.get_transaction_receipt_by_hash(&hash_owned).await },
+            request_path,
+            timeout,
+            DEFAULT_RECEIPT_POLL_INTERVAL,
+        )
+        .await
+    }
+
     /// Estimate transaction fee.
     ///
     /// # Arguments
@@ -132,11 +168,73 @@ impl Client {
     }
 }
 
+async fn poll_for_transaction_receipt<F, Fut>(
+    mut fetch_receipt: F,
+    request_path: String,
+    timeout: Duration,
+    poll_interval: Duration,
+) -> Result<TransactionReceipt>
+where
+    F: FnMut() -> Fut,
+    Fut: Future<Output = Result<TransactionReceipt>>,
+{
+    if timeout.is_zero() {
+        return Err(Error::invalid_parameter(
+            "timeout",
+            "Timeout must be greater than zero",
+        ));
+    }
+    if poll_interval.is_zero() {
+        return Err(Error::invalid_parameter(
+            "poll_interval",
+            "Poll interval must be greater than zero",
+        ));
+    }
+
+    let start = Instant::now();
+
+    loop {
+        match fetch_receipt().await {
+            Ok(receipt) => return Ok(receipt),
+            Err(err) => {
+                if !matches!(err, Error::ResourceNotFound { .. }) {
+                    return Err(err);
+                }
+            }
+        }
+
+        let elapsed = start.elapsed();
+        if elapsed >= timeout {
+            return Err(Error::request_timeout(
+                request_path.clone(),
+                duration_to_millis(timeout),
+            ));
+        }
+
+        if let Some(remaining) = timeout.checked_sub(elapsed) {
+            let sleep_duration = poll_interval.min(remaining);
+            sleep(sleep_duration).await;
+        } else {
+            return Err(Error::request_timeout(
+                request_path.clone(),
+                duration_to_millis(timeout),
+            ));
+        }
+    }
+}
+
+fn duration_to_millis(duration: Duration) -> u64 {
+    duration.as_millis().min(u128::from(u64::MAX)) as u64
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloy_primitives::{Address, U256};
+    use alloy_primitives::{Address, B256, U256};
+    use std::collections::VecDeque;
     use std::str::FromStr;
+    use std::sync::Mutex;
+    use std::time::Duration;
 
     #[test]
     fn test_payment_payload_alloy_rlp() {
@@ -273,5 +371,105 @@ mod tests {
         assert!(json.contains("\"success\":true"));
         assert!(json.contains("\"fee_used\":\"1000000\""));
         assert!(json.contains("\"counter_signatures\""));
+    }
+
+    fn sample_receipt(hash: &str) -> TransactionReceipt {
+        TransactionReceipt {
+            success: true,
+            transaction_hash: B256::from_str(hash).expect("valid hash"),
+            transaction_index: Some(0),
+            checkpoint_hash: None,
+            checkpoint_number: Some(42),
+            fee_used: 1,
+            from: Address::from_str("0x0000000000000000000000000000000000000001")
+                .expect("valid address"),
+            recipient: Some(
+                Address::from_str("0x0000000000000000000000000000000000000002")
+                    .expect("valid address"),
+            ),
+            token_address: Some(
+                Address::from_str("0x0000000000000000000000000000000000000003")
+                    .expect("valid address"),
+            ),
+        }
+    }
+
+    #[tokio::test]
+    async fn test_wait_for_transaction_receipt_eventually_succeeds() {
+        let tx_hash = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        let request_path = format!("/v1/transactions/receipt/by_hash?hash={tx_hash}");
+
+        let responses = Mutex::new(VecDeque::from([
+            Err(Error::resource_not_found("receipt", "pending")),
+            Ok(sample_receipt(tx_hash)),
+        ]));
+
+        let receipt = poll_for_transaction_receipt(
+            || {
+                let result = responses
+                    .lock()
+                    .expect("lock poisoned")
+                    .pop_front()
+                    .expect("response available");
+                async move { result }
+            },
+            request_path,
+            Duration::from_millis(100),
+            Duration::from_millis(10),
+        )
+        .await
+        .expect("should eventually succeed");
+
+        assert!(receipt.success);
+        assert_eq!(receipt.checkpoint_number, Some(42));
+        assert_eq!(
+            receipt.recipient,
+            Some(Address::from_str("0x0000000000000000000000000000000000000002").unwrap())
+        );
+    }
+
+    #[tokio::test]
+    async fn test_wait_for_transaction_receipt_respects_errors() {
+        let request_path = "/v1/transactions/receipt/by_hash?hash=0xbb".to_string();
+        let responses = Mutex::new(VecDeque::from([Err(Error::http_transport(
+            "boom",
+            Some(500),
+        ))]));
+
+        let err = poll_for_transaction_receipt(
+            || {
+                let result = responses
+                    .lock()
+                    .expect("lock poisoned")
+                    .pop_front()
+                    .expect("response available");
+                async move { result }
+            },
+            request_path,
+            Duration::from_millis(50),
+            Duration::from_millis(10),
+        )
+        .await
+        .expect_err("should propagate error");
+
+        assert!(matches!(err, Error::HttpTransport { .. }));
+    }
+
+    #[tokio::test]
+    async fn test_wait_for_transaction_receipt_with_zero_timeout_is_rejected() {
+        let err = poll_for_transaction_receipt(
+            || async {
+                Ok(sample_receipt(
+                    "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                ))
+            },
+            "/v1/transactions/receipt/by_hash?hash=0xcc".to_string(),
+            Duration::from_secs(0),
+            Duration::from_millis(10),
+        )
+        .await
+        .expect_err("zero timeout invalid");
+
+        assert!(matches!(err, Error::InvalidParameter { .. }));
     }
 }
