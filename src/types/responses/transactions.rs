@@ -7,6 +7,32 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 use super::{accounts::Nonce, tokens::TokenMetadata};
 use crate::Signature;
 
+/// Bridge-specific information for BurnAndBridge operations.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BridgeInfo {
+    /// The BurnAndBridge nonce used for sidechain anti-replay protection
+    pub bbnonce: u64,
+    /// The destination chain ID for the bridge operation
+    pub destination_chain_id: u64,
+    /// The destination address on the target chain
+    pub destination_address: String,
+}
+
+/// Success information for token transactions.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SuccessInfo {
+    /// Sender address
+    pub sender: Address,
+    /// Receiver address
+    pub receiver: Address,
+    /// Whether the transaction is private
+    pub is_private: bool,
+    /// Message associated with the transaction
+    pub message: String,
+    /// Bridge-specific information for BurnAndBridge operations
+    pub bridge_info: Option<BridgeInfo>,
+}
+
 /// Custom serialization for u128 as string
 mod u128_as_string {
     use serde::{Deserialize, Deserializer, Serializer};
@@ -161,6 +187,9 @@ pub struct TransactionReceipt {
     pub recipient: Option<Address>,
     /// The token address.
     pub token_address: Option<Address>,
+    /// Success information for token transactions.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub success_info: Option<SuccessInfo>,
 }
 
 impl Display for TransactionReceipt {
@@ -565,6 +594,7 @@ mod tests {
                     .expect("Test data should be valid"),
             ),
             token_address: None,
+            success_info: None,
         };
 
         let json = serde_json::to_string(&receipt).expect("Test data should be valid");
@@ -892,6 +922,7 @@ mod tests {
                 Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")
                     .expect("Test data should be valid"),
             ),
+            success_info: None,
         };
 
         let display_str = format!("{}", receipt);
@@ -915,6 +946,7 @@ mod tests {
                 .expect("Test data should be valid"),
             recipient: None,     // Test None branch
             token_address: None, // Test None branch
+            success_info: None,
         };
 
         let display_str = format!("{}", receipt);
