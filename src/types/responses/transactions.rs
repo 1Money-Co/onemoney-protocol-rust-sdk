@@ -1,6 +1,6 @@
 //! Transaction-related API response types.
 
-use alloy_primitives::{Address, B256, Bytes};
+use alloy_primitives::{Address, Bytes, B256};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
@@ -393,6 +393,8 @@ pub enum TxPayload {
         escrow_fee: String,
         /// Optional bridge metadata for additional information
         bridge_metadata: Option<String>,
+        /// Burn and bridge nonce for tracking bridge operations
+        bbnonce: u64,
         /// The token address
         token: Address,
     },
@@ -481,10 +483,8 @@ mod tests {
 
         let display_str = format!("{}", hash);
         assert!(display_str.contains("Transaction Hash"));
-        assert!(
-            display_str
-                .contains("0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777")
-        );
+        assert!(display_str
+            .contains("0x902006665c369834a0cf52eea2780f934a90b3c86a3918fb57371ac1fbbd7777"));
     }
 
     #[test]

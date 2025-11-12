@@ -112,6 +112,8 @@ pub struct TokenBurnAndBridgePayload {
     pub escrow_fee: U256,
     /// Optional bridge metadata for additional information.
     pub bridge_metadata: Option<String>,
+    /// Burn and bridge nonce for tracking bridge operations.
+    pub bbnonce: u64,
 }
 
 impl AlloyEncodable for TokenBurnAndBridgePayload {
@@ -131,6 +133,7 @@ impl AlloyEncodable for TokenBurnAndBridgePayload {
         if let Some(meta) = &self.bridge_metadata {
             meta.encode(out);
         }
+        self.bbnonce.encode(out);
     }
 }
 
@@ -317,11 +320,13 @@ mod tests {
             destination_address: "0x1234567890abcdef1234567890abcdef12345678".to_string(),
             escrow_fee: U256::from(1000000u64),
             bridge_metadata: None,
+            bbnonce: 42,
         };
 
         assert_eq!(payload.recent_checkpoint, 200);
         assert_eq!(payload.chain_id, 1212101);
         assert_eq!(payload.nonce, 5);
+        assert_eq!(payload.bbnonce, 42);
         assert_eq!(payload.sender, sender);
         assert_eq!(payload.value, U256::from(500000000u64));
         assert_eq!(payload.token, token);
@@ -349,6 +354,7 @@ mod tests {
             destination_address: "0x1234567890abcdef1234567890abcdef12345678".to_string(),
             escrow_fee: U256::from(1000000u64),
             bridge_metadata: None,
+            bbnonce: 42,
         };
 
         let json = serde_json::to_string(&payload).expect("Test data should be valid");
@@ -370,6 +376,7 @@ mod tests {
             destination_address: "0x1234567890abcdef1234567890abcdef12345678".to_string(),
             escrow_fee: U256::from(1000000u64),
             bridge_metadata: None,
+            bbnonce: 42,
         };
 
         let mut encoded = Vec::new();
@@ -398,6 +405,7 @@ mod tests {
             destination_address: "0x1234567890abcdef1234567890abcdef12345678".to_string(),
             escrow_fee: U256::from(1000000u64),
             bridge_metadata: None,
+            bbnonce: 42,
         };
 
         let hash1 = payload.signature_hash();
