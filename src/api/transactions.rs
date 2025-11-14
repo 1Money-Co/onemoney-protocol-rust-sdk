@@ -315,6 +315,7 @@ mod tests {
                         .expect("Test data should be valid"),
                 ),
                 token_address: None,
+                success_info: None,
             },
             counter_signatures: vec![Signature::default(), Signature::default()],
         };
@@ -358,6 +359,7 @@ mod tests {
                     Address::from_str("0xabcdef1234567890abcdef1234567890abcdef12")
                         .expect("Test data should be valid"),
                 ),
+                success_info: None,
             },
             counter_signatures: vec![Signature::default()],
         };
@@ -391,6 +393,7 @@ mod tests {
                 Address::from_str("0x0000000000000000000000000000000000000003")
                     .expect("valid address"),
             ),
+            success_info: None,
         }
     }
 
