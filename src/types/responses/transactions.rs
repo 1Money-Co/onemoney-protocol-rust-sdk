@@ -16,6 +16,9 @@ pub struct BridgeInfo {
     pub destination_chain_id: u64,
     /// The destination address on the target chain
     pub destination_address: String,
+    /// Optional bridge parameters as arbitrary bytes
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bridge_param: Option<Bytes>,
 }
 
 /// Success information for token transactions.
