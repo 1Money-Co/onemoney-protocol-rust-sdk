@@ -2,7 +2,7 @@
 
 use crate::Signature;
 use crate::crypto::Signable;
-use alloy_primitives::{Address, B256, U256, keccak256};
+use alloy_primitives::{Address, B256, Bytes, U256, keccak256};
 use alloy_rlp::{BufMut, Encodable as AlloyEncodable};
 use serde::{Deserialize, Serialize};
 
@@ -112,6 +112,8 @@ pub struct TokenBurnAndBridgePayload {
     pub escrow_fee: U256,
     /// Optional bridge metadata for additional information.
     pub bridge_metadata: Option<String>,
+    /// Optional bridge parameters as arbitrary bytes.
+    pub bridge_param: Option<Bytes>,
 }
 
 impl AlloyEncodable for TokenBurnAndBridgePayload {
@@ -130,6 +132,11 @@ impl AlloyEncodable for TokenBurnAndBridgePayload {
         self.bridge_metadata.is_some().encode(out);
         if let Some(meta) = &self.bridge_metadata {
             meta.encode(out);
+        }
+        // Encode bridge_param with same pattern
+        self.bridge_param.is_some().encode(out);
+        if let Some(param) = &self.bridge_param {
+            param.encode(out);
         }
     }
 }
@@ -317,6 +324,7 @@ mod tests {
             destination_address: "0x1234567890abcdef1234567890abcdef12345678".to_string(),
             escrow_fee: U256::from(1000000u64),
             bridge_metadata: None,
+            bridge_param: None,
         };
 
         assert_eq!(payload.recent_checkpoint, 200);
@@ -349,6 +357,7 @@ mod tests {
             destination_address: "0x1234567890abcdef1234567890abcdef12345678".to_string(),
             escrow_fee: U256::from(1000000u64),
             bridge_metadata: None,
+            bridge_param: None,
         };
 
         let json = serde_json::to_string(&payload).expect("Test data should be valid");
@@ -370,6 +379,7 @@ mod tests {
             destination_address: "0x1234567890abcdef1234567890abcdef12345678".to_string(),
             escrow_fee: U256::from(1000000u64),
             bridge_metadata: None,
+            bridge_param: None,
         };
 
         let mut encoded = Vec::new();
@@ -398,6 +408,7 @@ mod tests {
             destination_address: "0x1234567890abcdef1234567890abcdef12345678".to_string(),
             escrow_fee: U256::from(1000000u64),
             bridge_metadata: None,
+            bridge_param: None,
         };
 
         let hash1 = payload.signature_hash();
