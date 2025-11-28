@@ -88,7 +88,6 @@ mod tests {
             .expect("Test data should be valid");
 
         let payload = TokenBridgeAndMintPayload {
-            recent_checkpoint: 100,
             chain_id: 1212101,
             nonce: 1,
             recipient,
@@ -100,7 +99,6 @@ mod tests {
             bridge_metadata: None,
         };
 
-        assert_eq!(payload.recent_checkpoint, 100);
         assert_eq!(payload.chain_id, 1212101);
         assert_eq!(payload.nonce, 1);
         assert_eq!(payload.recipient, recipient);
@@ -117,7 +115,6 @@ mod tests {
             .expect("Test data should be valid");
 
         let payload = TokenBurnAndBridgePayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             sender,
@@ -130,7 +127,6 @@ mod tests {
             bridge_param: None,
         };
 
-        assert_eq!(payload.recent_checkpoint, 200);
         assert_eq!(payload.chain_id, 1212101);
         assert_eq!(payload.nonce, 5);
         assert_eq!(payload.sender, sender);
@@ -144,7 +140,6 @@ mod tests {
         use alloy_rlp::Encodable as AlloyEncodable;
 
         let payload = TokenBridgeAndMintPayload {
-            recent_checkpoint: 100,
             chain_id: 1212101,
             nonce: 1,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
@@ -169,7 +164,6 @@ mod tests {
         use alloy_rlp::Encodable as AlloyEncodable;
 
         let payload = TokenBurnAndBridgePayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             sender: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
@@ -195,7 +189,6 @@ mod tests {
         use alloy_rlp::Encodable as AlloyEncodable;
 
         let payload1 = TokenBridgeAndMintPayload {
-            recent_checkpoint: 100,
             chain_id: 1212101,
             nonce: 1,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
@@ -210,7 +203,6 @@ mod tests {
         };
 
         let payload2 = TokenBridgeAndMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 2,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
@@ -238,7 +230,6 @@ mod tests {
         use alloy_rlp::Encodable as AlloyEncodable;
 
         let payload = TokenBurnAndBridgePayload {
-            recent_checkpoint: 100,
             chain_id: 1212101,
             nonce: 1,
             sender: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
@@ -267,7 +258,6 @@ mod tests {
         use crate::types::common::Signature;
 
         let payload = TokenBridgeAndMintPayload {
-            recent_checkpoint: 100,
             chain_id: 1212101,
             nonce: 1,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")

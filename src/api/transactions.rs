@@ -42,7 +42,6 @@ impl Client {
     ///     let client = Client::mainnet()?;
     ///
     ///     let payload = PaymentPayload {
-    ///         recent_checkpoint: 456,
     ///         chain_id: 1212101,
     ///         nonce: 0,
     ///         recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")?,
@@ -241,7 +240,6 @@ mod tests {
         use alloy_rlp::Encodable as AlloyEncodable;
 
         let payload = PaymentPayload {
-            recent_checkpoint: 456,
             chain_id: 1212101,
             nonce: 0,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")

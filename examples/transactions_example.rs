@@ -108,15 +108,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("\n3. Create and Send Payment Transaction");
     println!("=====================================");
 
-    // Get latest state and chain ID for transaction
-    let checkpoint_info = match client.get_checkpoint_number().await {
-        Ok(s) => s,
-        Err(e) => {
-            print_detailed_error("Could not get latest state", &e);
-            return Ok(());
-        }
-    };
-
+    // Get chain ID for transaction
     let chain_id = match client.fetch_chain_id_from_network().await {
         Ok(id) => id,
         Err(e) => {
@@ -126,7 +118,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     };
 
     let payment_payload = PaymentPayload {
-        recent_checkpoint: checkpoint_info.number,
         chain_id,
         nonce,
         recipient: recipient_address,

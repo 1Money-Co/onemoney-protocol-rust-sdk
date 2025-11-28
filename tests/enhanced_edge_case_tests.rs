@@ -36,7 +36,6 @@ fn test_large_payload_memory_efficiency() {
 
     for amount in large_amounts {
         let payload = TokenMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             token: Address::ZERO,
@@ -143,7 +142,6 @@ fn test_rapid_payload_creation_performance() {
 
     for i in 0..iterations {
         let payload = TokenMintPayload {
-            recent_checkpoint: 200 + i,
             chain_id: 1,
             nonce: i + 1,
             token: Address::from([((i % 256) as u8); 20]),
@@ -188,7 +186,6 @@ fn test_extreme_numeric_values() {
 
     for (value, name) in extreme_values {
         let payload = TokenMintPayload {
-            recent_checkpoint: value,
             chain_id: value,
             nonce: value,
             token: Address::ZERO,
@@ -239,7 +236,6 @@ fn test_address_boundary_values() {
 
     for (address, name) in boundary_addresses {
         let payload = TokenMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             token: address,
