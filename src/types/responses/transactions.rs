@@ -117,9 +117,6 @@ pub struct Transaction {
     #[serde(default)]
     pub transaction_index: Option<u64>,
 
-    /// Checkpoint
-    pub recent_checkpoint: u64,
-
     /// The chain id of the transaction, if any.
     pub chain_id: ChainId,
     /// Sender
@@ -142,7 +139,7 @@ impl Display for Transaction {
             "Transaction {}: from {} at checkpoint {} (nonce: {})",
             self.hash,
             self.from,
-            self.checkpoint_number.unwrap_or(self.recent_checkpoint),
+            self.checkpoint_number.unwrap_or_default(),
             self.nonce
         )?;
         if let Some(checkpoint_hash) = &self.checkpoint_hash {
@@ -553,7 +550,6 @@ mod tests {
             ),
             checkpoint_number: Some(1500),
             transaction_index: Some(0),
-            recent_checkpoint: 200,
             chain_id: 1212101,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
@@ -568,8 +564,8 @@ mod tests {
 
         assert_eq!(transaction.hash, deserialized.hash);
         assert_eq!(
-            transaction.recent_checkpoint,
-            deserialized.recent_checkpoint
+            transaction.checkpoint_number,
+            deserialized.checkpoint_number
         );
     }
 
@@ -856,7 +852,6 @@ mod tests {
             ),
             checkpoint_number: Some(200),
             transaction_index: Some(1),
-            recent_checkpoint: 200,
             chain_id: 1212101,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),
@@ -880,9 +875,8 @@ mod tests {
             )
             .expect("Test data should be valid"),
             checkpoint_hash: None, // This tests the None branch
-            checkpoint_number: None,
+            checkpoint_number: Some(200),
             transaction_index: None,
-            recent_checkpoint: 200,
             chain_id: 1212101,
             from: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
                 .expect("Test data should be valid"),

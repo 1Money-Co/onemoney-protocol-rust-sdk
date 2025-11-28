@@ -87,7 +87,6 @@ impl Display for Checkpoint {
                     writeln!(f, "      Hash: {}", tx.hash)?;
                     writeln!(f, "      From: {}", tx.from)?;
                     writeln!(f, "      Nonce: {}", tx.nonce)?;
-                    writeln!(f, "      Recent Checkpoint: {}", tx.recent_checkpoint)?;
                     writeln!(f, "      Chain ID: {}", tx.chain_id)?;
 
                     if let Some(checkpoint_hash) = &tx.checkpoint_hash {
