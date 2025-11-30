@@ -104,12 +104,8 @@ let token_account_addr = client.derive_token_account_address(wallet, mint);
 ```rust
 use onemoney_protocol::{TokenMintPayload, Authority};
 
-// Get current checkpoint for transaction
-let checkpoint_info = client.get_checkpoint_number().await?;
-
 // Mint tokens
 let mint_payload = TokenMintPayload {
-    recent_checkpoint: checkpoint_info.number,
     chain_id: 1212101,
     nonce: 1,
     token: token_address,
@@ -125,12 +121,8 @@ let result = client.mint_token(mint_payload, private_key).await?;
 ```rust
 use onemoney_protocol::PaymentPayload;
 
-// Get current checkpoint for transaction
-let checkpoint_info = client.get_checkpoint_number().await?;
-
 // Send a payment
 let payment = PaymentPayload {
-    recent_checkpoint: checkpoint_info.number,
     chain_id: 1212101,
     nonce: 2,
     recipient: recipient_address,

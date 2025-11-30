@@ -30,8 +30,6 @@ where
 /// Token bridge and mint payload.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenBridgeAndMintPayload {
-    /// The most recent checkpoint when the transaction is submitted.
-    pub recent_checkpoint: u64,
     /// The chain id of the transaction.
     pub chain_id: u64,
     /// The nonce of the transaction.
@@ -56,7 +54,6 @@ pub struct TokenBridgeAndMintPayload {
 
 impl AlloyEncodable for TokenBridgeAndMintPayload {
     fn encode(&self, out: &mut dyn BufMut) {
-        self.recent_checkpoint.encode(out);
         self.chain_id.encode(out);
         self.nonce.encode(out);
         self.recipient.encode(out);
@@ -84,8 +81,6 @@ impl Signable for TokenBridgeAndMintPayload {
 /// Token burn and bridge payload.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TokenBurnAndBridgePayload {
-    /// The most recent checkpoint when the transaction is submitted.
-    pub recent_checkpoint: u64,
     /// The chain id of the transaction.
     pub chain_id: u64,
     /// The nonce of the transaction.
@@ -118,7 +113,6 @@ pub struct TokenBurnAndBridgePayload {
 
 impl AlloyEncodable for TokenBurnAndBridgePayload {
     fn encode(&self, out: &mut dyn BufMut) {
-        self.recent_checkpoint.encode(out);
         self.chain_id.encode(out);
         self.nonce.encode(out);
         self.sender.encode(out);
@@ -183,7 +177,6 @@ mod tests {
             .expect("Test data should be valid");
 
         let payload = TokenBridgeAndMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             recipient: address,
@@ -195,7 +188,6 @@ mod tests {
             bridge_metadata: None,
         };
 
-        assert_eq!(payload.recent_checkpoint, 200);
         assert_eq!(payload.chain_id, 1212101);
         assert_eq!(payload.nonce, 5);
         assert_eq!(payload.recipient, address);
@@ -217,7 +209,6 @@ mod tests {
             .expect("Test data should be valid");
 
         let payload = TokenBridgeAndMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             recipient: address,
@@ -235,7 +226,6 @@ mod tests {
     #[test]
     fn test_token_bridge_and_mint_payload_decimal_serialization() {
         let payload = TokenBridgeAndMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
@@ -258,7 +248,6 @@ mod tests {
     #[test]
     fn test_token_bridge_and_mint_payload_alloy_rlp_encoding() {
         let payload = TokenBridgeAndMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
@@ -286,7 +275,6 @@ mod tests {
     #[test]
     fn test_bridge_and_mint_payload_signature_hash_consistency() {
         let payload = TokenBridgeAndMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
@@ -314,7 +302,6 @@ mod tests {
             .expect("Test data should be valid");
 
         let payload = TokenBurnAndBridgePayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             sender,
@@ -327,7 +314,6 @@ mod tests {
             bridge_param: None,
         };
 
-        assert_eq!(payload.recent_checkpoint, 200);
         assert_eq!(payload.chain_id, 1212101);
         assert_eq!(payload.nonce, 5);
         assert_eq!(payload.sender, sender);
@@ -345,7 +331,6 @@ mod tests {
     #[test]
     fn test_token_burn_and_bridge_payload_decimal_serialization() {
         let payload = TokenBurnAndBridgePayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             sender: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
@@ -369,7 +354,6 @@ mod tests {
     #[test]
     fn test_token_burn_and_bridge_payload_alloy_rlp_encoding() {
         let payload = TokenBurnAndBridgePayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             sender: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
@@ -398,7 +382,6 @@ mod tests {
     #[test]
     fn test_burn_and_bridge_payload_signature_hash_consistency() {
         let payload = TokenBurnAndBridgePayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             sender: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),

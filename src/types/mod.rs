@@ -65,7 +65,6 @@ mod tests {
 
         // Test token request types
         let _mint_payload = TokenMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             token: token_address,
@@ -74,7 +73,6 @@ mod tests {
         };
 
         let _burn_payload = TokenBurnPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             token: token_address,
@@ -83,7 +81,6 @@ mod tests {
         };
 
         let _authority_payload = TokenAuthorityPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             action: AuthorityAction::Grant,
@@ -95,7 +92,6 @@ mod tests {
 
         // Test transaction request types
         let _payment_payload = PaymentPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             recipient,
@@ -199,7 +195,6 @@ mod tests {
         let recipient = Address::from([0xFF; 20]);
 
         let mint_payload = TokenMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             token: token_address,
@@ -232,7 +227,6 @@ mod tests {
 
         // Both should be accessible and distinct
         let _request_mint = RequestMintPayload {
-            recent_checkpoint: 1,
             chain_id: 1,
             nonce: 1,
             token: Address::ZERO,

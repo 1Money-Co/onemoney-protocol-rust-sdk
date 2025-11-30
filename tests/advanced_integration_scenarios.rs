@@ -39,7 +39,6 @@ async fn test_complete_token_lifecycle_simulation() -> Result<(), Box<dyn Error>
 
     // Step 3: Create token mint payload
     let mint_payload = TokenMintPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
         token: token_address,
@@ -49,7 +48,6 @@ async fn test_complete_token_lifecycle_simulation() -> Result<(), Box<dyn Error>
 
     // Step 4: Create authority payload
     let authority_payload = TokenAuthorityPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 2,
         action: AuthorityAction::Grant,
@@ -111,7 +109,6 @@ fn test_multi_client_coordination_pattern() -> Result<(), Box<dyn Error>> {
         .enumerate()
         .map(|(i, addr)| {
             Ok(TokenMintPayload {
-                recent_checkpoint: 200 + i as u64,
                 chain_id: 1,
                 nonce: i as u64 + 1,
                 token: addr,
@@ -243,7 +240,6 @@ fn test_complex_payload_transformations() -> Result<(), Box<dyn Error>> {
     // Test complex transformations and validations of payloads
 
     let base_payload = TokenMintPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
         token: Address::ZERO,
@@ -325,7 +321,6 @@ async fn test_cross_component_data_consistency() -> Result<(), Box<dyn Error>> {
 
     // Create payload
     let payload = TokenMintPayload {
-        recent_checkpoint: 250,
         chain_id: 42,
         nonce: 5,
         token: test_address,
@@ -337,7 +332,6 @@ async fn test_cross_component_data_consistency() -> Result<(), Box<dyn Error>> {
     let json = serde_json::to_string(&payload)?;
     let restored: TokenMintPayload = serde_json::from_str(&json)?;
 
-    assert_eq!(payload.recent_checkpoint, restored.recent_checkpoint);
     assert_eq!(payload.chain_id, restored.chain_id);
     assert_eq!(payload.nonce, restored.nonce);
     assert_eq!(payload.token, restored.token);
@@ -407,7 +401,6 @@ fn test_high_volume_payload_processing() -> Result<(), Box<dyn Error>> {
 
     for i in 0..payload_count {
         let payload = TokenMintPayload {
-            recent_checkpoint: 200 + i as u64,
             chain_id: 1,
             nonce: i as u64 + 1,
             token: Address::from([(i % 256) as u8; 20]),

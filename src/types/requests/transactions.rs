@@ -11,8 +11,6 @@ use std::result::Result;
 /// Payment transaction payload.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct PaymentPayload {
-    /// Recent checkpoint number.
-    pub recent_checkpoint: u64,
     /// Chain ID.
     pub chain_id: u64,
     /// Account nonce.
@@ -52,13 +50,8 @@ impl Display for PaymentPayload {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         write!(
             f,
-            "Payment to {}: value {}, token {}, nonce {}, checkpoint {}, chain {}",
-            self.recipient,
-            self.value,
-            self.token,
-            self.nonce,
-            self.recent_checkpoint,
-            self.chain_id
+            "Payment to {}: value {}, token {}, nonce {}, chain {}",
+            self.recipient, self.value, self.token, self.nonce, self.chain_id
         )
     }
 }
@@ -68,7 +61,6 @@ impl AlloyEncodable for PaymentPayload {
         // Calculate the actual payload length by encoding to a temporary buffer first
         let mut temp_buf = Vec::new();
 
-        self.recent_checkpoint.encode(&mut temp_buf);
         self.chain_id.encode(&mut temp_buf);
         self.nonce.encode(&mut temp_buf);
         self.recipient.encode(&mut temp_buf);
@@ -134,7 +126,6 @@ mod tests {
     #[test]
     fn test_payment_payload_decimal_deserialization() {
         let json = r#"{
-            "recent_checkpoint": 200,
             "chain_id": 1212101,
             "nonce": 5,
             "recipient": "0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0",
@@ -151,7 +142,6 @@ mod tests {
     #[test]
     fn test_payment_payload_round_trip_serialization() {
         let original_payload = PaymentPayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
@@ -186,7 +176,6 @@ mod tests {
     #[test]
     fn test_payment_payload_alloy_rlp_encoding() {
         let payload = PaymentPayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
@@ -211,7 +200,6 @@ mod tests {
     #[test]
     fn test_payment_payload_signature_hash_consistency() {
         let payload = PaymentPayload {
-            recent_checkpoint: 250,
             chain_id: 1212101,
             nonce: 10,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
@@ -232,7 +220,6 @@ mod tests {
     #[test]
     fn test_payment_payload_signable_trait() {
         let payload = PaymentPayload {
-            recent_checkpoint: 400,
             chain_id: 1212101,
             nonce: 15,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
@@ -252,7 +239,6 @@ mod tests {
     #[test]
     fn test_different_payment_payloads_different_encodings() {
         let payload1 = PaymentPayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
@@ -261,9 +247,8 @@ mod tests {
         };
 
         let payload2 = PaymentPayload {
-            recent_checkpoint: 201, // Different checkpoint
-            chain_id: 1212101,
-            nonce: 5,
+            chain_id: 1212102, // Different chain id
+            nonce: 6,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
             value: U256::from(1000000000000000000u64),
             token: Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap(),
@@ -291,7 +276,6 @@ mod tests {
         let large_value = U256::from_str("999999999999999999999999999999999999999").unwrap();
 
         let payload = PaymentPayload {
-            recent_checkpoint: u64::MAX,
             chain_id: u64::MAX,
             nonce: u64::MAX,
             recipient: Address::from_str("0xffffffffffffffffffffffffffffffffffffffff").unwrap(),
@@ -319,7 +303,6 @@ mod tests {
     #[test]
     fn test_payment_payload_encoding_with_zero_values() {
         let payload = PaymentPayload {
-            recent_checkpoint: 0,
             chain_id: 0,
             nonce: 0,
             recipient: Address::ZERO,
@@ -348,7 +331,6 @@ mod tests {
     fn test_payment_payload_default_implementation() {
         let default_payload = PaymentPayload::default();
 
-        assert_eq!(default_payload.recent_checkpoint, 0);
         assert_eq!(default_payload.chain_id, 0);
         assert_eq!(default_payload.nonce, 0);
         assert_eq!(default_payload.recipient, Address::ZERO);
@@ -367,7 +349,6 @@ mod tests {
     #[test]
     fn test_payment_payload_display_formatting() {
         let payload = PaymentPayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
@@ -386,14 +367,12 @@ mod tests {
         );
         assert!(display_str.contains("value 1000000000000000000"));
         assert!(display_str.contains("nonce 5"));
-        assert!(display_str.contains("checkpoint 200"));
         assert!(display_str.contains("chain 1212101"));
     }
 
     #[test]
     fn test_payment_payload_traits() {
         let payload = PaymentPayload {
-            recent_checkpoint: 200,
             chain_id: 1212101,
             nonce: 5,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
@@ -421,7 +400,6 @@ mod tests {
     #[test]
     fn test_payment_payload_serialization_consistency() {
         let payload = PaymentPayload {
-            recent_checkpoint: 600,
             chain_id: 1212101,
             nonce: 25,
             recipient: Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0").unwrap(),
@@ -447,7 +425,6 @@ mod tests {
     fn test_payment_payload_encoding_edge_cases() {
         // Test with minimum values
         let min_payload = PaymentPayload {
-            recent_checkpoint: 1,
             chain_id: 1,
             nonce: 1,
             recipient: Address::from_str("0x0000000000000000000000000000000000000001").unwrap(),
@@ -464,7 +441,6 @@ mod tests {
 
         // Test with very specific value patterns
         let pattern_payload = PaymentPayload {
-            recent_checkpoint: 67890,
             chain_id: 1212101,
             nonce: 111,
             recipient: Address::from_str("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap(),

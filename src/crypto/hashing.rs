@@ -25,7 +25,6 @@ mod tests {
             Address::from_str("0xabcdefabcdefabcdefabcdefabcdefabcdefabcd").expect("Valid address");
 
         let payload = TokenMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             token: token_address,
@@ -52,7 +51,6 @@ mod tests {
             Address::from_str("0x2222222222222222222222222222222222222222").expect("Valid address");
 
         let payload1 = TokenMintPayload {
-            recent_checkpoint: 250,
             chain_id: 42,
             nonce: 5,
             token: token_address,
@@ -62,7 +60,6 @@ mod tests {
 
         // Create identical payload with same values
         let payload2 = TokenMintPayload {
-            recent_checkpoint: 250,
             chain_id: 42,
             nonce: 5,
             token: token_address,
@@ -88,7 +85,6 @@ mod tests {
             Address::from_str("0x4444444444444444444444444444444444444444").expect("Valid address");
 
         let base_payload = TokenMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             token: token_address,
@@ -103,14 +99,14 @@ mod tests {
         let mut different_value = base_payload.clone();
         different_value.value = U256::from(2000000000000000000u64);
 
-        let mut different_checkpoint = base_payload.clone();
-        different_checkpoint.recent_checkpoint = 201;
+        let mut different_chain = base_payload.clone();
+        different_chain.chain_id = 2;
 
         let hashes = [
             base_payload.signature_hash(),
             different_nonce.signature_hash(),
             different_value.signature_hash(),
-            different_checkpoint.signature_hash(),
+            different_chain.signature_hash(),
         ];
 
         // Verify all hashes are different
@@ -133,7 +129,6 @@ mod tests {
 
         let payloads: Vec<Box<dyn Signable>> = vec![
             Box::new(TokenMintPayload {
-                recent_checkpoint: 1,
                 chain_id: 1,
                 nonce: 1,
                 token: token_address,
@@ -141,7 +136,6 @@ mod tests {
                 value: U256::from(1u64),
             }),
             Box::new(TokenBurnPayload {
-                recent_checkpoint: 1,
                 chain_id: 1,
                 nonce: 1,
                 token: token_address,
@@ -149,7 +143,6 @@ mod tests {
                 value: U256::from(1u64),
             }),
             Box::new(PaymentPayload {
-                recent_checkpoint: 1,
                 chain_id: 1,
                 nonce: 1,
                 recipient,
@@ -178,7 +171,6 @@ mod tests {
             Address::from_str("0x6666666666666666666666666666666666666666").expect("Valid address");
 
         let payload = TokenMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             token: token_address,
@@ -218,7 +210,6 @@ mod tests {
             Address::from_str("0x8888888888888888888888888888888888888888").expect("Valid address");
 
         let mint_payload = TokenMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             token: token_address,
@@ -227,7 +218,6 @@ mod tests {
         };
 
         let burn_payload = TokenBurnPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             token: token_address,
@@ -236,7 +226,6 @@ mod tests {
         };
 
         let payment_payload = PaymentPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 2, // Different nonce to ensure different hash
             recipient,
@@ -279,7 +268,6 @@ mod tests {
         let extreme_payloads = [
             // Maximum values
             TokenMintPayload {
-                recent_checkpoint: u64::MAX,
                 chain_id: u64::MAX,
                 nonce: u64::MAX,
                 token: token_address,
@@ -288,7 +276,6 @@ mod tests {
             },
             // Minimum values
             TokenMintPayload {
-                recent_checkpoint: 0,
                 chain_id: 0,
                 nonce: 0,
                 token: Address::ZERO,
@@ -320,7 +307,6 @@ mod tests {
     fn test_signable_field_sensitivity() {
         // Test that each field affects the hash
         let base_payload = TokenMintPayload {
-            recent_checkpoint: 200,
             chain_id: 1,
             nonce: 1,
             token: Address::from_str("0x1111111111111111111111111111111111111111").unwrap(),
@@ -332,10 +318,6 @@ mod tests {
 
         // Test each field change produces different hash
         let field_variants = [
-            TokenMintPayload {
-                recent_checkpoint: 201,
-                ..base_payload
-            },
             TokenMintPayload {
                 chain_id: 2,
                 ..base_payload

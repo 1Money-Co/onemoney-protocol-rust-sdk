@@ -565,7 +565,6 @@ async fn test_token_payload_serialization() -> Result<(), Box<dyn Error>> {
 
     // Test TokenMintPayload
     let mint_payload = TokenMintPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
         token: addresses.token_mint,
@@ -601,7 +600,6 @@ async fn test_invalid_payload_handling() -> Result<(), Box<dyn Error>> {
 
     // Test with invalid private key format
     let mint_payload = TokenMintPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
         token: addresses.token_mint,
@@ -636,7 +634,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 1. mint_token
     let mint_payload = TokenMintPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
         token: addresses.token_mint,
@@ -649,7 +646,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 2. burn_token
     let burn_payload = TokenBurnPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 2,
         token: addresses.token_mint,
@@ -661,7 +657,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 3. grant_authority
     let authority_payload = TokenAuthorityPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 3,
         action: AuthorityAction::Grant,
@@ -686,7 +681,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 5. pause_token
     let pause_payload = TokenPausePayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 5,
         action: PauseAction::Pause,
@@ -697,7 +691,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 6. manage_blacklist
     let blacklist_payload = TokenBlacklistPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 6,
         action: BlacklistAction::Add,
@@ -711,7 +704,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 7. manage_whitelist
     let whitelist_payload = TokenWhitelistPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 7,
         action: WhitelistAction::Add,
@@ -725,7 +717,6 @@ async fn test_token_method_signatures() -> Result<(), Box<dyn Error>> {
 
     // 8. update_token_metadata
     let metadata_payload = TokenMetadataUpdatePayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 8,
         token: addresses.token_mint,
@@ -754,7 +745,6 @@ async fn test_payload_edge_cases() -> Result<(), Box<dyn Error>> {
 
     // Test with maximum values
     let max_payload = TokenMintPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
         token: addresses.token_mint,
@@ -773,7 +763,6 @@ async fn test_payload_edge_cases() -> Result<(), Box<dyn Error>> {
 
     // Test with zero values
     let zero_payload = TokenMintPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 2,
         token: addresses.token_mint,
@@ -809,7 +798,6 @@ async fn test_concurrent_payload_operations() -> Result<(), Box<dyn Error>> {
 
         let handle = tokio::spawn(async move {
             let payload = TokenMintPayload {
-                recent_checkpoint: 200,
                 chain_id: 1,
                 nonce: 1,
                 token: addresses_clone.token_mint,
@@ -868,7 +856,6 @@ async fn test_request_structure_creation() -> Result<(), Box<dyn Error>> {
 
     // Test creating request structures (this tests the internal request creation)
     let mint_payload = TokenMintPayload {
-        recent_checkpoint: 200,
         chain_id: 1,
         nonce: 1,
         token: addresses.token_mint,
