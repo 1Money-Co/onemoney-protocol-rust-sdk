@@ -172,36 +172,25 @@ mod tests {
 
     #[test]
     fn test_associated_token_account_display() {
-        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
-            .expect("Test data should be valid");
         let account = AssociatedTokenAccount {
-            token_account_address: address,
             balance: "1000000000000000000".to_string(),
             nonce: 5,
         };
 
         let display_str = format!("{}", account);
         assert!(display_str.contains("Associated Token Account"));
-        assert!(display_str.contains("Address: 0x742d35Cc6634c0532925a3b8D91D6f4a81B8cbc0"));
         assert!(display_str.contains("Balance: 1000000000000000000"));
         assert!(display_str.contains("Nonce: 5"));
     }
 
     #[test]
     fn test_associated_token_account_equality() {
-        let address1 = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
-            .expect("Test data should be valid");
-        let address2 = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
-            .expect("Test data should be valid");
-
         let account1 = AssociatedTokenAccount {
-            token_account_address: address1,
             balance: "1000000000000000000".to_string(),
             nonce: 5,
         };
 
         let account2 = AssociatedTokenAccount {
-            token_account_address: address2,
             balance: "1000000000000000000".to_string(),
             nonce: 5,
         };
@@ -211,10 +200,7 @@ mod tests {
 
     #[test]
     fn test_associated_token_account_clone() {
-        let address = Address::from_str("0x742d35Cc6634C0532925a3b8D91D6F4A81B8Cbc0")
-            .expect("Test data should be valid");
         let account = AssociatedTokenAccount {
-            token_account_address: address,
             balance: "1000000000000000000".to_string(),
             nonce: 5,
         };
@@ -226,7 +212,6 @@ mod tests {
     #[test]
     fn test_associated_token_account_default() {
         let account = AssociatedTokenAccount::default();
-        assert_eq!(account.token_account_address, Address::default());
         assert_eq!(account.balance, String::default());
         assert_eq!(account.nonce, 0);
     }

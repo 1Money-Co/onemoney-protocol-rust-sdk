@@ -104,14 +104,9 @@ mod tests {
 
     #[test]
     fn test_response_types_accessibility() {
-        // Test that all response types can be created and used
-        let test_address =
-            Address::from_str("0x1234567890abcdef1234567890abcdef12345678").expect("Valid address");
-
         // Test account response types
         let _nonce = AccountNonce { nonce: 100 };
         let _token_account = AssociatedTokenAccount {
-            token_account_address: test_address,
             balance: "1000".to_string(),
             nonce: 42,
         };
