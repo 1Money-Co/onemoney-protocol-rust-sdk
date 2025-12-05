@@ -215,7 +215,7 @@ mod tests {
         set.insert(account2.clone());
         set.insert(account3.clone());
 
-        // Should have 2 unique accounts (account1 == account2)
+        // Should have 1 unique account (all three accounts have identical values)
         assert_eq!(set.len(), 1);
         assert!(set.contains(&account3));
     }
