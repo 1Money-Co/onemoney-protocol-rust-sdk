@@ -241,6 +241,10 @@ pub enum TxPayload {
         /// operate with the tokens
         is_private: bool,
 
+        /// Whether clawback is enabled for this token. This is immutable after
+        /// issuance and must be set at mint creation.
+        clawback_enabled: bool,
+
         /// The name of the token to create.
         name: String,
     },
@@ -258,6 +262,22 @@ pub enum TxPayload {
 
         /// The token address, if it's native token, token address is `None`.
         token: Option<Address>,
+    },
+
+    /// Claw back tokens from a frozen account. The signer must be an issuer
+    /// clawback authority and the source account must have been frozen via
+    /// list management.
+    ///
+    /// Refer to `TokenInstruction::Clawback`.
+    TokenClawback {
+        /// The wallet address to claw back tokens from.
+        from: Address,
+        /// The destination wallet address to receive clawed-back tokens.
+        recipient: Address,
+        /// The amount of tokens to claw back.
+        value: String,
+        /// The token address.
+        token: Address,
     },
 
     /// Grant authority to another account. The signer of message must be the
