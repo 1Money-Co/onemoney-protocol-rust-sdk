@@ -34,6 +34,8 @@ pub enum Authority {
     UpdateMetadata,
     /// Can bridge tokens to/from other chains.
     Bridge,
+    /// Can claw back tokens from frozen accounts.
+    Clawback,
 }
 
 impl Display for Authority {
@@ -52,6 +54,7 @@ impl Authority {
             Authority::ManageList => "ManageList",
             Authority::UpdateMetadata => "UpdateMetadata",
             Authority::Bridge => "Bridge",
+            Authority::Clawback => "Clawback",
         }
     }
 }
@@ -97,6 +100,7 @@ mod tests {
         assert_eq!(Authority::ManageList.to_string(), "ManageList");
         assert_eq!(Authority::UpdateMetadata.to_string(), "UpdateMetadata");
         assert_eq!(Authority::Bridge.to_string(), "Bridge");
+        assert_eq!(Authority::Clawback.to_string(), "Clawback");
     }
 
     #[test]
@@ -113,6 +117,7 @@ mod tests {
         assert_eq!(Authority::ManageList.as_str(), "ManageList");
         assert_eq!(Authority::UpdateMetadata.as_str(), "UpdateMetadata");
         assert_eq!(Authority::Bridge.as_str(), "Bridge");
+        assert_eq!(Authority::Clawback.as_str(), "Clawback");
     }
 
     #[test]
