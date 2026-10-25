@@ -12,9 +12,12 @@ impl Client {
     /// This method returns the predefined chain ID for the client's network configuration
     /// without making any network requests. This is fast and always available.
     ///
+    /// Returns `None` for custom networks (`Network::Custom`), which do not have a
+    /// predefined chain ID and must fetch it from the network instead.
+    ///
     /// # Returns
     ///
-    /// The predefined chain ID for this network.
+    /// The predefined chain ID for this network, or `None` for custom networks.
     ///
     /// # Example
     ///
@@ -22,10 +25,10 @@ impl Client {
     /// use onemoney_protocol::Client;
     ///
     /// let client = Client::mainnet().unwrap();
-    /// let chain_id = client.predefined_chain_id();
+    /// let chain_id = client.predefined_chain_id().expect("Mainnet has a predefined chain ID");
     /// assert_eq!(chain_id, 21210);
     /// ```
-    pub const fn predefined_chain_id(&self) -> u64 {
+    pub const fn predefined_chain_id(&self) -> Option<u64> {
         self.network.predefined_chain_id()
     }
 
@@ -49,7 +52,9 @@ impl Client {
     ///     let client = Client::mainnet()?;
     ///
     ///     let api_chain_id = client.fetch_chain_id_from_network().await?;
-    ///     let expected_chain_id = client.predefined_chain_id();
+    ///     let expected_chain_id = client
+    ///         .predefined_chain_id()
+    ///         .expect("Mainnet has a predefined chain ID");
     ///
     ///     assert_eq!(api_chain_id, expected_chain_id);
     ///     println!("Network chain ID matches expected: {}", api_chain_id);
@@ -87,8 +92,8 @@ mod tests {
         let testnet_client = Client::testnet().expect("Should create testnet client");
         let local_client = Client::local().expect("Should create local client");
 
-        assert_eq!(mainnet_client.predefined_chain_id(), 21210);
-        assert_eq!(testnet_client.predefined_chain_id(), 1_212_101);
-        assert_eq!(local_client.predefined_chain_id(), 1_212_101);
+        assert_eq!(mainnet_client.predefined_chain_id(), Some(21210));
+        assert_eq!(testnet_client.predefined_chain_id(), Some(1_212_101));
+        assert_eq!(local_client.predefined_chain_id(), Some(1_212_101));
     }
 }
