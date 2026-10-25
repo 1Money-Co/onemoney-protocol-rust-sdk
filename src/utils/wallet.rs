@@ -10,7 +10,11 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 /// A complete EVM wallet containing private key, public key, and address.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+///
+/// The [`Debug`] implementation for this type redacts the private key, so the
+/// key never leaks into logs or panic messages. The private key still serializes
+/// to JSON and must be stored carefully.
+#[derive(Clone, Serialize, Deserialize)]
 pub struct EvmWallet {
     /// Private key as hex string (with 0x prefix).
     pub private_key: String,
@@ -20,12 +24,23 @@ pub struct EvmWallet {
     pub address: Address,
 }
 
+// The private key must never appear in debug output because wallets are often
+// logged through `Debug`; only public-facing fields are shown instead.
+impl std::fmt::Debug for EvmWallet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("EvmWallet")
+            .field("public_key", &self.public_key)
+            .field("address", &self.address)
+            .finish_non_exhaustive()
+    }
+}
+
 impl Display for EvmWallet {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         write!(
             f,
-            "EVM Wallet:\n  address: {}\n  private_key: {}\n  public_key: {}",
-            self.address, self.private_key, self.public_key
+            "EVM Wallet:\n  address: {}\n  public_key: {}",
+            self.address, self.public_key
         )
     }
 }
@@ -49,7 +64,10 @@ impl EvmWallet {
     /// let wallet = EvmWallet::generate_random()?;
     /// println!("Generated wallet: {}", wallet);
     /// println!("Address: {}", wallet.address);
-    /// println!("Private key: {}", wallet.private_key);
+    ///
+    /// // The private key must never be logged or printed; `Debug` output
+    /// // intentionally redacts it so accidental logging cannot leak the key.
+    /// println!("Wallet (redacted): {:?}", wallet);
     /// # Ok(())
     /// # }
     /// ```
@@ -141,9 +159,24 @@ mod tests {
 
         assert!(display_str.contains("EVM Wallet:"));
         assert!(display_str.contains("address:"));
-        assert!(display_str.contains("private_key:"));
         assert!(display_str.contains("public_key:"));
         assert!(display_str.contains(&wallet.address.to_string()));
+
+        // Display must not leak the private key value
+        assert!(!display_str.contains(&wallet.private_key));
+    }
+
+    #[test]
+    fn test_wallet_debug_redacts_private_key() {
+        let wallet = EvmWallet::generate_random().expect("Failed to generate wallet");
+        let debug_str = format!("{:?}", wallet);
+
+        // Debug must show public-facing fields but redact the private key
+        assert!(debug_str.contains("EvmWallet"));
+        assert!(debug_str.contains("address:"));
+        assert!(debug_str.contains("public_key:"));
+        assert!(!debug_str.contains(&wallet.private_key));
+        assert!(!debug_str.contains("private_key"));
     }
 
     #[test]
